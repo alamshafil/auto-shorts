@@ -1,0 +1,45 @@
+name: "Publish documentation"
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-documentation:
+    permissions:
+      id-token: "write"
+      pages: "write"
+
+    environment:
+      name: "github-pages"
+      url: "${{ steps.deployment.outputs.page_url }}"
+
+    runs-on: "ubuntu-latest"
+    steps:
+      - id: "checkout"
+        name: "Check out Git repository"
+        uses: "actions/checkout@v3"
+
+      - id: "setup-node"
+        name: "Set up Node.js"
+        uses: "actions/setup-node@v3"
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - id: "install-dependencies"
+        name: "Install Node.js dependencies"
+        run: |
+          npm ci
+      - id: "build"
+        name: "Build documentation"
+        run: |
+          npm run doc
+      - id: "upload-documentation"
+        name: "Upload Pages artifact"
+        uses: "actions/upload-pages-artifact@v2"
+        with:
+          path: "docs/"
+
+      - id: "deployment"
+        name: "Deploy documentation to GitHub Pages"
+        uses: "actions/deploy-pages@v2"

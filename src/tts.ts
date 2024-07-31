@@ -1,0 +1,128 @@
+// Copyright (c) 2024 Shafil Alam
+
+import { VideoGen } from "./videogen";
+import { ElevenLabsClient } from "elevenlabs";
+import fs from "fs";
+import say from "say";
+
+/**
+ * Voice generation types
+ */
+export enum VoiceGenType {
+    ElevenLabsVoice = "ElevenLabsVoice",
+    BuiltinTTSVoice = "BuiltinTTSVoice",
+}
+
+/**
+ * Voice generation options
+ * @example
+ * ```
+ * {
+ *  text: "Hello, how are you?",
+ *  voice: "male",
+ *  filename: "voice.wav",
+ * }
+ * ```
+ */
+export interface VoiceGenOptions {
+    /** Text to convert to voice */
+    text: string;
+    /** Voice type: can be male or female */
+    voice: "male" | "female";
+    /** Filename to save the voice to */
+    filename: string;
+    /** ElevenLabs options */
+    elevenLabsOptions?: ElevenLabsOptions;
+}
+
+/**
+ * ElevenLabs voice options
+ */
+export interface ElevenLabsOptions {
+    /** Voice model */
+    model?: "eleven_turbo_v2";
+    /** Male voice model used for ElevenLabs */
+    maleVoice?: "Will";
+    /** Female voice model used for ElevenLabs */
+    femaleVoice?: "Sarah";
+}
+
+/**
+ * Base class for voice generation
+ * @abstract
+ */
+export class VoiceGen {
+    static async generateVoice(gen: VideoGen, options: VoiceGenOptions) {
+        throw new Error("Method 'generateVoice' must be implemented");
+    }
+}
+
+/**
+ * Voice generation using ElevenLabs API
+ */
+export class ElevenLabsVoice extends VoiceGen {
+
+    /**
+     * Generate voice using ElevenLabs API
+     * @param options Voice generation options
+     * @param apiKey ElevenLabs API key (required)
+     */
+    static async generateVoice(gen: VideoGen, options: VoiceGenOptions, apiKey?: string) {
+        if (!apiKey) {
+            throw new Error("ElevenLabs API key required");
+        }
+
+        const elevenlabs = new ElevenLabsClient({
+            apiKey: apiKey
+        });
+ 
+        const voiceModel = (options.voice == "male") ?
+            (options.elevenLabsOptions?.maleVoice ?? "Will") : 
+            (options.elevenLabsOptions?.femaleVoice ?? "Sarah");
+
+        // TODO: Fix async issue
+        // eslint-disable-next-line no-async-promise-executor
+        return await new Promise<void>(async (resolve, reject) => {
+            try {
+                const audio = await elevenlabs.generate({
+                    voice: voiceModel,
+                    text: options.text,
+                    model_id: "eleven_turbo_v2"
+                });
+
+                const fileStream = fs.createWriteStream(options.filename);
+
+                audio.pipe(fileStream);
+
+                fileStream.on("finish", () => resolve());
+                fileStream.on("error", reject);
+
+                gen.log(`Voice created using Elevenlab for message ${options.filename}`);
+            } catch (error) {
+                reject(error);
+            }
+        });
+
+    }
+}
+
+/**
+ * Voice generation using built-in TTS
+ */
+export class BuiltinTTSVoice extends VoiceGen {
+
+    /**
+     * Generate voice using built-in TTS
+     * @param options Voice generation options
+     */
+    static async generateVoice(gen: VideoGen, options: VoiceGenOptions) {
+        const voiceModel = (options.voice == "male") ? "Alex" : "Vicki";
+        return await new Promise<void>((resolve, reject) => {
+            say.export(options.text, voiceModel, 1, options.filename, (err: any) => {
+                if (err) gen.log(`[ignoring] Error creating voice for message: ${err.message}`);
+                gen.log(`Voice created using Say for message ${options.filename}`);
+                resolve();
+            });
+        });
+    }
+}
