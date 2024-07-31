@@ -125,6 +125,12 @@ async function cli() {
             description: 'Use mock JSON data. {bold (default: false)}'
         },
         {
+            name: 'disableSubtitles',
+            type: Boolean,
+            defaultValue: false,
+            description: 'Disable subtitles in video. {bold (default: false)}'
+        },
+        {
             name: "systemPromptOverride",
             typeLabel: '{underline text}',
             description: "Override system prompt. {italic May not work with all AI types.}"
@@ -204,6 +210,7 @@ async function cli() {
     let deleteFiles = options.deleteFiles ?? true;
     let changePhotos = options.changePhotos ?? true;
     let disableTTS = options.disableTTS ?? false;
+    let disableSubtitles = options.disableSubtitles ?? false;
     let bgVideo = options.bgVideo ?? null;
     let bgMusic = options.bgMusic ?? null;
 
@@ -249,6 +256,7 @@ async function cli() {
     console.info("Delete files: " + deleteFiles);
     console.info("Change photos: " + changePhotos);
     console.info("Disable TTS: " + disableTTS);
+    console.info("Disable subtitles: " + disableSubtitles);
     console.info("Background video: " + (bgVideo ?? "Using random"));
     console.info("Background music: " + (bgMusic ?? "Using random"));
 
@@ -295,6 +303,7 @@ async function cli() {
                 console.info("Delete files: " + jsonData.deleteFiles);
                 console.info("Change photos: " + jsonData.changePhotos);
                 console.info("Disable TTS: " + jsonData.disableTTS);
+                console.info("Disable subtitles: " + jsonData.disableSubtitles);
                 console.info("Background video: " + (jsonData.bgVideo ?? "Using random"));
                 console.info("Background music: " + (jsonData.bgMusic ?? "Using random"));
 
@@ -304,6 +313,7 @@ async function cli() {
                 deleteFiles = jsonData.deleteFiles;
                 changePhotos = jsonData.changePhotos;
                 disableTTS = jsonData.disableTTS;
+                disableSubtitles = jsonData.disableSubtitles;
                 bgVideo = jsonData.bgVideo;
                 bgMusic = jsonData.bgMusic
             } catch (e: any) {
@@ -344,9 +354,12 @@ async function cli() {
 
         const disableTTSRep = await input({ message: `Disable TTS in video? (default: false) (y/n) -> ` });
 
+        const disableSubtitlesRep = await input({ message: `Disable subtitles in video? (default: false) (y/n) -> ` });
+
         deleteFiles = deleteFilesRep == "y";
         changePhotos = changePhotosRep == "y";
         disableTTS = disableTTSRep == "y";
+        disableSubtitles = disableSubtitlesRep == "y";
 
         // Custom video/bg music
         const useCustomMusicRep = await input({ message: `Use custom video/bg music? (default: false) (y/n) -> ` });
@@ -382,6 +395,7 @@ async function cli() {
         console.info("Delete files: " + deleteFiles);
         console.info("Change photos: " + changePhotos);
         console.info("Disable TTS: " + disableTTS);
+        console.info("Disable subtitles: " + disableSubtitles);
         console.info("Background video: " + (bgVideo ?? "Using random"));
         console.info("Background music: " + (bgMusic ?? "Using random"));
 
@@ -393,6 +407,7 @@ async function cli() {
             deleteFiles: deleteFiles,
             changePhotos: changePhotos,
             disableTTS: disableTTS,
+            disableSubtitles: disableSubtitles,
             bgVideo: bgVideo,
             bgMusic: bgMusic
         };
@@ -429,7 +444,7 @@ async function cli() {
         bgPath: bgMusic,
         internalOptions: {
             debug: true,
-            deleteFiles: deleteFiles, changePhotos: changePhotos, disableTTS: disableTTS, useMock: useMock,
+            deleteFiles: deleteFiles, changePhotos: changePhotos, disableTTS: disableTTS, useMock: useMock, disableSubtitles: disableSubtitles
         },
     };
 

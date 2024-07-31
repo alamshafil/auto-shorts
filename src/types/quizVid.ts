@@ -137,7 +137,9 @@ export class QuizVideo extends VideoGen {
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
-        await WhisperSubtitles.transcribeSrt(this, audio16kFile, 30, srtFile, this.resPath);
+        if (!this.internalOptions.disableSubtitles) {
+            await WhisperSubtitles.transcribeSrt(this, audio16kFile, 30, srtFile, this.resPath);
+        }
 
         // Create video from audio file with on-screen text
         this.log('Creating video from audio file with on-screen text...');

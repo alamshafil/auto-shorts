@@ -104,7 +104,9 @@ export class TopicVideo extends VideoGen {
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
-        await WhisperSubtitles.transcribeSrt(this, audio16kFile, 21, srtFile, this.resPath);
+        if (!this.internalOptions.disableSubtitles) {
+            await WhisperSubtitles.transcribeSrt(this, audio16kFile, 4, srtFile, this.resPath);
+        }
 
         // Create video from audio file with on-screen text
         this.log('Creating video from audio file with on-screen text...');
@@ -169,7 +171,7 @@ export class TopicVideo extends VideoGen {
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
             x: 1080 / 2,
             y: (1920 / 2) + 200,
-            fontSize: 100,
+            fontSize: 40,
             backgroundColor: '#000000',
             color: '#fff',
             comma: true,

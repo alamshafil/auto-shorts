@@ -85,6 +85,8 @@ export interface InternalVideoOptions {
     changePhotos: boolean;
     /** Disable TTS */
     disableTTS: boolean;
+    /** Disable subtitles */
+    disableSubtitles: boolean;
     /** Use mock data */
     useMock: boolean;
     /** Eleven Labs options */
@@ -96,6 +98,7 @@ export const DEFAULT_INTERNAL_VIDEO_OPTIONS: InternalVideoOptions = {
     deleteFiles: true,
     changePhotos: true,
     disableTTS: false,
+    disableSubtitles: false,
     useMock: false,
 };
 
