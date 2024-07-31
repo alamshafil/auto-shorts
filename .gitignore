@@ -153,3 +153,6 @@ coverage/
 
 # Doc folder
 docs/
+
+# Options JSON
+options_autoshorts.json

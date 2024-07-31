@@ -283,7 +283,7 @@ async function cli() {
             // TODO: Fix saving path
 
             try {
-                const data = fs.readFileSync('options_AutoShorts.json');
+                const data = fs.readFileSync('options_autoshorts.json');
                 const jsonData = JSON.parse(data.toString());
 
                 console.info("Using advanced previous options:");
@@ -397,8 +397,8 @@ async function cli() {
 
         const jsonData = JSON.stringify(data);
 
-        fs.writeFileSync('options_AutoShorts.json', jsonData);
-        console.info("Options saved to file at: " + path.resolve('options_AutoShorts.json'));
+        fs.writeFileSync('options_autoshorts.json', jsonData);
+        console.info("Options saved to file at: " + path.resolve('options_autoshorts.json'));
     }
 
     // Ask if to use mock data
