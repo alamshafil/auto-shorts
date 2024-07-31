@@ -20,7 +20,7 @@
     "start": "tsc && node dist/cli.js",
     "build": "tsc",
     "lint": "eslint .",
-    "doc": "typedoc src/**/*.ts",
+    "doc": "typedoc --entryPointStrategy expand ./src",
     "test": "jest"
   },
   "bin": {

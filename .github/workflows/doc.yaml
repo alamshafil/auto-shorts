@@ -2,6 +2,7 @@ name: "Publish documentation"
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   publish-documentation:
@@ -17,13 +18,12 @@ jobs:
     steps:
       - id: "checkout"
         name: "Check out Git repository"
-        uses: "actions/checkout@v3"
+        uses: "actions/checkout@v4"
 
       - id: "setup-node"
         name: "Set up Node.js"
-        uses: "actions/setup-node@v3"
+        uses: "actions/setup-node@v4"
         with:
-          node-version-file: ".nvmrc"
           cache: "npm"
 
       - id: "install-dependencies"
@@ -34,12 +34,16 @@ jobs:
         name: "Build documentation"
         run: |
           npm run doc
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - id: "upload-documentation"
         name: "Upload Pages artifact"
-        uses: "actions/upload-pages-artifact@v2"
+        uses: "actions/upload-pages-artifact@v3"
         with:
           path: "docs/"
 
       - id: "deployment"
         name: "Deploy documentation to GitHub Pages"
-        uses: "actions/deploy-pages@v2"
+        uses: "actions/deploy-pages@v4"
