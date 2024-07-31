@@ -207,6 +207,8 @@ async function cli() {
     let bgVideo = options.bgVideo ?? null;
     let bgMusic = options.bgMusic ?? null;
 
+    let useMock = options.useMock ?? false;
+
     const tempPath = options.tempPath ?? path.resolve(process.cwd(), 'video_temp');
 
     const resPath = options.resPath ??  path.resolve(process.cwd(), 'res');
@@ -401,23 +403,18 @@ async function cli() {
         console.info("Options saved to file at: " + path.resolve('options_autoshorts.json'));
     }
 
-    // Ask if to use mock data
-    let useMock = false;
-    const useMockRep = await input({ message: `Use mock data? (default: false) (y/n) -> ` });
-
-    useMock = useMockRep == "y";
-    if (useMockRep == "") useMock = false;
-
     let userComment = "";
 
-    if (!useMock && !userPrompt) {
+    if (!useMock && !userPrompt && !options.jsonFile) {
         userComment = await input({ message: `What's your prompt (comment, etc.) ? -> ` });
         console.info("User prompt: " + userComment);
-    } else if (useMock && !userPrompt) {
+    } else if (useMock && !options.jsonFile) {
         console.info("Using mock data. (No user prompt)");
-    } else {
+    } else if (userPrompt && !options.jsonFile) {
         userComment = userPrompt;
         console.info("User prompt (via args): " + userComment);
+    } else if (options.jsonFile) {
+        console.info(`Using JSON file '${options.jsonFile}' for video generation.`);
     }
 
     // Generate video based on user comment
@@ -440,8 +437,6 @@ async function cli() {
     // Check if user wants to use json file
     if (options.jsonFile) {
         const jsonFile = options.jsonFile;
-        console.info("Using JSON file: " + jsonFile);
-
         if (!fs.existsSync(jsonFile)) {
             console.error("Error: JSON file not found. Exiting...");
             return;
