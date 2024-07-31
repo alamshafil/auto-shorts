@@ -36,6 +36,8 @@ export interface QuizVideoData {
     start_script: string;
     /** Extra end information */
     end_script: string;
+    /** Font name (optional) */
+    fontName?: string;
 }
 
 /**
@@ -186,7 +188,7 @@ export class QuizVideo extends VideoGen {
         titleObj.alignCenter()
 
         titleObj.setStyle({
-            fontFamily: ['Bangers'],
+            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
             // fontWeight: 'bold',
             color: '#fff',
             stroke: '#000000',
@@ -216,7 +218,7 @@ export class QuizVideo extends VideoGen {
             });
 
             questionObj.setStyle({
-                fontFamily: ['Bangers'],
+                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
                 // fontWeight: 'bold',
                 color: randomColor,
                 stroke: outlineColor,
@@ -237,7 +239,7 @@ export class QuizVideo extends VideoGen {
             answerObj.addEffect('fadeIn', 0.2, question_start_duration);
 
             answerObj.setStyle({
-                fontFamily: ['Bangers'],
+                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
                 // fontWeight: 'bold',
                 color: randomColor,
                 stroke: outlineColor,
@@ -258,7 +260,7 @@ export class QuizVideo extends VideoGen {
             comma: true,
             style:
             {
-                fontFamily: ['Bangers'],
+                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
                 // fontWeight: 'bold',
                 color: '#fff',
                 stroke: '#000000',
@@ -267,7 +269,7 @@ export class QuizVideo extends VideoGen {
         });
 
         subObj.setStyle({
-            fontFamily: ['Bangers'],
+            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
             // fontWeight: 'bold',
             color: '#fff',
             stroke: '#000000',

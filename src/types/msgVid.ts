@@ -31,6 +31,8 @@ export interface MessageVideoData {
     }[];
     /** Extra information to be spoken at the end of the video */
     extra: string;
+    /** Font name (optional) */
+    fontName?: string;
 }
 
 /**
@@ -190,7 +192,7 @@ export class MsgVideo extends VideoGen {
         const headerCanvas = createCanvas(headerImage.width, headerImage.height);
         const headerCtx = headerCanvas.getContext('2d');
         headerCtx.drawImage(headerImage, 0, 0);
-        headerCtx.font = '20px "SF Pro Display"';
+        headerCtx.font = `20px "${this.jsonData.fontName ?? 'SF Pro Display'}"`;
         headerCtx.fillStyle = 'white';
         headerCtx.textAlign = 'center';
         headerCtx.fillText(name, headerImage.width / 2, 225);

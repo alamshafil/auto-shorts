@@ -58,6 +58,8 @@ export interface RatherVideoData {
     start_script: string;
     /** End script */
     end_script: string;
+    /** Font name (optional) */
+    fontName?: string;
 }
 
 /**
@@ -188,7 +190,7 @@ export class RatherVideo extends VideoGen {
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
             // Add text for each option
-            ctx.font = '70px Bangers';
+            ctx.font = `70px ${this.jsonData.fontName ?? 'Bangers'}`;
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
@@ -284,13 +286,13 @@ export class RatherVideo extends VideoGen {
             percent2.alignCenter();
 
             percent1.setStyle({
-                fontFamily: ['Bangers'],
+                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
                 stroke: '#000000',
                 strokeThickness: 10,
             });
 
             percent2.setStyle({
-                fontFamily: ['Bangers'],
+                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
                 stroke: '#000000',
                 strokeThickness: 10,
             });

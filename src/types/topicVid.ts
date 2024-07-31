@@ -21,6 +21,10 @@ export interface TopicVideoData {
     end_script: string;
     /** Images for the video. List of image search terms for API */
     images: string[];
+    /** Font name (optional) */
+    fontName?: string;
+    /** Font size (optional) */
+    fontSize?: number;
 }
 
 /**
@@ -159,7 +163,7 @@ export class TopicVideo extends VideoGen {
     
         // Add subtitles
         const subStyle = {
-            fontFamily: ['Bangers'],
+            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
             color: '#fff',
             stroke: '#000000',
             strokeThickness: 20,
@@ -169,12 +173,11 @@ export class TopicVideo extends VideoGen {
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
             x: 1080 / 2,
             y: (1920 / 2) + 200,
-            fontSize: 40,
+            fontSize: this.jsonData.fontSize ?? 40,
             backgroundColor: '#000000',
             color: '#fff',
             comma: true,
             style: subStyle
-           
         });
     
         subObj.setStyle(subStyle);

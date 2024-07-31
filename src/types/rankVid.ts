@@ -24,6 +24,8 @@ export interface RankVideoData {
      * ["TypeScript logo", "JavaScript logo", "C# logo"]
      */
     images: string[];
+    /** Font name (optional) */
+    fontName?: string;
 }
 
 /**
@@ -123,7 +125,7 @@ export class RankVideo extends VideoGen {
         const r_image = await loadImage(rankImages[0]);
         startCtx.drawImage(r_image, 0, 0, startCanvas.width, startCanvas.height);
 
-        startCtx.font = '80px Bangers';
+        startCtx.font = `80px ${this.jsonData.fontName ?? 'Bangers'}`;
         startCtx.fillStyle = '#ffffff';
         startCtx.textAlign = 'center';
         startCtx.strokeStyle = '#000000';
@@ -134,7 +136,7 @@ export class RankVideo extends VideoGen {
         // Show numbers based on length of rankings
         const numbers = rankings.length;
         for (let i = 0; i < numbers; i++) {
-            startCtx.font = '90px Bangers';
+            startCtx.font = `90px ${this.jsonData.fontName ?? 'Bangers'}`;
             startCtx.fillStyle = '#ffffff';
             startCtx.textAlign = 'center';
             startCtx.strokeStyle = '#000000';
@@ -158,7 +160,7 @@ export class RankVideo extends VideoGen {
             const rankImage = await loadImage(rankImages[index]);
             ctx.drawImage(rankImage, 0, 0, canvas.width, canvas.height);
 
-            ctx.font = '90px Bangers';
+            ctx.font = `90px ${this.jsonData.fontName ?? 'Bangers'}`;
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
@@ -169,7 +171,7 @@ export class RankVideo extends VideoGen {
             // Show numbers based on length of rankings
             const numbers = rankings.length;
             for (let i = 0; i < numbers; i++) {
-                ctx.font = '80px Bangers';
+                ctx.font = `80px ${this.jsonData.fontName ?? 'Bangers'}`;
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.strokeStyle = '#000000';
