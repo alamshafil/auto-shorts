@@ -104,9 +104,7 @@ export class TopicVideo extends VideoGen {
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
-        if (!this.internalOptions.disableSubtitles) {
-            await WhisperSubtitles.transcribeSrt(this, audio16kFile, 4, srtFile, this.resPath);
-        }
+        await this.generateSubtitles(audio16kFile, srtFile, 10);
 
         // Create video from audio file with on-screen text
         this.log('Creating video from audio file with on-screen text...');

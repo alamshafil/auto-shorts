@@ -12,6 +12,7 @@ import { RankVideoData } from "./types/rankVid";
 import { RatherVideoData } from "./types/ratherVid";
 import { QuizVideoData } from "./types/quizVid";
 import { MessageVideoData } from "./types/msgVid";
+import { WhisperSubtitles } from "./subtitles";
 
 /**
  * Video data types
@@ -216,6 +217,12 @@ export class VideoGen {
         }
 
         return imgs;
+    }
+
+    async generateSubtitles(audio16kFile: string, srtFile: string, maxLen: number) {
+        if (!this.internalOptions.disableSubtitles) {
+            await WhisperSubtitles.transcribeSrt(this, audio16kFile, maxLen, srtFile, this.resPath);
+        }
     }
 
     /**

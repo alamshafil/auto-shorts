@@ -2,7 +2,6 @@
 
 import { FFCreator, FFScene, FFSubtitle, FFText, FFVideo } from "ffcreator";
 import { VideoGen } from "../videogen";
-import { WhisperSubtitles } from "../subtitles";
 import path from 'path';
 
 /**
@@ -137,9 +136,7 @@ export class QuizVideo extends VideoGen {
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
-        if (!this.internalOptions.disableSubtitles) {
-            await WhisperSubtitles.transcribeSrt(this, audio16kFile, 30, srtFile, this.resPath);
-        }
+        await this.generateSubtitles(audio16kFile, srtFile, 30);
 
         // Create video from audio file with on-screen text
         this.log('Creating video from audio file with on-screen text...');

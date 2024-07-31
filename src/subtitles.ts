@@ -6,7 +6,19 @@ import { decode } from "node-wav";
 import fs from "fs";
 import path from "path";
 
-export class WhisperSubtitles {
+/**
+ * Subtitle generation
+ */
+export class SubtitleGen {
+    static async transcribeSrt(gen: VideoGen, audio16kFile: string, maxLen: number, srtFile: string, resPath: string, modelPath?: string) : Promise<any> {  
+        throw new Error("Method 'transcribeSrt' must be implemented");
+    }
+}
+
+/**
+ * Whisper Subtitles
+ */ 
+export class WhisperSubtitles extends SubtitleGen {
     /** Default ggml model */
     static DEFAULT_MODEL = "ggml-base.en.bin";
 
