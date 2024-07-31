@@ -9,8 +9,9 @@ import say from "say";
  * Voice generation types
  */
 export enum VoiceGenType {
-    ElevenLabsVoice = "ElevenLabsVoice",
-    BuiltinTTSVoice = "BuiltinTTSVoice",
+    ElevenLabs = "ElevenLabs",
+    BuiltinTTS = "BuiltinTTS",
+    NeetsTTS = "NeetsTTS",
 }
 
 /**
@@ -33,6 +34,8 @@ export interface VoiceGenOptions {
     filename: string;
     /** ElevenLabs options */
     elevenLabsOptions?: ElevenLabsOptions;
+    /** Neets options */
+    neetsTTSOptions?: NeetsTTSOptions;
 }
 
 /**
@@ -45,6 +48,18 @@ export interface ElevenLabsOptions {
     maleVoice?: "Will";
     /** Female voice model used for ElevenLabs */
     femaleVoice?: "Sarah";
+}
+
+/**
+ * NeetsTTS voice options
+ */
+export interface NeetsTTSOptions {
+    /** Voice model */
+    voiceModel?: string;
+    /** Male voice model */
+    maleVoice?: string;
+    /** Female voice model */
+    femaleVoice?: string;
 }
 
 /**
@@ -64,6 +79,7 @@ export class ElevenLabsVoice extends VoiceGen {
 
     /**
      * Generate voice using ElevenLabs API
+     * @param gen VideoGen instance
      * @param options Voice generation options
      * @param apiKey ElevenLabs API key (required)
      */
@@ -75,9 +91,9 @@ export class ElevenLabsVoice extends VoiceGen {
         const elevenlabs = new ElevenLabsClient({
             apiKey: apiKey
         });
- 
+
         const voiceModel = (options.voice == "male") ?
-            (options.elevenLabsOptions?.maleVoice ?? "Will") : 
+            (options.elevenLabsOptions?.maleVoice ?? "Will") :
             (options.elevenLabsOptions?.femaleVoice ?? "Sarah");
 
         // TODO: Fix async issue
@@ -107,12 +123,59 @@ export class ElevenLabsVoice extends VoiceGen {
 }
 
 /**
+ * Voice generation using NeetsTTS API
+ */
+export class NeetsTTSVoice extends VoiceGen {
+    /**
+     * Generate voice using NeetsTTS API
+     * @param gen VideoGen instance
+     * @param options Voice generation options
+     * @param apiKey NeetsTTS API key (required)
+     */
+    static async generateVoice(gen: VideoGen, options: VoiceGenOptions, apiKey?: string) {
+        if (!apiKey) {
+            throw new Error("NeetsTTS API key required");
+        }
+
+        // const voiceModel = (options.voice == "male") ? "us-male-2" : "us-female-2";
+
+        const voiceModel = (options.voice == "male") ?
+            (options.neetsTTSOptions?.maleVoice ?? "us-male-2") :
+            (options.neetsTTSOptions?.femaleVoice ?? "us-female-2");
+
+        const response = await fetch(
+            'https://api.neets.ai/v1/tts',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': apiKey
+                },
+                body: JSON.stringify({
+                    text: options.text,
+                    voice_id: voiceModel,
+                    params: {
+                        model: options.neetsTTSOptions?.voiceModel ?? "style-diff-500"
+                    }
+                })
+            }
+        );
+
+        const buffer = await response.arrayBuffer();
+        fs.writeFileSync(options.filename, Buffer.from(buffer));
+
+        gen.log(`Voice created using NeetsTTS for message ${options.filename}`);
+    }
+}
+
+/**
  * Voice generation using built-in TTS
  */
 export class BuiltinTTSVoice extends VoiceGen {
 
     /**
      * Generate voice using built-in TTS
+     * @param gen VideoGen instance
      * @param options Voice generation options
      */
     static async generateVoice(gen: VideoGen, options: VoiceGenOptions) {

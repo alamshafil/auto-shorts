@@ -5,7 +5,7 @@
 import 'console-info'
 import 'dotenv/config'
 
-import { checkResDir, genVideoWithAI, genVideoWithJson } from ".";
+import { checkResDir, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
 
 import { AIGenType, OllamaAIGen } from "./ai";
 import { VoiceGenType } from "./tts";
@@ -86,6 +86,11 @@ async function cli() {
             name: 'pexelsAPIKey',
             typeLabel: '{underline key}',
             description: 'Pexels API key. {italic If applicable.}'
+        },
+        {
+            name: 'neetsAPIKey',
+            typeLabel: '{underline key}',
+            description: 'Neets API key. {italic If applicable.}'
         }
     ];
 
@@ -185,7 +190,7 @@ async function cli() {
     }
 
     let aiType: string = options.aiType ?? AIGenType.OllamaAIGen;
-    let ttsType: string = options.ttsType ?? VoiceGenType.BuiltinTTSVoice;
+    let ttsType: string = options.ttsType ?? VoiceGenType.BuiltinTTS;
     let imageType: string = options.imageType ?? ImageGenType.GoogleScraperImageGen;
 
     // Check if type is valid
@@ -228,6 +233,7 @@ async function cli() {
     const promptOverride = options.systemPromptOverride ?? null;
     const elevenLabsAPIKey = options.elevenlabsAPIKey ?? null;
     const pexelsAPIKey = options.pexelsAPIKey ?? null;
+    const neetsAPIKey = options.neetsAPIKey ?? null;
 
     const ollamaModel = options.ollamaModel ?? OllamaAIGen.DEFAULT_MODEL;
 
@@ -263,16 +269,22 @@ async function cli() {
     if (promptOverride) console.info("System prompt override: " + promptOverride);
     if (elevenLabsAPIKey) console.info("Eleven Labs API key: present");
     if (pexelsAPIKey) console.info("Pexels API key: present");
+    if (neetsAPIKey) console.info("Neets API key: present");
     if (options.ollamaModel) console.info("Ollama model: " + ollamaModel);
 
     // Check API keys (checked again later)
-    if (ttsType == VoiceGenType.ElevenLabsVoice && !elevenLabsAPIKey) {
+    if (ttsType == VoiceGenType.ElevenLabs && !elevenLabsAPIKey) {
         console.error("Error: Eleven Labs API key not found. Exiting...");
         return;
     }
 
     if (imageType == ImageGenType.PexelsImageGen && !pexelsAPIKey) {
         console.error("Error: Pexels API key not found. Exiting...");
+        return;
+    }
+
+    if (ttsType == VoiceGenType.NeetsTTS && !neetsAPIKey) {
+        console.error("Error: Neets API key not found. Exiting...");
         return;
     }
 
@@ -433,13 +445,16 @@ async function cli() {
     }
 
     // Generate video based on user comment
-    const vidOptions = {
+    const vidOptions: VideoOptions = {
         tempPath: tempPath,
         resPath: resPath,
         voiceGenType: VoiceGenType[ttsType as keyof typeof VoiceGenType],
         imageGenType: ImageGenType[imageType as keyof typeof ImageGenType],
-        elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY,
-        pexelsAPIKey: process.env.PEXELS_API_KEY,
+        apiKeys: {
+            elevenLabsAPIKey: elevenLabsAPIKey ?? process.env.ELEVENLABS_API_KEY,
+            pexelsAPIKey: pexelsAPIKey ?? process.env.PEXELS_API_KEY,
+            neetsAPIKey: neetsAPIKey ?? process.env.NEETS_API_KEY,
+        },
         vidPath: bgVideo,
         bgPath: bgMusic,
         internalOptions: {
@@ -448,7 +463,6 @@ async function cli() {
         },
     };
 
-    
     // Check if user wants to use json file
     if (options.jsonFile) {
         const jsonFile = options.jsonFile;

@@ -62,12 +62,20 @@ export interface VideoOptions {
     bgPath?: string;
     /** Internal video generation options */
     internalOptions?: InternalVideoOptions;
+    /** API Keys */
+    apiKeys: APIKeys;
+}
 
-    // APIs
+/**
+ * API keys
+ */
+export interface APIKeys {
     /** ElevenLabs API key */
     elevenLabsAPIKey?: string;
     /** Pexels API key */
     pexelsAPIKey?: string;
+    /** Neets API key */
+    neetsAPIKey?: string;
 }
 
 /**
@@ -92,6 +100,8 @@ export interface InternalVideoOptions {
     useMock: boolean;
     /** Eleven Labs options */
     elevenLabsOptions?: tts.ElevenLabsOptions;
+    /** Neets TTS options */
+    neetsTTSOptions?: tts.NeetsTTSOptions;
 }
 
 export const DEFAULT_INTERNAL_VIDEO_OPTIONS: InternalVideoOptions = {
@@ -129,10 +139,8 @@ export class VideoGen {
     protected bgPath?: string;
     /** Internal video generation options */
     protected internalOptions: InternalVideoOptions = DEFAULT_INTERNAL_VIDEO_OPTIONS;
-    /** Eleven Labs API key */
-    protected elevenLabsAPIKey?: string;
-    /** Pexels API key */
-    protected pexelsAPIKey?: string;
+    /** API Keys */
+    protected apiKeys?: APIKeys;
 
     constructor(options: VideoOptions, jsonData: any) {
         // Initialize properties
@@ -140,8 +148,7 @@ export class VideoGen {
         this.resPath = options.resPath;
         this.voiceGenType = options.voiceGenType;
         this.imageGenType = options.imageGenType;
-        this.elevenLabsAPIKey = options.elevenLabsAPIKey;
-        this.pexelsAPIKey = options.pexelsAPIKey;
+        this.apiKeys = options.apiKeys;
         this.vidPath = options.vidPath;
         this.bgPath = options.bgPath;
         this.internalOptions = options.internalOptions ?? DEFAULT_INTERNAL_VIDEO_OPTIONS;
@@ -172,11 +179,17 @@ export class VideoGen {
             options.elevenLabsOptions = this.internalOptions.elevenLabsOptions;
         }
 
+        if (this.internalOptions.neetsTTSOptions) {
+            options.neetsTTSOptions = this.internalOptions.neetsTTSOptions;
+        }
+
         if (!this.internalOptions.disableTTS) {
             switch (this.voiceGenType) {
-                case tts.VoiceGenType.ElevenLabsVoice:
-                    return await tts.ElevenLabsVoice.generateVoice(this, options, this.elevenLabsAPIKey);
-                case tts.VoiceGenType.BuiltinTTSVoice:
+                case tts.VoiceGenType.ElevenLabs:
+                    return await tts.ElevenLabsVoice.generateVoice(this, options, this.apiKeys?.elevenLabsAPIKey);
+                case tts.VoiceGenType.NeetsTTS:
+                    return await tts.NeetsTTSVoice.generateVoice(this, options, this.apiKeys?.neetsAPIKey);
+                case tts.VoiceGenType.BuiltinTTS:
                     return await tts.BuiltinTTSVoice.generateVoice(this, options);
                 default:
                     throw new Error("Invalid voice generation type");
@@ -197,7 +210,7 @@ export class VideoGen {
         const genImages = async (images: string[]) : Promise<string[]> => {
             switch (this.imageGenType) {
                 case img.ImageGenType.PexelsImageGen:
-                    return await img.PexelsImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, this.pexelsAPIKey, filePrefix);
+                    return await img.PexelsImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, this.apiKeys?.pexelsAPIKey, filePrefix);
                 case img.ImageGenType.GoogleScraperImageGen:
                     return await img.GoogleScraperImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, filePrefix);
                 default:
@@ -221,7 +234,7 @@ export class VideoGen {
 
     async generateSubtitles(audio16kFile: string, srtFile: string, maxLen: number) {
         if (!this.internalOptions.disableSubtitles) {
-            await WhisperSubtitles.transcribeSrt(this, audio16kFile, maxLen, srtFile, this.resPath);
+            return await WhisperSubtitles.transcribeSrt(this, audio16kFile, maxLen, srtFile, this.resPath);
         }
     }
 

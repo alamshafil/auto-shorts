@@ -145,6 +145,7 @@ This package uses AI tools like OpenAI and ElevenLabs to generate scripts and im
 You need to provide the following API key depending on what tools you want to use:
 - ElevenLabs API Key
 - Pexels API Key
+- Neets.ai API Key
 - OpenAI API Key *(coming soon)*
 
 Make sure to provide the API keys in the environment variables with a package like `dotenv`.
