@@ -106,7 +106,7 @@ async function download_ggml(resPath: string) {
 }
 
 async function download_res_zip(resPath: string) {
-    const url = "https://www.github.com/alamshafil/auto-shorts/releases/latest/download/resources.zip";
+    const url = "https://github.com/alamshafil/auto-shorts/releases/download/v0.1.0/resources.zip";
 
     console.info(`Downloading resources zip file...`);
 
