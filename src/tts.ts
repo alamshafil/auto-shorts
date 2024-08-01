@@ -143,6 +143,15 @@ export class NeetsTTSVoice extends VoiceGen {
             (options.neetsTTSOptions?.maleVoice ?? "us-male-2") :
             (options.neetsTTSOptions?.femaleVoice ?? "us-female-2");
 
+        const data = JSON.stringify({
+            text: options.text,
+            voice_id: voiceModel,
+            fmt: "wav",
+            params: {
+                model: options.neetsTTSOptions?.voiceModel ?? "style-diff-500"
+            }
+        });
+
         const response = await fetch(
             'https://api.neets.ai/v1/tts',
             {
@@ -151,15 +160,13 @@ export class NeetsTTSVoice extends VoiceGen {
                     'Content-Type': 'application/json',
                     'X-API-Key': apiKey
                 },
-                body: JSON.stringify({
-                    text: options.text,
-                    voice_id: voiceModel,
-                    params: {
-                        model: options.neetsTTSOptions?.voiceModel ?? "style-diff-500"
-                    }
-                })
+                body: data,
             }
         );
+
+        if (!response.ok) {
+            throw new Error(`NeetsTTS API error: ${response.statusText}.`);
+        }
 
         const buffer = await response.arrayBuffer();
         fs.writeFileSync(options.filename, Buffer.from(buffer));
