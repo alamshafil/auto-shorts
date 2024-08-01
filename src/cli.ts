@@ -321,7 +321,7 @@ async function cli() {
 
                 aiType = jsonData.aiType;
                 ttsType = jsonData.ttsType;
-                imageType = jsonData.image
+                imageType = jsonData.imageType;
                 deleteFiles = jsonData.deleteFiles;
                 changePhotos = jsonData.changePhotos;
                 disableTTS = jsonData.disableTTS;
