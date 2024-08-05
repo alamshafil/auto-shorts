@@ -243,7 +243,7 @@ async function cli() {
     }
 
     // Welcome message
-    console.info("Welcome to AutoShorts AI video generator v0.1.0-dev!");
+    console.info("Welcome to AutoShorts AI video generator v0.1.1-dev!");
 
     if (!options.resPath) {
         console.info("[*] Resource path not found (--resPath). Using 'res' directory.");
