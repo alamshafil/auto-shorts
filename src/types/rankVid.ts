@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Shafil Alam
 
 import { VideoGen } from "../videogen";
-import { FFCreator, FFImage, FFScene } from "ffcreator";
+import { FFCreator, FFImage, FFScene } from "ffcreator-autoshorts";
 import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import fs from "fs";

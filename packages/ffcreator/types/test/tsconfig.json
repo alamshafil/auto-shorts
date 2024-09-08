@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noEmit": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "ffcreator": [
+        "../"
+      ]
+    },
+    "lib": [
+      "es2016",
+      "DOM"
+    ]
+  },
+  "include": [
+    "../index.d.ts",
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "../../node_modules"
+  ]
+}

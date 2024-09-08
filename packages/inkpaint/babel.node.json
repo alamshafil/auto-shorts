@@ -1,0 +1,26 @@
+{
+  "assumptions": {
+    "ignoreToPrimitiveHint": true,
+    "mutableTemplateObject": true,
+    "ignoreFunctionLength": true,
+    "skipForOfIteratorClosing": true,
+    "pureGetters": true,
+    "constantSuper": true,
+    "noDocumentAll": true,
+    "setClassMethods": true,
+    "setComputedProperties": true,
+    "superIsCallableConstructor": true,
+    "noClassCalls": true
+  },
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "esmodules": true
+        }
+      }
+    ]
+  ],
+  "plugins": ["static-fs", "version-inline"]
+}

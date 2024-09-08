@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Shafil Alam
 
 import { VideoGen } from '../videogen';
-import { FFScene, FFVideo, FFAlbum, FFCreator, FFSubtitle } from "ffcreator";
+import { FFScene, FFVideo, FFAlbum, FFCreator, FFSubtitle } from "ffcreator-autoshorts";
 import { WhisperSubtitles } from '../subtitles';
 import path from 'path';
 

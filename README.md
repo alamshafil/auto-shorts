@@ -161,5 +161,6 @@ Make sure to provide the API keys in the environment variables with a package li
 - [ ] Add more tests
 - [ ] Add more documentation
 - [ ] Add support for more general video generation (e.g., long-form videos)
+- [ ] Fix external dependencies vulnerabilities (only on dev dependencies)
 
 **By Shafil Alam.**

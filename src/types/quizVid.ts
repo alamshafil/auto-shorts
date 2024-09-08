@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Shafil Alam
 
-import { FFCreator, FFScene, FFSubtitle, FFText, FFVideo } from "ffcreator";
+import { FFCreator, FFScene, FFSubtitle, FFText, FFVideo } from "ffcreator-autoshorts";
 import { VideoGen } from "../videogen";
 import path from 'path';
 

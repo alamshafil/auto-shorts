@@ -1,0 +1,166 @@
+{
+    "demos-basic": [
+        {
+            "title": "Container",
+            "entry": "container.js"
+        },
+        {
+            "title": "Transparent Background",
+            "entry": "transparent-background.js"
+        },
+        {
+            "title": "BlendModes",
+            "entry": "blendmodes.js"
+        },
+        {
+            "title": "Resize",
+            "entry": "resize.js"
+        },
+        {
+            "title": "Network",
+            "entry": "network.js"
+        }
+    ],
+    "demos-advanced": [
+        {
+            "title": "Slots",
+            "entry": "slots.js"
+        },
+        {
+            "title": "Scratchcard",
+            "entry": "scratchcard.js"
+        },
+        {
+            "title": "Star Warp",
+            "entry": "star-warp.js"
+        },
+        {
+            "title": "replace ProxyObj",
+            "entry": "replace.js"
+        },
+        {
+            "title": "Destroy APP",
+            "entry": "destroy.js"
+        }
+    ],
+    "text": [
+        {
+            "title": "Text",
+            "entry": "text.js"
+        },
+        {
+            "title": "FontFamily",
+            "entry": "fontfamily.js"
+        },
+        {
+            "title": "Webfont",
+            "entry": "webfont.js"
+        }
+    ],
+    "sprite": [
+        {
+            "title": "Basic",
+            "entry": "basic.js"
+        },
+        {
+            "title": "Texture Swap",
+            "entry": "texture-swap.js"
+        },
+        {
+            "title": "Animated Sprite - Explosion",
+            "entry": "animatedsprite-explosion.js"
+        },
+        {
+            "title": "Animated Sprite - Jet",
+            "entry": "animatedsprite-jet.js"
+        },
+        {
+            "title": "Animated Sprite Speed",
+            "entry": "animatedsprite-animationspeed.js"
+        },
+        {
+            "title": "Video",
+            "entry": "video.js"
+        }
+    ],
+    "textures": [
+        {
+            "title": "Basic Texture",
+            "entry": "texture.js"
+        },
+        {
+            "title": "Texture Rotate",
+            "entry": "texture-rotate.js"
+        },
+        {
+            "title": "Texture Change",
+            "entry": "texture-orig.js"
+        },
+        {
+            "title": "Canvas Texture",
+            "entry": "texture-canvas.js"
+        },
+        {
+            "title": "Render Texture Basic",
+            "entry": "render-texture-basic.js"
+        },
+        {
+            "title": "Render Texture Advanced",
+            "entry": "render-texture-advanced.js"
+        },
+        {
+            "title": "Gradient Basic",
+            "entry": "gradient-basic.js"
+        }
+    ],
+    "graphics": [
+        {
+            "title": "Simple",
+            "entry": "simple.js"
+        },
+        {
+            "title": "Advanced",
+            "entry": "advanced.js"
+        },
+        {
+            "title": "Dynamic",
+            "entry": "dynamic.js"
+        }
+    ],
+    "masks": [
+        {
+            "title": "Graphics",
+            "entry": "graphics.js"
+        },
+        {
+            "title": "Sprite",
+            "entry": "sprite.js"
+        }
+    ],
+    "filters": [
+        {
+            "title": "Blur",
+            "entry": "blur.js"
+        },
+        {
+            "title": "Color Matrix",
+            "entry": "color-matrix.js"
+        },
+        {
+            "title": "FXAA",
+            "entry": "fxaa.js"
+        },
+        {
+            "title": "Displacement Map - Crawlies",
+            "entry": "displacement-map-crawlies.js"
+        },
+        {
+            "title": "Displacement Map - Flag",
+            "entry": "displacement-map-flag.js"
+        },
+        {
+            "title": "Custom Filter",
+            "entry": "custom.js"
+        }
+    ]
+}

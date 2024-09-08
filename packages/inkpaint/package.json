@@ -1,0 +1,62 @@
+{
+  "name": "inkpaint-autoshorts",
+  "version": "3.0.0",
+  "description": "InkPaint is a lightweight node.js canvas graphics animation library. (Fork for AutoShorts)",
+  "main": "./lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rimraf dist lib && mkdirp dist && mkdir lib",
+    "web": "concurrently \"npm run watch\" \"serve ./\"",
+    "examples": "node ./examples",
+    "server-examples": "xvfb-run -s \"-ac -screen 0 1280x1024x24\" npm run examples",
+    "watch": "npm run dist -- --watch",
+    "watch-lib": "npm run lib -- --watch",
+    "watch:lint": "watch \"eslint src test || exit 0\" src",
+    "test": "npm run lint && npm run dist",
+    "lint": "eslint src",
+    "lintfix": "npm run lint --fix",
+    "prebuild": "npm run lint",
+    "build": "npm run dist",
+    "predist": "rimraf --glob dist/**",
+    "dist": "pixify -d dist -n InkPaint -o inkpaint -t babelify -m false",
+    "prelib": "rimraf --glob lib/**",
+    "lib": "babel --no-babelrc --config-file ./babel.node.json src --out-dir lib -s"
+  },
+  "files": [
+    "lib/",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "dependencies": {
+    "bit-twiddle": "^1.0.2",
+    "browser-or-node": "^3.0.0",
+    "canvas": "^3.0.0-rc2",
+    "earcut": "^2.1.4",
+    "eventemitter3": "^5.0.1",
+    "gl": "^8.0.2",
+    "mini-signals": "^1.2.0",
+    "parse-uri": "^1.0.9",
+    "pixi-gl-core": "^1.1.4",
+    "superagent": "^10.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.25.6",
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/register": "^7.24.6",
+    "babel-plugin-static-fs": "^3.0.0",
+    "babel-plugin-version-inline": "^1.0.0",
+    "babelify": "^10.0.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.9.1",
+    "fs-extra": "^11.2.0",
+    "globals": "^15.9.0",
+    "inquirer": "^10.2.0",
+    "js-md5": "^0.8.3",
+    "pixify": "^1.1.0",
+    "rimraf": "^5.0.10",
+    "watch": "^0.13.0"
+  }
+}

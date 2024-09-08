@@ -108,6 +108,7 @@
   "exclude": [
     "ui",
     "test",
-    "dist"
+    "dist",
+    "packages"
   ]
 }

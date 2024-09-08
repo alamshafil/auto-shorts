@@ -2,7 +2,7 @@
 
 import { createCanvas, loadImage } from "canvas";
 import { VideoGen } from "../videogen";
-import { FFCreator, FFImage, FFScene, FFText } from "ffcreator";
+import { FFCreator, FFImage, FFScene, FFText } from "ffcreator-autoshorts";
 import fs from "fs";
 import path from "path";
 

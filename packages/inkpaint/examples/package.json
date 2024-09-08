@@ -1,0 +1,16 @@
+{
+  "name": "inkpaint-examples",
+  "version": "4.0.0",
+  "description": "The examples site for inkpaint",
+  "license": "MIT",
+  "scripts": {
+    "less": "lessc src/less/inkpaint-examples.less dest/css/inkpaint-examples.min.css",
+    "js": "terser src/js/inkpaint-examples.js -b -o dest/js/inkpaint-examples.min.js",
+    "build": "npm run less && npm run js"
+  },
+  "devDependencies": {
+    "less": "^3.11.1",
+    "terser": "^4.6.3"
+  },
+  "dependencies": {}
+}
