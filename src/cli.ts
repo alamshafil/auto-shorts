@@ -7,7 +7,7 @@ import 'dotenv/config'
 
 import { checkResDir, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
 
-import { AIGenType, OllamaAIGen } from "./ai";
+import { AIGenType, GPTAIGen, OllamaAIGen } from "./ai";
 import { VoiceGenType } from "./tts";
 import { ImageGenType } from "./image";
 
@@ -91,6 +91,11 @@ async function cli() {
             name: 'neetsAPIKey',
             typeLabel: '{underline key}',
             description: 'Neets API key. {italic If applicable.}'
+        },
+        {
+            name: 'openAIKey',
+            typeLabel: '{underline key}',
+            description: 'OpenAI API key. {italic If applicable.}'
         }
     ];
 
@@ -144,6 +149,16 @@ async function cli() {
             name: 'ollamaModel',
             typeLabel: '{underline model}',
             description: 'Ollama model to use. {italic If applicable.}'
+        },
+        {
+            name: 'openAIModel',
+            typeLabel: '{underline model}',
+            description: 'OpenAI model to use. {italic If applicable.}'
+        },
+        { 
+            name: 'openAIEndpoint',
+            typeLabel: '{underline endpoint}',
+            description: 'OpenAI endpoint URL to use. {italic If applicable.}'
         }
     ];
 
@@ -234,8 +249,12 @@ async function cli() {
     const elevenLabsAPIKey = options.elevenlabsAPIKey ?? null;
     const pexelsAPIKey = options.pexelsAPIKey ?? null;
     const neetsAPIKey = options.neetsAPIKey ?? null;
+    const openAIKey = options.openAIKey ?? null;
 
-    const ollamaModel = options.ollamaModel ?? OllamaAIGen.DEFAULT_MODEL;
+    const openAIEndpoint = options.openAIEndpoint ?? GPTAIGen.DEFAULT_ENDPOINT;
+
+    let ollamaModel = options.ollamaModel ?? OllamaAIGen.DEFAULT_MODEL;
+    let openAIModel = options.openAIModel ?? GPTAIGen.DEFAULT_MODEL;
 
     if (options.help) {
         console.log(usage);
@@ -252,6 +271,7 @@ async function cli() {
     // Log current options
     console.log("\n--> Current options:");
     console.info("AI Type: " + aiType);
+    console.info("AI Model: " + (aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
     console.info("TTS Type: " + ttsType);
     console.info("Image API Type: " + imageType);
     console.info("Temp path: " + tempPath);
@@ -270,7 +290,11 @@ async function cli() {
     if (elevenLabsAPIKey) console.info("Eleven Labs API key: present");
     if (pexelsAPIKey) console.info("Pexels API key: present");
     if (neetsAPIKey) console.info("Neets API key: present");
-    if (options.ollamaModel) console.info("Ollama model: " + ollamaModel);
+    if (openAIKey) console.info("OpenAI API key: present");
+    if (options.ollamaModel) console.info("Ollama override model: " + ollamaModel);
+    if (options.openAIModel) console.info("OpenAI override model: " + openAIModel);
+    if (options.openAIEndpoint && aiType == AIGenType.GPTAIGen) console.info("OpenAI endpoint: " + openAIEndpoint);
+    if (options.openAIEndpoint && aiType != AIGenType.GPTAIGen) console.info("OpenAI endpoint: present but not used for current AI type.");
 
     // Check API keys (checked again later)
     if (ttsType == VoiceGenType.ElevenLabs && !elevenLabsAPIKey) {
@@ -289,7 +313,7 @@ async function cli() {
     }
 
     // Advanced options
-    const useAdvancedOptionsRep = await input({ message: `Change advanced options? (y/n) -> ` });
+    const useAdvancedOptionsRep = await input({ message: `Change advanced options? (AI type, other types, models, debug, etc.) (y/n) -> ` });
 
     const useAdvancedOptions = useAdvancedOptionsRep == "y";
 
@@ -318,6 +342,7 @@ async function cli() {
                 console.info("Disable subtitles: " + jsonData.disableSubtitles);
                 console.info("Background video: " + (jsonData.bgVideo ?? "Using random"));
                 console.info("Background music: " + (jsonData.bgMusic ?? "Using random"));
+                console.info("AI Model: " + (jsonData.aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
 
                 aiType = jsonData.aiType;
                 ttsType = jsonData.ttsType;
@@ -328,6 +353,8 @@ async function cli() {
                 disableSubtitles = jsonData.disableSubtitles;
                 bgVideo = jsonData.bgVideo;
                 bgMusic = jsonData.bgMusic
+                ollamaModel = jsonData.aiType == AIGenType.OllamaAIGen ? ollamaModel : GPTAIGen.DEFAULT_MODEL;
+                openAIModel = jsonData.aiType == AIGenType.GPTAIGen ? openAIModel : OllamaAIGen.DEFAULT_MODEL;
             } catch (e: any) {
                 console.info("[!] Error reading previous options file. Using default options and CLI options.\nError details ->");
                 console.error(e.message ?? e.toString());
@@ -359,6 +386,23 @@ async function cli() {
                     return { title: key, value: key };
                 }),
         });
+
+        // Select AI model
+        if (aiType == AIGenType.OllamaAIGen) {
+            ollamaModel = await select({
+                message: 'Select Ollama model',
+                choices: (await OllamaAIGen.getModels()).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.GPTAIGen) {
+            openAIModel = await select({
+                message: 'Select OpenAI model',
+                choices: (await GPTAIGen.getModels(openAIKey, { endpoint: openAIEndpoint })).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        }
 
         const deleteFilesRep = await input({ message: `Delete files before starting? (default: true) (y/n) -> ` });
 
@@ -410,6 +454,7 @@ async function cli() {
         console.info("Disable subtitles: " + disableSubtitles);
         console.info("Background video: " + (bgVideo ?? "Using random"));
         console.info("Background music: " + (bgMusic ?? "Using random"));
+        console.info("AI Model: " + (aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
 
         // Save to file
         const data = {
@@ -421,7 +466,9 @@ async function cli() {
             disableTTS: disableTTS,
             disableSubtitles: disableSubtitles,
             bgVideo: bgVideo,
-            bgMusic: bgMusic
+            bgMusic: bgMusic,
+            openAIModel: openAIModel,
+            ollamaModel: ollamaModel,
         };
 
         const jsonData = JSON.stringify(data);
@@ -488,7 +535,9 @@ async function cli() {
         AIGenType[aiType as keyof typeof AIGenType],
         vidOptions,
         promptOverride, 
-        { model: ollamaModel }
+        { model: ollamaModel },
+        { model: openAIModel, endpoint: openAIEndpoint },
+        openAIKey
     );
 
     task.on('done', (output) => {

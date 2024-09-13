@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { AIGenType, GPTAIGen, OllamaAIGen, OllamaOptions } from './ai';
+import { AIGenType, GPTAIGen, OllamaAIGen, OllamaOptions, OpenAIOptions } from './ai';
 import { VideoDataType, VideoGenType, VideoOptions, InternalVideoOptions } from './videogen';
 import { TopicVideo } from "./types/topicVid";
 import { MsgVideo } from './types/msgVid';
@@ -42,6 +42,8 @@ export {
  * @param options Video options
  * @param customSystemPrompt Custom system prompt to override built-in prompt (optional)
  * @param ollamaOptions Ollama AI options (optional)
+ * @param openAIOptions OpenAI options (optional)
+ * @param openAIKey OpenAI API key (optional)
  * 
  * @example
  * ```typescript
@@ -57,7 +59,7 @@ export {
  *  });
  * ```
  */
-export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, customSystemPrompt?: string, ollamaOptions?: OllamaOptions) : Promise<EventEmitter> {
+export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, customSystemPrompt?: string, ollamaOptions?: OllamaOptions, openAIOptions?: OpenAIOptions, openAIKey?: string) : Promise<EventEmitter> {
     const log = (msg: string) => {
         if (options.internalOptions?.debug) console.info(msg);
     }
@@ -74,7 +76,7 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
     async function genAI(): Promise<string> {
         switch (aiType) {
             case AIGenType.GPTAIGen:
-                return await GPTAIGen.generate(log, systemPrompt);
+                return await GPTAIGen.generate(log, systemPrompt, openAIKey, openAIOptions);
             case AIGenType.OllamaAIGen:
                 return await OllamaAIGen.generate(log, systemPrompt, ollamaOptions);
             default:
