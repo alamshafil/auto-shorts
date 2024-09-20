@@ -57,10 +57,11 @@ You must only respond with JSON, the JSON MUST BE spec-compliant OR THE SCRIPT W
 User comment:
 `;
 
-
 /**
  * Mock AI data for testing
  */
+
+/** Test JSON for message */
 export const mockAiData = `
 {
 "type": "message",
@@ -78,8 +79,9 @@ export const mockAiData = `
     }
 ]
 }
-`
+`;
 
+/** Test JSON for quiz */
 // export const mockAiData = `
 // {
 //     "type": "quiz",
@@ -89,6 +91,49 @@ export const mockAiData = `
 //     ],
 //     "answers": [
 //         "Paris"
+//     ],
+//     "start_script": "Welcome to the quiz!",
+//     "end_script": "Thanks for playing!"
+// }
+// `;
+
+/** Test JSON for topic */
+// export const mockAiData = `
+// {
+//     "type": "topic",
+//     "text": "Hello! Today we will be talking about TypeScript.",
+//     "images": ["TypeScript"],
+//     "start_script": "Welcome to the video!",
+//     "end_script": "Thanks for watching!"
+// }
+// `;
+
+/** Test JSON for rank */
+// export const mockAiData = `
+// {
+//     "type": "rank",
+//     "title": "Ranking Title",
+//     "rankings": ["TypeScript", "JavaScript"],
+//     "images": ["TypeScript logo", "JavaScript logo"],
+//     "start_script": "Rank these items",
+//     "end_script": "Thanks for watching!"
+// }
+// `;
+
+/** Test JSON for rather */
+// export const mockAiData = `
+// {
+//     "type": "rather",
+//     "title": "Would you rather?",
+//     "questions": [
+//         {
+//             "option1": "Be a dog",
+//             "option2": "Be a cat",
+//             "p1": 50,
+//             "p2": 50,
+//             "image1": "dog",
+//             "image2": "cat"
+//         }
 //     ],
 //     "start_script": "Welcome to the quiz!",
 //     "end_script": "Thanks for playing!"

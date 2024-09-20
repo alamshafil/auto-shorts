@@ -114,10 +114,12 @@ export class TopicVideo extends VideoGen {
         this.log('Creating video from audio file with on-screen text...');
         const videoFile = path.join(this.tempPath, 'video.mp4');
 
+        const [width, height] = this.getResolution();
+
         const creator = new FFCreator({
             output: videoFile,
-            width: 1080,
-            height: 1920,
+            width: width,
+            height: height,
             audio: audioFile,
             log: true,
         });
@@ -141,15 +143,15 @@ export class TopicVideo extends VideoGen {
         this.log("Background video is " + bgVideo)
     
         // Add background video
-        const bg = new FFVideo({ path: bgVideo, x: 1080 / 2, y: 1920 / 2, width: 1080, height: 1920 });
+        const bg = new FFVideo({ path: bgVideo, x: width / 2, y: height / 2, width: width, height: height });
         bg.setAudio(false);
         scene.addChild(bg);
     
         // Add images
         const album = new FFAlbum({
             list: imgs,
-            x: 1080 / 2,
-            y: (1920 / 2) - 200,
+            x: width / 2,
+            y: (height / 2) - 200,
             width: 512,
             height: 512,
             showCover: false,

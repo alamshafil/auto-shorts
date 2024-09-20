@@ -82,6 +82,13 @@ export class RatherVideo extends VideoGen {
      */
     async generateVideo() {
         this.checkJson();
+
+        // TODO: Add support for horizontal orientation
+        // Check if video orientation is horizontal
+        if (this.orientation == "horizontal") {
+            throw new Error("Rather video does not support horizontal orientation as of now.");
+        }
+
         this.checkTempPath();
 
         const questions = this.jsonData.questions;
@@ -178,11 +185,13 @@ export class RatherVideo extends VideoGen {
         this.log('Creating images for each question...');
         const imageFiles = [];
 
+        const [width, height] = this.getResolution();
+
         for (const [index, question] of questions.entries()) {
             const option1 = question.option1;
             const option2 = question.option2;
 
-            const canvas = createCanvas(1080, 1920);
+            const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
             
             // Use img/rather.png as background
@@ -233,8 +242,8 @@ export class RatherVideo extends VideoGen {
         // make ffcreator with 720*120 with background video from img/background.mp4 and set duration to sum to full audio duration
         const creator = new FFCreator({
             output: videoFile,
-            width: 1080,
-            height: 1920,
+            width: width,
+            height: height,
             audio: audioFile,
             log: true,
         });
@@ -255,7 +264,7 @@ export class RatherVideo extends VideoGen {
             const scene = new FFScene();
             scene.setBgColor('#000000');
 
-            const image = new FFImage({ path: imageFile, x: 1080 / 2, y: 1920 / 2, width: 1080, height: 1920 });
+            const image = new FFImage({ path: imageFile, x: width / 2, y: height / 2, width: width, height: height });
             scene.addChild(image);
 
             let duration = durations[index + 1] ?? 0;

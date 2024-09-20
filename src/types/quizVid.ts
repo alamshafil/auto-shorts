@@ -144,10 +144,12 @@ export class QuizVideo extends VideoGen {
         this.log('Creating video from audio file with on-screen text...');
         const videoFile = path.join(this.tempPath, 'video.mp4');
 
+        const [width, height] = this.getResolution();
+
         const creator = new FFCreator({
             output: videoFile,
-            width: 1080,
-            height: 1920,
+            width: width,
+            height: height,
             audio: audioFile,
             log: true,
         });
@@ -156,29 +158,29 @@ export class QuizVideo extends VideoGen {
         this.log("Video file is " + videoFile)
         
         // get duration of audio file
-        const full_duration = await this.getAudioDuration(audioFile);
+        const fullDuration = await this.getAudioDuration(audioFile);
 
-        this.log("Full duration of audio is " + full_duration)
+        this.log("Full duration of audio is " + fullDuration)
 
-        creator.setDuration(full_duration);
+        creator.setDuration(fullDuration);
 
         //  Show message images on screen based on audio duration; stack vertically; hide then show once duration is reached
         const scene = new FFScene();
         scene.setBgColor('#000000');
-        scene.setDuration(full_duration);
+        scene.setDuration(fullDuration);
         
         // Get random video background
         const bgVideo = this.getRandomBgVideo();
         this.log(`Background video file: ${bgVideo}`);
 
-        const bg = new FFVideo({ path: bgVideo, x: 1080/2, y: 1920/2, width: 1080, height: 1920 });
+        const bg = new FFVideo({ path: bgVideo, x: width/2, y: height/2, width: width, height: height });
         bg.setAudio(false);
         scene.addChild(bg);
 
         // Add title text
         const titleObj = new FFText({
             text: title,
-            x: 1080 / 2,
+            x: width / 2,
             y: 150,
             fontSize: 60,
             color: '#ffffff',
@@ -250,31 +252,26 @@ export class QuizVideo extends VideoGen {
         } 
 
         // Add subtitles
-        const subObj = new FFSubtitle({
-            path: path.join(this.tempPath, 'audio16k.wav.srt'),
-            x: 1080 / 2, 
-            y: 400, 
-            fontSize: 70, 
-            backgroundColor: '#000000', 
-            color: '#fff', 
-            comma: true,
-            style:
-            {
-                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
-                // fontWeight: 'bold',
-                color: '#fff',
-                stroke: '#000000',
-                strokeThickness: 20,
-            }
-        });
-
-        subObj.setStyle({
+        const subStyle = {
             fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
             // fontWeight: 'bold',
             color: '#fff',
             stroke: '#000000',
             strokeThickness: 20,
+        };
+
+        const subObj = new FFSubtitle({
+            path: path.join(this.tempPath, 'audio16k.wav.srt'),
+            x: width / 2, 
+            y: 400, 
+            fontSize: 70, 
+            backgroundColor: '#000000', 
+            color: '#fff', 
+            comma: true,
+            style: subStyle
         });
+
+        subObj.setStyle(subStyle);
 
         this.log("Subtitles file is " + srtFile)
 

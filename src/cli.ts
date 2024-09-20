@@ -54,6 +54,11 @@ async function cli() {
             description: `The image provider to use. Can be {italic ${Object.keys(ImageGenType).join(", ")}.}`
         },
         {
+            name: 'orientation',
+            typeLabel: '{underline orientation}',
+            description: 'The orientation of the video. {italic (vertical, horizontal)}'
+        },
+        {
             name: 'tempPath',
             typeLabel: '{underline path}',
             description: 'The temporary path to save video files. {bold (default: ./video_temp)}'
@@ -233,6 +238,7 @@ async function cli() {
     let disableSubtitles = options.disableSubtitles ?? false;
     let bgVideo = options.bgVideo ?? null;
     let bgMusic = options.bgMusic ?? null;
+    let orientation = options.orientation ?? "vertical";
 
     let useMock = options.useMock ?? false;
 
@@ -274,6 +280,7 @@ async function cli() {
     console.info("AI Model: " + (aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
     console.info("TTS Type: " + ttsType);
     console.info("Image API Type: " + imageType);
+    console.info("Orientation: " + orientation);
     console.info("Temp path: " + tempPath);
     console.info("Res path: " + resPath);
     console.info("Prompt: " + (userPrompt ?? "None (will be asked later)"));
@@ -336,6 +343,7 @@ async function cli() {
                 console.info("AI Type: " + jsonData.aiType);
                 console.info("TTS Type: " + jsonData.ttsType);
                 console.info("Image API Type: " + jsonData.imageType);
+                console.info("Orientation: " + jsonData.orientation);
                 console.info("Delete files: " + jsonData.deleteFiles);
                 console.info("Change photos: " + jsonData.changePhotos);
                 console.info("Disable TTS: " + jsonData.disableTTS);
@@ -347,6 +355,7 @@ async function cli() {
                 aiType = jsonData.aiType;
                 ttsType = jsonData.ttsType;
                 imageType = jsonData.imageType;
+                orientation = jsonData.orientation;
                 deleteFiles = jsonData.deleteFiles;
                 changePhotos = jsonData.changePhotos;
                 disableTTS = jsonData.disableTTS;
@@ -385,6 +394,14 @@ async function cli() {
                 Object.keys(VoiceGenType).map((key) => {
                     return { title: key, value: key };
                 }),
+        });
+
+        orientation = await select({
+            message: 'Select video orientation',
+            choices: [
+                { name: 'Vertical', value: 'vertical' },
+                { name: 'Horizontal', value: 'horizontal' },
+            ],
         });
 
         // Select AI model
@@ -448,6 +465,7 @@ async function cli() {
         console.info("AI Type: " + aiType);
         console.info("TTS Type: " + ttsType);
         console.info("Image API Type: " + imageType);
+        console.info("Image API Type: " + imageType);
         console.info("Delete files: " + deleteFiles);
         console.info("Change photos: " + changePhotos);
         console.info("Disable TTS: " + disableTTS);
@@ -461,6 +479,7 @@ async function cli() {
             aiType: aiType,
             ttsType: ttsType,
             imageType: imageType,
+            orientation: orientation,
             deleteFiles: deleteFiles,
             changePhotos: changePhotos,
             disableTTS: disableTTS,
@@ -497,6 +516,7 @@ async function cli() {
         resPath: resPath,
         voiceGenType: VoiceGenType[ttsType as keyof typeof VoiceGenType],
         imageGenType: ImageGenType[imageType as keyof typeof ImageGenType],
+        orientation: orientation,
         apiKeys: {
             elevenLabsAPIKey: elevenLabsAPIKey ?? process.env.ELEVENLABS_API_KEY,
             pexelsAPIKey: pexelsAPIKey ?? process.env.PEXELS_API_KEY,

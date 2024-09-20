@@ -115,10 +115,12 @@ export class RankVideo extends VideoGen {
         // Create images from JSON data
         this.log('Creating images from JSON data...');
 
+        const [width, height] = this.getResolution();
+
         const imageFiles = [];
 
-        // Make inital scene with title with canvas size 1080*1920
-        const startCanvas = createCanvas(1080, 1920);
+        // Make inital scene with title
+        const startCanvas = createCanvas(width, height);
         const startCtx = startCanvas.getContext('2d');
 
         // Put rank image
@@ -130,8 +132,8 @@ export class RankVideo extends VideoGen {
         startCtx.textAlign = 'center';
         startCtx.strokeStyle = '#000000';
         startCtx.lineWidth = 20;
-        startCtx.strokeText(title, 1080 / 2, 300);
-        startCtx.fillText(title, 1080 / 2, 300);
+        startCtx.strokeText(title, width / 2, 300);
+        startCtx.fillText(title, width / 2, 300);
 
         // Show numbers based on length of rankings
         const numbers = rankings.length;
@@ -153,7 +155,7 @@ export class RankVideo extends VideoGen {
         imageFiles.push(startImage);
 
         for (const [index, rank] of rankings.entries()) {
-            const canvas = createCanvas(1080, 1920);
+            const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
 
             // Put rank image
@@ -165,8 +167,8 @@ export class RankVideo extends VideoGen {
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 20;
-            ctx.strokeText(rank, 1080 / 2, 300);
-            ctx.fillText(rank, 1080 / 2, 300);
+            ctx.strokeText(rank, width / 2, 300);
+            ctx.fillText(rank, width / 2, 300);
 
             // Show numbers based on length of rankings
             const numbers = rankings.length;
@@ -198,8 +200,8 @@ export class RankVideo extends VideoGen {
 
         const creator = new FFCreator({
             output: videoFile,
-            width: 1080,
-            height: 1920,
+            width: width,
+            height: height,
             audio: audioFile,
             log: true,
         });
@@ -218,7 +220,7 @@ export class RankVideo extends VideoGen {
             const scene = new FFScene();
             scene.setBgColor('#000000');
 
-            const image = new FFImage({ path: imageFile, x: 1080 / 2, y: 1920 / 2, width: 1080, height: 1920 });
+            const image = new FFImage({ path: imageFile, x: width / 2, y: height / 2, width: width, height: height });
             scene.addChild(image);
 
             let duration = durations[index] ?? 0;

@@ -121,10 +121,12 @@ export class MsgVideo extends VideoGen {
         this.log('Creating video from audio file with on-screen text...');
         const videoFile = path.join(this.tempPath, 'video.mp4');
 
+        const [width, height] = this.getResolution();
+
         const creator = new FFCreator({
             output: videoFile,
-            width: 1080,
-            height: 1920,
+            width: width,
+            height: height,
             audio: audioFile,
             log: true,
         });
@@ -133,36 +135,36 @@ export class MsgVideo extends VideoGen {
         this.log("Video file is " + videoFile)
         
         // get duration of audio file
-        const full_duration = await this.getAudioDuration(audioFile);
+        const fullDuration = await this.getAudioDuration(audioFile);
 
-        this.log("Full duration of audio is " + full_duration)
+        this.log("Full duration of audio is " + fullDuration)
 
-        creator.setDuration(full_duration);
+        creator.setDuration(fullDuration);
 
         const scene = new FFScene();
         scene.setBgColor('#000000');
-        scene.setDuration(full_duration);
+        scene.setDuration(fullDuration);
         
         // Get random video background
         const bgVideo = this.getRandomBgVideo();
         this.log(`Background video file: ${bgVideo}`);
 
-        const bg = new FFVideo({ path: bgVideo, x: 1080/2, y: 1920/2, width: 1080, height: 1920 });
+        const bg = new FFVideo({ path: bgVideo, x: width/2, y: height/2, width: width, height: height });
         bg.setAudio(false);
         scene.addChild(bg);
 
-        const header = new FFImage({ path: headerFile, x: 1080/2, y: 400 });
+        const header = new FFImage({ path: headerFile, x: width/2, y: 400 });
         scene.addChild(header);
 
         for (const [index, img] of messageImages.entries()) {
             this.log(`Image #${index} path is ${img}`)
             this.log(`Image #${index} y is ${((400 * 1.4) + (70 * index))}`)
-            const messageImage = new FFImage({ path: img, x: 1080/2, y: ((400 * 1.4) + (70 * index)) });
-            const img_start_duration = durations.slice(0, index).reduce((a, b) => a + b, 0);
-            messageImage.addEffect('fadeIn', 0.2, img_start_duration);
-            this.log(`Image #${index} start duration is ${img_start_duration} s`)
-            this.log(`Image #${index} full duration is ${(full_duration - img_start_duration)} s`)
-            messageImage.setDuration(full_duration - img_start_duration);
+            const messageImage = new FFImage({ path: img, x: width/2, y: ((400 * 1.4) + (70 * index)) });
+            const imgStartDuration = durations.slice(0, index).reduce((a, b) => a + b, 0);
+            messageImage.addEffect('fadeIn', 0.2, imgStartDuration);
+            this.log(`Image #${index} start duration is ${imgStartDuration} s`)
+            this.log(`Image #${index} full duration is ${(fullDuration - imgStartDuration)} s`)
+            messageImage.setDuration(fullDuration - imgStartDuration);
             scene.addChild(messageImage);
         }
 

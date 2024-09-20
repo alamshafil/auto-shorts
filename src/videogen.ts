@@ -56,6 +56,8 @@ export interface VideoOptions {
     voiceGenType: tts.VoiceGenType;
     /** Image generation type */
     imageGenType: img.ImageGenType;
+    /** Video orientation */
+    orientation: "vertical" | "horizontal";
     /** Custom background video path */
     vidPath?: string;
     /** Custom background music path */
@@ -133,6 +135,8 @@ export class VideoGen {
     protected voiceGenType: tts.VoiceGenType;
     /** Image generation type */
     protected imageGenType: img.ImageGenType;
+    /** Video orientation */
+    protected orientation: "vertical" | "horizontal";
     /** Custom background video path */
     protected vidPath?: string;
     /** Custom background music path */
@@ -148,11 +152,30 @@ export class VideoGen {
         this.resPath = options.resPath;
         this.voiceGenType = options.voiceGenType;
         this.imageGenType = options.imageGenType;
+        this.orientation = options.orientation;
         this.apiKeys = options.apiKeys;
         this.vidPath = options.vidPath;
         this.bgPath = options.bgPath;
         this.internalOptions = options.internalOptions ?? DEFAULT_INTERNAL_VIDEO_OPTIONS;
         this.jsonData = jsonData;
+    }
+
+    /**
+     * Function to convert orientation to resolution (1920x1080 for horizontal, 1080x1920 for vertical)
+     * 
+     * @returns Resolution as a tuple of numbers (width, height)
+     */
+    getResolution() {
+        let res: [number, number];
+        if (this.orientation === "horizontal") {
+            res = [1920, 1080];
+            return res;
+        } else if (this.orientation === "vertical") {
+            res = [1080, 1920];
+            return res;
+        } else {
+            throw new Error("Invalid orientation: " + this.orientation);
+        }
     }
 
     /**
