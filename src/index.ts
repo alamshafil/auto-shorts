@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { AIGenType, GPTAIGen, OllamaAIGen, OllamaOptions, OpenAIOptions } from './ai';
+import { AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen, AIOptions } from './ai';
 import { VideoDataType, VideoGenType, VideoOptions, InternalVideoOptions } from './videogen';
 import { TopicVideo } from "./types/topicVid";
 import { MsgVideo } from './types/msgVid';
@@ -41,9 +41,8 @@ export {
  * @param aiType AI type (ex. OllamaAIGen)
  * @param options Video options
  * @param customSystemPrompt Custom system prompt to override built-in prompt (optional)
- * @param ollamaOptions Ollama AI options (optional)
- * @param openAIOptions OpenAI options (optional)
- * @param openAIKey OpenAI API key (optional)
+ * @param aiOptions AI options (optional)
+ * @param aiAPIKey AI API key (optional)
  * 
  * @example
  * ```typescript
@@ -59,7 +58,7 @@ export {
  *  });
  * ```
  */
-export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, customSystemPrompt?: string, ollamaOptions?: OllamaOptions, openAIOptions?: OpenAIOptions, openAIKey?: string) : Promise<EventEmitter> {
+export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, customSystemPrompt?: string, aiOptions?: AIOptions, aiAPIKey?: string) : Promise<EventEmitter> {
     const log = (msg: string) => {
         if (options.internalOptions?.debug) console.info(msg);
     }
@@ -75,12 +74,16 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
 
     async function genAI(): Promise<string> {
         switch (aiType) {
-            case AIGenType.GPTAIGen:
-                return await GPTAIGen.generate(log, systemPrompt, openAIKey, openAIOptions);
             case AIGenType.OllamaAIGen:
-                return await OllamaAIGen.generate(log, systemPrompt, ollamaOptions);
+                return await OllamaAIGen.generate(log, systemPrompt, aiOptions);
+            case AIGenType.OpenAIGen:
+                return await OpenAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
+            case AIGenType.GoogleAIGen:
+                return await GoogleAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
+            case AIGenType.AnthropicAIGen:
+                return await AnthropicAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
             default:
-                throw new Error("Invalid AI type");
+                throw new Error("Invalid AI type: " + aiType);
         }
     }
 
@@ -88,9 +91,6 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
         log("Generating video script...");
         ai_response = await genAI();
     } else {
-        // Mock data
-        // ai_response = '{"type": "message", "contactname": "Raeed", "script": [{"voice": "female", "message": "Hello! How are you doing on this fine day?", "msgtype": "sender"}, {"voice": "male", "message": "Hi! I am doing okay my friend. Nothing much else to say.", "msgtype": "receiver"}]}';
-        // ai_response = '{"type": "reddit", "subreddit": "r/funny"}';
         ai_response = mockAiData;
     }
 

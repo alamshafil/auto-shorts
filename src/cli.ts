@@ -7,7 +7,7 @@ import 'dotenv/config'
 
 import { checkResDir, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
 
-import { AIGenType, GPTAIGen, OllamaAIGen } from "./ai";
+import { AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from "./ai";
 import { VoiceGenType } from "./tts";
 import { ImageGenType } from "./image";
 
@@ -98,9 +98,19 @@ async function cli() {
             description: 'Neets API key. {italic If applicable.}'
         },
         {
-            name: 'openAIKey',
+            name: 'openaiAPIKey',
             typeLabel: '{underline key}',
             description: 'OpenAI API key. {italic If applicable.}'
+        },
+        {
+            name: 'googleaiAPIKey',
+            typeLabel: '{underline key}',
+            description: 'Google AI API key. {italic If applicable.}'
+        },
+        {
+            name: 'anthropicAPIKey',
+            typeLabel: '{underline key}',
+            description: 'Anthropic AI API key. {italic If applicable.}'
         }
     ];
 
@@ -150,20 +160,15 @@ async function cli() {
             typeLabel: '{underline text}',
             description: "Override system prompt. {italic May not work with all AI types.}"
         },
-        {
-            name: 'ollamaModel',
-            typeLabel: '{underline model}',
-            description: 'Ollama model to use. {italic If applicable.}'
-        },
-        {
-            name: 'openAIModel',
-            typeLabel: '{underline model}',
-            description: 'OpenAI model to use. {italic If applicable.}'
-        },
         { 
             name: 'openAIEndpoint',
             typeLabel: '{underline endpoint}',
             description: 'OpenAI endpoint URL to use. {italic If applicable.}'
+        },
+        {
+            name: 'model',
+            typeLabel: '{underline model}',
+            description: 'AI model to use. {italic If applicable.}'
         }
     ];
 
@@ -255,12 +260,14 @@ async function cli() {
     const elevenLabsAPIKey = options.elevenlabsAPIKey ?? null;
     const pexelsAPIKey = options.pexelsAPIKey ?? null;
     const neetsAPIKey = options.neetsAPIKey ?? null;
-    const openAIKey = options.openAIKey ?? null;
 
-    const openAIEndpoint = options.openAIEndpoint ?? GPTAIGen.DEFAULT_ENDPOINT;
+    const openaiAPIKey = options.openaiAPIKey ?? null;
+    const googleaiAPIKey = options.googleaiAPIKey ?? null;
+    const anthropicAPIKey = options.anthropicAPIKey ?? null;
 
-    let ollamaModel = options.ollamaModel ?? OllamaAIGen.DEFAULT_MODEL;
-    let openAIModel = options.openAIModel ?? GPTAIGen.DEFAULT_MODEL;
+    const openAIEndpoint = options.openAIEndpoint ?? OpenAIGen.DEFAULT_ENDPOINT;
+
+    let aiModel = options.model ?? null;
 
     if (options.help) {
         console.log(usage);
@@ -277,7 +284,7 @@ async function cli() {
     // Log current options
     console.log("\n--> Current options:");
     console.info("AI Type: " + aiType);
-    console.info("AI Model: " + (aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
+    console.info("AI Model: " + (aiModel ?? "(using default)"));
     console.info("TTS Type: " + ttsType);
     console.info("Image API Type: " + imageType);
     console.info("Orientation: " + orientation);
@@ -297,11 +304,10 @@ async function cli() {
     if (elevenLabsAPIKey) console.info("Eleven Labs API key: present");
     if (pexelsAPIKey) console.info("Pexels API key: present");
     if (neetsAPIKey) console.info("Neets API key: present");
-    if (openAIKey) console.info("OpenAI API key: present");
-    if (options.ollamaModel) console.info("Ollama override model: " + ollamaModel);
-    if (options.openAIModel) console.info("OpenAI override model: " + openAIModel);
-    if (options.openAIEndpoint && aiType == AIGenType.GPTAIGen) console.info("OpenAI endpoint: " + openAIEndpoint);
-    if (options.openAIEndpoint && aiType != AIGenType.GPTAIGen) console.info("OpenAI endpoint: present but not used for current AI type.");
+    if (openaiAPIKey) console.info("OpenAI API key: present");
+    if (options.model) console.info("AI override model: " + aiModel);
+    if (options.openAIEndpoint && aiType == AIGenType.OpenAIGen) console.info("OpenAI endpoint: " + openAIEndpoint);
+    if (options.openAIEndpoint && aiType != AIGenType.OpenAIGen) console.info("OpenAI endpoint: present but not used for current AI type.");
 
     // Check API keys (checked again later)
     if (ttsType == VoiceGenType.ElevenLabs && !elevenLabsAPIKey) {
@@ -350,7 +356,7 @@ async function cli() {
                 console.info("Disable subtitles: " + jsonData.disableSubtitles);
                 console.info("Background video: " + (jsonData.bgVideo ?? "Using random"));
                 console.info("Background music: " + (jsonData.bgMusic ?? "Using random"));
-                console.info("AI Model: " + (jsonData.aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
+                console.info("AI Model: " + jsonData.model);
 
                 aiType = jsonData.aiType;
                 ttsType = jsonData.ttsType;
@@ -362,8 +368,7 @@ async function cli() {
                 disableSubtitles = jsonData.disableSubtitles;
                 bgVideo = jsonData.bgVideo;
                 bgMusic = jsonData.bgMusic
-                ollamaModel = jsonData.aiType == AIGenType.OllamaAIGen ? ollamaModel : GPTAIGen.DEFAULT_MODEL;
-                openAIModel = jsonData.aiType == AIGenType.GPTAIGen ? openAIModel : OllamaAIGen.DEFAULT_MODEL;
+                aiModel = jsonData.model;
             } catch (e: any) {
                 console.info("[!] Error reading previous options file. Using default options and CLI options.\nError details ->");
                 console.error(e.message ?? e.toString());
@@ -406,16 +411,30 @@ async function cli() {
 
         // Select AI model
         if (aiType == AIGenType.OllamaAIGen) {
-            ollamaModel = await select({
+            aiModel = await select({
                 message: 'Select Ollama model',
                 choices: (await OllamaAIGen.getModels()).map((model: string) => {
                     return { title: model, value: model };
                 }),
             });
-        } else if (aiType == AIGenType.GPTAIGen) {
-            openAIModel = await select({
+        } else if (aiType == AIGenType.OpenAIGen) {
+            aiModel = await select({
                 message: 'Select OpenAI model',
-                choices: (await GPTAIGen.getModels(openAIKey, { endpoint: openAIEndpoint })).map((model: string) => {
+                choices: (await OpenAIGen.getModels(openaiAPIKey, { endpoint: openAIEndpoint })).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.GoogleAIGen) {
+            aiModel = await select({
+                message: 'Select Google AI model',
+                choices: (await GoogleAIGen.getModels()).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.AnthropicAIGen) {
+            aiModel = await select({
+                message: 'Select Anthropic model',
+                choices: (await AnthropicAIGen.getModels()).map((model: string) => {
                     return { title: model, value: model };
                 }),
             });
@@ -472,7 +491,7 @@ async function cli() {
         console.info("Disable subtitles: " + disableSubtitles);
         console.info("Background video: " + (bgVideo ?? "Using random"));
         console.info("Background music: " + (bgMusic ?? "Using random"));
-        console.info("AI Model: " + (aiType == AIGenType.OllamaAIGen ? ollamaModel : openAIModel));
+        console.info("AI Model: " + aiModel);
 
         // Save to file
         const data = {
@@ -486,8 +505,7 @@ async function cli() {
             disableSubtitles: disableSubtitles,
             bgVideo: bgVideo,
             bgMusic: bgMusic,
-            openAIModel: openAIModel,
-            ollamaModel: ollamaModel,
+            aiModel: aiModel
         };
 
         const jsonData = JSON.stringify(data);
@@ -550,14 +568,27 @@ async function cli() {
         return;
     }
 
+    // Get AI API key based on type
+    let aiAPIKey;
+    switch (aiType) {
+        case AIGenType.OpenAIGen:
+            aiAPIKey = openaiAPIKey;
+            break;
+        case AIGenType.GoogleAIGen:
+            aiAPIKey = googleaiAPIKey;
+            break;
+        case AIGenType.AnthropicAIGen:
+            aiAPIKey = anthropicAPIKey;
+            break;
+    }
+
     const task = await genVideoWithAI(
         userComment,
         AIGenType[aiType as keyof typeof AIGenType],
         vidOptions,
         promptOverride, 
-        { model: ollamaModel },
-        { model: openAIModel, endpoint: openAIEndpoint },
-        openAIKey
+        { model: aiModel, endpoint: openAIEndpoint },
+        aiAPIKey
     );
 
     task.on('done', (output) => {
