@@ -85,7 +85,7 @@ export class ElevenLabsVoice extends VoiceGen {
      */
     static async generateVoice(gen: VideoGen, options: VoiceGenOptions, apiKey?: string) {
         if (!apiKey) {
-            throw new Error("ElevenLabs API key required");
+            throw new Error("ElevenLabs API key required for voice generation. Set via '--elevenlabsAPIKey' option or define 'ELEVENLABS_API_KEY' environment variable.");
         }
 
         const elevenlabs = new ElevenLabsClient({
@@ -134,7 +134,7 @@ export class NeetsTTSVoice extends VoiceGen {
      */
     static async generateVoice(gen: VideoGen, options: VoiceGenOptions, apiKey?: string) {
         if (!apiKey) {
-            throw new Error("NeetsTTS API key required");
+            throw new Error("NeetsTTS API key required. Set via '--neetsAPIKey' option or define 'NEETS_API_KEY' environment variable.");
         }
 
         // const voiceModel = (options.voice == "male") ? "us-male-2" : "us-female-2";

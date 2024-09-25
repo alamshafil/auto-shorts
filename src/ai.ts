@@ -84,7 +84,7 @@ export class OpenAIGen extends AIGen {
         log(`Calling OpenAI API with endpoint: ${endpoint}`);
 
         if (apiKey == "" || apiKey == undefined) {
-            log("[*] Warning: OpenAI API key is not set! Set via '--openaiAPIKey' flag.");
+            log("[*] Warning: OpenAI API key is not set! Set via '--openaiAPIKey' flag or define 'OPENAI_API_KEY' environment variable.");
         }
 
         const client = new OpenAI({
@@ -238,7 +238,7 @@ export class GoogleAIGen extends AIGen {
         log(`Calling Google AI API with endpoint: ${endpoint}`);
 
         if (apiKey == "" || apiKey == undefined) {
-            throw Error("Google AI API key is not set! Set via '--googleaiAPIKey' flag.");
+            throw Error("Google AI API key is not set! Set via '--googleaiAPIKey' flag or define 'GOOGLE_AI_API_KEY' environment variable.");
         }
 
         let aiResponse = '';
@@ -364,7 +364,7 @@ export class AnthropicAIGen extends AIGen {
         log(`Calling Anthropic AI API with endpoint: ${endpoint}`);
 
         if (apiKey == "" || apiKey == undefined) {
-            throw Error("Anthropic AI API key is not set! Set via '--anthropicAPIKey' flag.");
+            throw Error("Anthropic AI API key is not set! Set via '--anthropicAPIKey' flag or define 'ANTHROPIC_API_KEY' environment variable.");
         }
 
         const headers = {
