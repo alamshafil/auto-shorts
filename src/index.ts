@@ -40,9 +40,9 @@ export {
  * @param prompt Prompt for AI to generate script (can be user comment, etc.)
  * @param aiType AI type (ex. OllamaAIGen)
  * @param options Video options
- * @param customSystemPrompt Custom system prompt to override built-in prompt (optional)
- * @param aiOptions AI options (optional)
  * @param aiAPIKey AI API key (optional)
+ * @param aiOptions AI options (optional)
+ * @param customSystemPrompt Custom system prompt to override built-in prompt (optional)
  * 
  * @example
  * ```typescript
@@ -58,7 +58,7 @@ export {
  *  });
  * ```
  */
-export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, customSystemPrompt?: string, aiOptions?: AIOptions, aiAPIKey?: string) : Promise<EventEmitter> {
+export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, aiAPIKey?: string, aiOptions?: AIOptions, customSystemPrompt?: string,) : Promise<EventEmitter> {
     const log = (msg: string) => {
         if (options.internalOptions?.debug) console.info(msg);
     }

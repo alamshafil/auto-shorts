@@ -135,23 +135,22 @@ task.on('done', (output) => {
 
 /** @type {import("auto-shorts").VideoDataType} */
 const data = {
-    type: "topic",
-    title: "TypeScript",
-    description: "TypeScript is a programming language...",
-    start_script: "Hello! Today we will be talking about TypeScript.",
-    end_script: "That's all for today. Thanks for watching!",
-    images: ["typescript logo"]
+    type: "topic", // Provide the type of video
+    title: "TypeScript", // Provide the title of the video
+    start_script: "Hello! Today we will be talking about TypeScript.", // Provide the start script of the video
+    end_script: "That's all for today. Thanks for watching!", // Provide the end script of the video
+    images: ["typescript logo"] // Provide the images for the video
 };
 
 const task = await genVideoWithJson(
     data, {
-    tempPath: 'video_temp',
-    resPath: 'res',
-    voiceGenType: VoiceGenType.ElevenLabsVoice,
-    imageGenType: ImageGenType.GoogleScraperImageGen,
+    tempPath: 'video_temp', // Provide the path to the temporary video folder
+    resPath: 'res', // Provide the path to the downloaded resources folder
+    voiceGenType: VoiceGenType.ElevenLabsVoice, // Use ElevenLabs to generate the voice
+    imageGenType: ImageGenType.PexelsImageGen, // Use Google Scraper to generate the image
     apiKeys: {
-        elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY,
-        pexelsAPIKey: process.env.PEXELS_API_KEY,
+        elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY, // Provide the ElevenLabs API key
+        pexelsAPIKey: process.env.PEXELS_API_KEY, // Provide the Pexels API key
     }
 });
 

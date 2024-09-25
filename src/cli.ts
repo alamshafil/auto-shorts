@@ -257,13 +257,13 @@ async function cli() {
     const userPrompt = options.prompt ?? null;
 
     const promptOverride = options.systemPromptOverride ?? null;
-    const elevenLabsAPIKey = options.elevenlabsAPIKey ?? process.env.ELEVENLABS_API_KEY;
-    const pexelsAPIKey = options.pexelsAPIKey ?? process.env.PEXELS_API_KEY;
-    const neetsAPIKey = options.neetsAPIKey ?? process.env.NEETS_API_KEY;
+    const elevenLabsAPIKey = options.elevenlabsAPIKey ?? process.env.ELEVENLABS_API_KEY ?? null;
+    const pexelsAPIKey = options.pexelsAPIKey ?? process.env.PEXELS_API_KEY ?? null;
+    const neetsAPIKey = options.neetsAPIKey ?? process.env.NEETS_API_KEY ?? null;
 
-    const openaiAPIKey = options.openaiAPIKey ?? process.env.OPENAI_API_KEY;
-    const googleaiAPIKey = options.googleaiAPIKey ?? process.env.GOOGLE_AI_API_KEY;
-    const anthropicAPIKey = options.anthropicAPIKey ?? process.env.ANTHROPIC_API_KEY;
+    const openaiAPIKey = options.openaiAPIKey ?? process.env.OPENAI_API_KEY ?? null;
+    const googleaiAPIKey = options.googleaiAPIKey ?? process.env.GOOGLE_AI_API_KEY ?? null;
+    const anthropicAPIKey = options.anthropicAPIKey ?? process.env.ANTHROPIC_API_KEY ?? null;
 
     const openAIEndpoint = options.openAIEndpoint ?? OpenAIGen.DEFAULT_ENDPOINT;
 
@@ -293,18 +293,21 @@ async function cli() {
     console.info("Prompt: " + (userPrompt ?? "None (will be asked later)"));
 
     console.log("\n--> Advanced options:");
-    console.info("Delete files: " + deleteFiles);
-    console.info("Change photos: " + changePhotos);
-    console.info("Disable TTS: " + disableTTS);
-    console.info("Disable subtitles: " + disableSubtitles);
     console.info("Background video: " + (bgVideo ?? "Using random"));
     console.info("Background music: " + (bgMusic ?? "Using random"));
+
+    if (options.deleteFiles) console.info("Delete files: " + deleteFiles);
+    if (options.changePhotos) console.info("Change photos: " + changePhotos);
+    if (options.disableTTS) console.info("Disable TTS: " + disableTTS);
+    if (options.disableSubtitles) console.info("Disable subtitles: " + disableSubtitles);
 
     if (promptOverride) console.info("System prompt override: " + promptOverride);
     if (elevenLabsAPIKey) console.info("Eleven Labs API key: present");
     if (pexelsAPIKey) console.info("Pexels API key: present");
     if (neetsAPIKey) console.info("Neets API key: present");
     if (openaiAPIKey) console.info("OpenAI API key: present");
+    if (googleaiAPIKey) console.info("Google AI API key: present");
+    if (anthropicAPIKey) console.info("Anthropic API key: present");
     if (options.model) console.info("AI override model: " + aiModel);
     if (options.openAIEndpoint && aiType == AIGenType.OpenAIGen) console.info("OpenAI endpoint: " + openAIEndpoint);
     if (options.openAIEndpoint && aiType != AIGenType.OpenAIGen) console.info("OpenAI endpoint: present but not used for current AI type.");
@@ -323,6 +326,41 @@ async function cli() {
     if (ttsType == VoiceGenType.NeetsTTS && !neetsAPIKey) {
         console.error("Error: Neets API key not found. Exiting...");
         return;
+    }
+
+    // Function to get AI model
+    async function getAIModel() {
+        let aiModel;
+        if (aiType == AIGenType.OllamaAIGen) {
+            aiModel = await select({
+                message: 'Select Ollama model',
+                choices: (await OllamaAIGen.getModels()).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.OpenAIGen) {
+            aiModel = await select({
+                message: 'Select OpenAI model',
+                choices: (await OpenAIGen.getModels(openaiAPIKey, { endpoint: openAIEndpoint })).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.GoogleAIGen) {
+            aiModel = await select({
+                message: 'Select Google AI model',
+                choices: (await GoogleAIGen.getModels()).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        } else if (aiType == AIGenType.AnthropicAIGen) {
+            aiModel = await select({
+                message: 'Select Anthropic model',
+                choices: (await AnthropicAIGen.getModels()).map((model: string) => {
+                    return { title: model, value: model };
+                }),
+            });
+        }
+        return aiModel;
     }
 
     // Advanced options
@@ -410,35 +448,7 @@ async function cli() {
         });
 
         // Select AI model
-        if (aiType == AIGenType.OllamaAIGen) {
-            aiModel = await select({
-                message: 'Select Ollama model',
-                choices: (await OllamaAIGen.getModels()).map((model: string) => {
-                    return { title: model, value: model };
-                }),
-            });
-        } else if (aiType == AIGenType.OpenAIGen) {
-            aiModel = await select({
-                message: 'Select OpenAI model',
-                choices: (await OpenAIGen.getModels(openaiAPIKey, { endpoint: openAIEndpoint })).map((model: string) => {
-                    return { title: model, value: model };
-                }),
-            });
-        } else if (aiType == AIGenType.GoogleAIGen) {
-            aiModel = await select({
-                message: 'Select Google AI model',
-                choices: (await GoogleAIGen.getModels()).map((model: string) => {
-                    return { title: model, value: model };
-                }),
-            });
-        } else if (aiType == AIGenType.AnthropicAIGen) {
-            aiModel = await select({
-                message: 'Select Anthropic model',
-                choices: (await AnthropicAIGen.getModels()).map((model: string) => {
-                    return { title: model, value: model };
-                }),
-            });
-        }
+        aiModel = await getAIModel();
 
         const deleteFilesRep = await input({ message: `Delete files before starting? (default: true) (y/n) -> ` });
 
@@ -514,6 +524,15 @@ async function cli() {
         console.info("Options saved to file at: " + path.resolve('options_autoshorts.json'));
     }
 
+    // Get AI model
+    if (!aiModel) {
+        try {
+            aiModel = await getAIModel();
+        } catch (e: any) {
+            console.info("[*] IMPORTANT: Error getting AI models (check if using correct AI type, if using Ollama - check if running). Error message: " + e.message ?? e.toString());
+        }
+    }
+
     let userComment = "";
 
     if (!useMock && !userPrompt && !options.jsonFile) {
@@ -586,9 +605,9 @@ async function cli() {
         userComment,
         AIGenType[aiType as keyof typeof AIGenType],
         vidOptions,
-        promptOverride, 
+        aiAPIKey,
         { model: aiModel, endpoint: openAIEndpoint },
-        aiAPIKey
+        promptOverride, 
     );
 
     task.on('done', (output) => {
