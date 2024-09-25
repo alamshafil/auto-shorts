@@ -1,6 +1,32 @@
 // Copyright (c) 2024 Shafil Alam
 
-import ollama, {ModelResponse} from "ollama";
+import ollama, { ModelResponse } from "ollama";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from 'openai';
+import { ChatCompletionMessageParam } from "openai/resources";
+
+import { VideoGenType } from "./videogen";
+import { INITIAL_AI_PROMPT, messageVideoAIPrompt, quizVideoAIPrompt, rankVideoAIPrompt, ratherVideoAIPrompt, topicVideoAIPrompt } from "./const";
+
+/** 
+ * Function to convert video type to AI prompt
+ */
+export function convertVideoTypeToPrompt(videoType: VideoGenType) : any {
+    switch (videoType) {
+        case VideoGenType.TopicVideo:
+            return topicVideoAIPrompt;
+        case VideoGenType.TextMessageVideo:
+            return messageVideoAIPrompt;
+        case VideoGenType.RatherVideo:
+            return ratherVideoAIPrompt;
+        case VideoGenType.RankVideo:
+            return rankVideoAIPrompt;
+        case VideoGenType.QuizVideo:
+            return quizVideoAIPrompt;
+        default:
+            throw Error(`Invalid video type: '${videoType}' (maybe issue due to AI giving invalid video type)`);
+    }
+}
 
 /**
  * AI generation types
@@ -24,7 +50,7 @@ export interface AIOptions {
  * @abstract
  */
 export class AIGen {
-    static async generate(log: (msg: string) => void, prompt: string) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string) : Promise<string> {
         throw new Error("Method 'generate' must be implemented");
     }
 
@@ -38,17 +64,19 @@ export class AIGen {
  */
 export class OpenAIGen extends AIGen {
     static DEFAULT_MODEL = "gpt-4o-mini";
-    static DEFAULT_ENDPOINT = "https://api.openai.com/v1";
+    static DEFAULT_ENDPOINT = "https://api.openai.com/v1/";
 
     /**
      * Generate AI text using OpenAI API
-     * @param prompt - Prompt text
+     * @param log - Log function
+     * @param systemPrompt - System prompt
+     * @param userPrompt - User prompt
      * @param apiKey - OpenAI API key
      * @param options - OpenAI options
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, prompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
         const endpoint = options?.endpoint ?? this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -59,40 +87,100 @@ export class OpenAIGen extends AIGen {
             log("[*] Warning: OpenAI API key is not set! Set via '--openaiAPIKey' flag.");
         }
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-        };
-
-        const data = {
-            model: model,
-            messages: [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-        };
-
-        const response = await fetch(endpoint + "/chat/completions", {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(data),
+        const client = new OpenAI({
+            apiKey: apiKey,
+            baseURL: endpoint,
         });
 
-        if (!response.ok) {
-            throw new Error("Failed to call OpenAI API: " + response.statusText);
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: INITIAL_AI_PROMPT + userPrompt }
+        ];
+
+        const response = await client.chat.completions.create({
+            model: model,
+            messages: messages as ChatCompletionMessageParam[],
+            stream: true,
+        });
+
+        let aiResponse = '';
+        let videoType = '';
+
+        for await (const chunk of response) {
+            videoType += chunk.choices[0]?.delta?.content;
+            log(`AI Response chunk -> ${chunk.choices[0]?.delta?.content?.trim()}`);
         }
 
-        const json = await response.json();
+        videoType = videoType.trim();
 
-        const aiResponse = json.choices[0].message.content;
+        // Get AI prompts for video type
+        // Check if AI string matches any type in VideoGenType enum
+        const videoTypeValues = Object.values<string>(VideoGenType);
+        let matchedType = videoTypeValues.find((val) => val.toLowerCase() === videoType.toLowerCase());
 
-        log(`Response: ${aiResponse.trim()}`);
+        if (!matchedType) {
+            log(`[*] Invalid video type (defaulting to topic): '${videoType}'`);
+            matchedType = VideoGenType.TopicVideo;
+        }
+
+        log(`(OpenAI ${model}) AI said video type is '${matchedType}'`);
+
+        const videoGenType = matchedType as VideoGenType;
+        const aiPrompt = convertVideoTypeToPrompt(videoGenType);
+        
+        // Get each prompt from each field and add to JSON
+        let videoJson: any = {};
+
+        videoJson["type"] = videoGenType;
+
+        for (const [key, value] of Object.entries<string>(aiPrompt)) {
+            if (key == "csv" || key == "csv_multi") continue;
+
+            const prompt = value;
+
+            log(`(OpenAI ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
+
+            messages.push({ role: 'user', content: prompt });
+            const response = await client.chat.completions.create({
+                model: model,
+                messages: messages as ChatCompletionMessageParam[],
+                stream: true,
+            });
+
+            let res = '';
+            for await (const chunk of response) {
+                res += chunk.choices[0]?.delta?.content;
+                log(`AI Response chunk -> ${chunk.choices[0]?.delta?.content?.trim()}`);
+            }
+
+            videoJson[key] = res;
+
+            // Check if field is CSV and parse into JSON array
+            if (aiPrompt.csv?.includes(key)) {
+                videoJson[key] = res.split(',').map((item: string) => item.trim());
+            }
+
+            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
+            if (aiPrompt.csv_multi?.includes(key)) {
+                const lines = res.split('\n');
+                const headers = lines[0].split(',');
+                const data = lines.slice(1);
+                const jsonArr = data.map((line: string) => {
+                    const obj: any = {};
+                    const values = line.split(',');
+                    headers.forEach((header, index) => {
+                        obj[header] = values[index];
+                    });
+                    return obj;
+                });
+
+                videoJson[key] = jsonArr;
+            }
+
+            log(`(OpenAI ${model}) AI said for field '${key}' is '${res}'`);
+        }
+
+        aiResponse = JSON.stringify(videoJson, null, 2);
 
         return aiResponse;
     }
@@ -112,23 +200,14 @@ export class OpenAIGen extends AIGen {
             console.info("[*] Warning: OpenAI API key is not set!");
         }
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-        };
-
-        const response = await fetch(endpoint + "/models", {
-            method: 'GET',
-            headers: headers,
+        const client = new OpenAI({
+            apiKey: apiKey,
+            baseURL: endpoint,
         });
 
-        if (!response.ok) {
-            throw new Error("Failed to call OpenAI API: " + response.statusText);
-        }
+        const response = await client.models.list();
 
-        const json = await response.json();
-
-        const models = json.data.map((model: any) => model.id);
+        const models = response.data.map((model: any) => model.id);
 
         return models;
     }
@@ -141,7 +220,17 @@ export class GoogleAIGen extends AIGen {
     static DEFAULT_MODEL = "gemini-1.5-flash";
     static DEFAULT_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
 
-    static async generate(log: (msg: string) => void, prompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    /**
+     * Generate AI text using Google Gemini API
+     * @param log - Log function
+     * @param systemPrompt - System prompt
+     * @param userPrompt - User prompt
+     * @param apiKey - Google Gemini API key
+     * @param options - Google Gemini AI options
+     * @returns AI generated text
+     * @throws Error if API call fails
+     */
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
         const endpoint = this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -152,33 +241,89 @@ export class GoogleAIGen extends AIGen {
             throw Error("Google AI API key is not set! Set via '--googleaiAPIKey' flag.");
         }
 
-        const headers = {
-            'Content-Type': 'application/json',
-        };
+        let aiResponse = '';
 
-        const data = {
-            contents: [{
-                parts: [{ text: prompt }]
-            }]
-        };
+        const ai = new GoogleGenerativeAI(apiKey);
+        const geminiModel = ai.getGenerativeModel({ model: model });
+        const chat = await geminiModel.startChat({
+            history: [
+                { role: "user", parts: [{ text: systemPrompt }] }
+            ]
+        })
 
-        const url = `${endpoint}/models/${model}:generateContent?key=${apiKey}`;
+        let videoTypeResult = await chat.sendMessageStream(INITIAL_AI_PROMPT + userPrompt);
+        let videoType = '';
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to call Google AI API: " + response.statusText);
+        for await (const part of videoTypeResult.stream) {
+            videoType += part.text();
+            log(`AI Response chunk for 'type' -> ${part.text().trim()}`);
         }
 
-        const json = await response.json();
+        videoType = videoType.trim();
 
-        const aiResponse = json.candidates[0].content;
+        // Get AI prompts for video type
+        // Check if AI string matches any type in VideoGenType enum
+        const videoTypeValues = Object.values<string>(VideoGenType);
+        let matchedType = videoTypeValues.find((val) => val.toLowerCase() === videoType.toLowerCase());
 
-        log(`Response: ${aiResponse.trim()}`);
+        if (!matchedType) {
+            log(`[*] Invalid video type (defaulting to topic): '${videoType}'`);
+            matchedType = VideoGenType.TopicVideo;
+        }
+
+        log(`(Google AI ${model}) AI said video type is '${matchedType}'`);
+
+        const videoGenType = matchedType as VideoGenType;
+
+        const aiPrompt = convertVideoTypeToPrompt(videoGenType);
+
+        // Get each prompt from each field and add to JSON
+        let videoJson: any = {};
+
+        videoJson["type"] = videoGenType;
+
+        for (const [key, value] of Object.entries<string>(aiPrompt)) {
+            if (key == "csv" || key == "csv_multi") continue;
+
+            const prompt = value;
+
+            log(`(Google AI ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
+
+            let result = await chat.sendMessageStream(prompt);
+            let res = '';
+            for await (const part of result.stream) {
+                res += part.text();
+                log(`AI Response chunk for '${key}' -> ${part.text().trim()}`);
+            }
+
+            videoJson[key] = res;
+
+            // Check if field is CSV and parse into JSON array
+            if (aiPrompt.csv?.includes(key)) {
+                videoJson[key] = res.split(',').map((item: string) => item.trim());
+            }
+
+            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
+            if (aiPrompt.csv_multi?.includes(key)) {
+                const lines = res.split('\n');
+                const headers = lines[0].split(',');
+                const data = lines.slice(1);
+                const jsonArr = data.map((line: string) => {
+                    const obj: any = {};
+                    const values = line.split(',');
+                    headers.forEach((header, index) => {
+                        obj[header] = values[index];
+                    });
+                    return obj;
+                });
+
+                videoJson[key] = jsonArr;
+            }
+
+            log(`(Google AI ${model}) AI said for field '${key}' is '${res}'`);
+        }
+
+        aiResponse = JSON.stringify(videoJson, null, 2);
 
         return aiResponse;
     }
@@ -201,7 +346,17 @@ export class AnthropicAIGen extends AIGen {
     static DEFAULT_MODEL = "claude-3-5-sonnet-20240620";
     static DEFAULT_ENDPOINT = "https://api.anthropic.com/v1";
 
-    static async generate(log: (msg: string) => void, prompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    /**
+     * Generate AI text using Anthropic API
+     * @param log - Log function
+     * @param systemPrompt - System prompt
+     * @param userPrompt - User prompt
+     * @param apiKey - Anthropic API key
+     * @param options - Anthropic AI options
+     * @returns AI generated text
+     * @throws Error if API call fails
+     */
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
         const endpoint = this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -218,14 +373,14 @@ export class AnthropicAIGen extends AIGen {
             'anthropic-version': '2023-06-01',
         };
 
+        const messages = [
+            { role: 'user', content: systemPrompt },
+            { role: 'user', content: INITIAL_AI_PROMPT + userPrompt }
+        ]
+
         const data = {
             model: model,
-            messages: [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+            messages: messages,
         };
 
         const response = await fetch(endpoint + "/messages", {
@@ -240,9 +395,85 @@ export class AnthropicAIGen extends AIGen {
 
         const json = await response.json();
 
-        const aiResponse = json.content[0].text;
+        let videoType = json.content[0].text;
 
-        log(`Response: ${aiResponse.trim()}`);
+        // Get AI prompts for video type
+        // Check if AI string matches any type in VideoGenType enum
+        const videoTypeValues = Object.values<string>(VideoGenType);
+        let matchedType = videoTypeValues.find((val) => val.toLowerCase() === videoType.toLowerCase());
+
+        if (!matchedType) {
+            log(`[*] Invalid video type (defaulting to topic): '${videoType}'`);
+            matchedType = VideoGenType.TopicVideo;
+        }
+
+        log(`(Anthropic ${model}) AI said video type is '${matchedType}'`);
+
+        const videoGenType = matchedType as VideoGenType;
+
+        const aiPrompt = convertVideoTypeToPrompt(videoGenType);
+
+        // Get each prompt from each field and add to JSON
+        let videoJson: any = {};
+
+        videoJson["type"] = videoGenType;
+
+        for (const [key, value] of Object.entries<string>(aiPrompt)) {
+            if (key == "csv" || key == "csv_multi") continue;
+
+            const prompt = value;
+
+            log(`(Anthropic ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
+
+            messages.push({ role: 'user', content: prompt });
+
+            const data = {
+                model: model,
+                messages: messages,
+            };
+
+            const response = await fetch(endpoint + "/messages", {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to call Anthropic AI API: " + response.statusText);
+            }
+
+            const json = await response.json();
+
+            let res: string = json.content[0].text;
+
+            videoJson[key] = res;
+
+            // Check if field is CSV and parse into JSON array
+            if (aiPrompt.csv?.includes(key)) {
+                videoJson[key] = res.split(',').map((item: string) => item.trim());
+            }
+
+            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
+            if (aiPrompt.csv_multi?.includes(key)) {
+                const lines = res.split('\n');
+                const headers = lines[0].split(',');
+                const data = lines.slice(1);
+                const jsonArr = data.map((line: string) => {
+                    const obj: any = {};
+                    const values = line.split(',');
+                    headers.forEach((header, index) => {
+                        obj[header] = values[index];
+                    });
+                    return obj;
+                });
+
+                videoJson[key] = jsonArr;
+            }
+
+            log(`(Anthropic ${model}) AI said for field '${key}' is '${res}'`);
+        }
+
+        let aiResponse = JSON.stringify(videoJson, null, 2);
 
         return aiResponse;
     }
@@ -263,29 +494,112 @@ export class AnthropicAIGen extends AIGen {
  */
 export class OllamaAIGen extends AIGen {
     /** Default model name */
-    static DEFAULT_MODEL = "mistral";
+    static DEFAULT_MODEL = "llama3.1";
 
     /**
-     * Generate AI text using Ollama API
-     * @param prompt - Prompt text
-     * @param options - Ollama options
+     * Generate AI text using Ollama local API
+     * @param log - Log function
+     * @param systemPrompt - System prompt
+     * @param userPrompt - User prompt
+     * @param options - Ollama AI options
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, prompt: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, options?: AIOptions) : Promise<string> {
         let model = options?.model ?? this.DEFAULT_MODEL;
-        log(`Calling Ollama API with model: ${model}`);
+        log(`Calling Ollama local API with model: ${model}`);
 
         let aiResponse = '';
         try {
-            const message = { role: 'user', content: prompt }
-            const response = await ollama.chat({ model: model, messages: [message], stream: true })
+
+            let videoType = '';
+
+            const messages = [
+                { role: 'user', content: systemPrompt }, 
+                { role: 'user', content: INITIAL_AI_PROMPT + userPrompt }
+            ];
+            const response = await ollama.chat({ model: model, messages: messages, stream: true })
+
             for await (const part of response) {
                 const msgChunk = part.message.content;
-                aiResponse += msgChunk;
-                log(`Response chunk: ${msgChunk.trim()}`);
+                videoType += msgChunk;
+                log(`AI Response chunk for 'type' -> ${msgChunk.trim()}`);
             }
+
+            videoType = videoType.trim();
+
+            // Get AI prompts for video type
+            // Check if AI string matches any type in VideoGenType enum
+            const videoTypeValues = Object.values<string>(VideoGenType);
+            let matchedType = videoTypeValues.find((val) => val.toLowerCase() === videoType.toLowerCase());
+
+            if (!matchedType) {
+                log(`[*] Invalid video type (defaulting to topic): '${videoType}'`);
+                matchedType = VideoGenType.TopicVideo;
+            }
+
+            log(`(Ollama ${model}) AI said video type is '${matchedType}'`);
+
+            const videoGenType = matchedType as VideoGenType;
+
+            const aiPrompt = convertVideoTypeToPrompt(videoGenType);
+
+            // Get each prompt from each field and add to JSON
+            let videoJson: any = {};
+
+            videoJson["type"] = videoGenType;
+
+            for (const [key, value] of Object.entries<string>(aiPrompt)) {
+                if (key == "csv" || key == "csv_multi") continue;
+
+                const prompt = value;
+
+                log(`(Ollama ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
+
+                messages.push({ role: 'user', content: prompt });
+                const response = await ollama.chat({ model: model, messages: messages, stream: true });
+
+                let res = '';
+                for await (const part of response) {
+                    const msgChunk = part.message.content;
+                    res += msgChunk;
+                    log(`AI Response chunk for '${key}' -> ${msgChunk.trim()}`);
+                }
+
+                videoJson[key] = res;
+
+                // Check if field is CSV and parse into JSON array
+                if (aiPrompt.csv?.includes(key)) {
+                    videoJson[key] = res.split(',').map((item: string) => item.trim());
+                }
+
+                // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
+                if (aiPrompt.csv_multi?.includes(key)) {
+                    const lines = res.split('\n');
+                    const headers = lines[0].split(',');
+                    const data = lines.slice(1);
+                    const jsonArr = data.map((line: string) => {
+                        const obj: any = {};
+                        const values = line.split(',');
+                        headers.forEach((header, index) => {
+                            obj[header] = values[index];
+                        });
+                        return obj;
+                    });
+
+                    // Log 
+                    log(`(Ollama ${model}) Resultant: ${jsonArr}`);
+                    
+                    videoJson[key] = jsonArr;
+                }
+
+                log(`(Ollama ${model}) AI said for field '${key}' is '${res}'`);
+            }
+
+            aiResponse = JSON.stringify(videoJson, null, 2);
+
             return aiResponse;
+
         } catch (error: any) {
             log("Error while calling Ollama API: " + error.message);
             throw new Error("Error while calling Ollama API: " + error.message);

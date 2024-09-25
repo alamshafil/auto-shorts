@@ -13,7 +13,7 @@ import { MsgVideo } from './types/msgVid';
 import { RatherVideo } from './types/ratherVid';
 import { RankVideo } from './types/rankVid';
 import { QuizVideo } from './types/quizVid';
-import { builtin_ai_system_prompt, mockAiData } from "./const";
+import { BUILTIN_AI_SYSTEM_PROMPT, MockAIData } from "./const";
 
 import { EventEmitter } from 'events';
 import fs from 'fs';
@@ -66,22 +66,19 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
     const userComment = prompt;
 
     // Add user comment to system prompt
-    const systemPrompt = customSystemPrompt 
-        ? customSystemPrompt + userComment
-        : builtin_ai_system_prompt + userComment;
-
-    let ai_response = '';
+    const systemPrompt = customSystemPrompt ? customSystemPrompt : BUILTIN_AI_SYSTEM_PROMPT;
+    let aiResponse = '';
 
     async function genAI(): Promise<string> {
         switch (aiType) {
             case AIGenType.OllamaAIGen:
-                return await OllamaAIGen.generate(log, systemPrompt, aiOptions);
+                return await OllamaAIGen.generate(log, systemPrompt, prompt, aiOptions);
             case AIGenType.OpenAIGen:
-                return await OpenAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
+                return await OpenAIGen.generate(log, systemPrompt, prompt, aiAPIKey, aiOptions);
             case AIGenType.GoogleAIGen:
-                return await GoogleAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
+                return await GoogleAIGen.generate(log, systemPrompt, prompt, aiAPIKey, aiOptions);
             case AIGenType.AnthropicAIGen:
-                return await AnthropicAIGen.generate(log, systemPrompt, aiAPIKey, aiOptions);
+                return await AnthropicAIGen.generate(log, systemPrompt, prompt, aiAPIKey, aiOptions);
             default:
                 throw new Error("Invalid AI type: " + aiType);
         }
@@ -89,18 +86,18 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
 
     if (!options.internalOptions?.useMock) {
         log("Generating video script...");
-        ai_response = await genAI();
+        aiResponse = await genAI();
     } else {
-        ai_response = mockAiData;
+        aiResponse = MockAIData;
     }
 
     // Debug print
-    log(`Final response: \n${ai_response}`);
+    log(`Final response: \n${aiResponse}`);
 
     log("Video script generated successfully!");
 
     // Generate video based on AI response
-    return await genVideo(ai_response, options);
+    return await genVideo(aiResponse, options);
 }
 
 /** 

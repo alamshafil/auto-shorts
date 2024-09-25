@@ -28,6 +28,19 @@ export interface TopicVideoData {
 }
 
 /**
+ * AI prompt for each JSON field of TopicVideoData
+ * Prompt will be given to AI and result will be placed inside JSON field of data.
+ */
+export const topicVideoAIPrompt = {
+    text: "Generate what will be spoken in the video based on topic",
+    // start_script: "Generate what will be spoken at start of the video",
+    // end_script: "Generate what will be spoken at end of the video",
+    images: "List of short image search terms for the video. Use CSV format!",
+    // Fields that will be parsed as CSV into JSON array
+    csv: ["images"]
+};
+
+/**
  * Topic video generation
  */
 export class TopicVideo extends VideoGen {

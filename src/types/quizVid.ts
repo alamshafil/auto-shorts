@@ -32,12 +32,27 @@ export interface QuizVideoData {
      * ```
     */
     answers: string[];
-    /** Extra start information */
+    /** Start script to be spoken */
     start_script: string;
-    /** Extra end information */
+    /** End script to be spoken */
     end_script: string;
     /** Font name (optional) */
     fontName?: string;
+}
+
+/**
+ * AI prompt for each JSON field of QuizVideoData
+ * Prompt will be given to AI and result will be placed inside JSON field of data.
+ */
+export const quizVideoAIPrompt = {
+    title: "Generate title for the quiz video",
+    questions: "Generate questions for the quiz video. Use CSV format. Only questions, no answers. Answers for each questions will be asked later, in the same order.",
+    answers: "Generate answers for the quiz video based on questions. Use CSV format. Only answers on same index as question being answered, no questions.",
+    start_script: "Generate what will be spoken at start of the quiz video",
+    end_script: "Generate what will be spoken at end of the quiz video",
+    // fontName: "Generate font name for the quiz video"
+    // Fields that will be parsed as CSV into JSON array
+    csv: ["questions", "answers"]
 }
 
 /**

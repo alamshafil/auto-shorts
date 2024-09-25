@@ -36,6 +36,24 @@ export interface MessageVideoData {
 }
 
 /**
+ * AI prompt for each JSON field of MessageVideoData
+ * Prompt will be given to AI and result will be placed inside JSON field of data.
+ */
+export const messageVideoAIPrompt = {
+    contactname: "What is the contact name of the text message story?",
+    // script: {
+    //     voice: "What is the voice of the message? Respond with 'male' or 'female'",
+    //     message: "What is the message text?",
+    //     msgtype: "Who is the message for? Respond with 'receiver' or 'sender'"
+    // },
+    script: "Generate the script for the text message story. Use CSV format with headers. Use a break line (\n) to seperate each item. Each message (CSV item) should have the following fields: voice, message, msgtype. 'voice' will be 'male' or 'female'. 'msgtype' will be 'receiver' or 'sender'. 'message' will be the message text.",
+    extra: "What is the extra information to be spoken at the end of the video? Do a simple summary of the story and say goodbye.",
+    // Fields that will be parsed as CSV into JSON array
+    csv: [],
+    csv_multi: ["script"]
+};
+
+/**
  * Message video generation class
  */
 export class MsgVideo extends VideoGen {

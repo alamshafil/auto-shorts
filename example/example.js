@@ -1,8 +1,8 @@
-// Example of shorts-gpt usage
+// Example of auto-shorts usage
 
-import { genVideoWithJson, VoiceGenType, ImageGenType } from 'shorts-gpt';
+import { genVideoWithJson, VoiceGenType, ImageGenType } from 'auto-shorts';
 
-/** @type {import("shorts-gpt").VideoDataType} */
+/** @type {import("auto-shorts").VideoDataType} */
 const data = {
     type: "topic",
     title: "TypeScript",
