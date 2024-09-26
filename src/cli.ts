@@ -5,7 +5,7 @@
 import 'console-info'
 import 'dotenv/config'
 
-import { checkResDir, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
+import { checkResDir, genVideo, genVideoDataWithAI, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
 
 import { AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from "./ai";
 import { VoiceGenType } from "./tts";
@@ -601,13 +601,26 @@ async function cli() {
             break;
     }
 
-    const task = await genVideoWithAI(
+    const aiResponse = await genVideoDataWithAI(
         userComment,
         AIGenType[aiType as keyof typeof AIGenType],
         vidOptions,
         aiAPIKey,
         { model: aiModel, endpoint: openAIEndpoint },
         promptOverride, 
+    );
+
+    // Ask user if they want to generate video based on AI response
+    const genVideoRep = await input({ message: `Generate video based on AI response? (y/n) -> ` });
+
+    if (genVideoRep == "n") {
+        console.info("Exiting...");
+        return;
+    }
+
+    const task = await genVideo(
+        aiResponse,
+        vidOptions
     );
 
     task.on('done', (output) => {

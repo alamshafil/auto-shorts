@@ -163,15 +163,40 @@ task.on('done', (output) => {
 });
 ```
 
+# Tools available
+
+## Voice Generation
+- ElevenLabs
+- Neets.ai
+- Local TTS on system
+
+## Image Generation
+- Pexels
+- Scraper
+
+## AI Script Generation
+- OpenAI (and compatible endpoints like Ollama, Groq, etc.) (e.g., GPT-4o)
+- Google Gemini AI (e.g., Gemini 1.5 Pro/Flash)
+- Anthropic (e.g, Claude)
+- Ollama local LLMs (e.g., llama3.1)
+
 # API Keys
 
 This package uses AI tools like OpenAI and ElevenLabs to generate scripts and images. You need to provide the API keys for these tools to use this package.
 
 You need to provide the following API key depending on what tools you want to use:
+
+## Voice Generation
 - ElevenLabs API Key
-- Pexels API Key
 - Neets.ai API Key
-- OpenAI API Key 
+
+## Image Generation
+- Pexels API Key
+
+## AI Script Generation
+- OpenAI API Key
+- Google Gemini AI API Key
+- Anthropic (Claude) API Key
 
 Make sure to provide the API keys in the environment variables with a package like `dotenv`.
 

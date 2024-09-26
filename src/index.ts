@@ -35,7 +35,7 @@ export {
 };
 
 /**
- * Generate video based on user comment and AI response
+ * Generate video data based on user comment and AI response
  * 
  * @param prompt Prompt for AI to generate script (can be user comment, etc.)
  * @param aiType AI type (ex. OllamaAIGen)
@@ -58,7 +58,7 @@ export {
  *  });
  * ```
  */
-export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, aiAPIKey?: string, aiOptions?: AIOptions, customSystemPrompt?: string,) : Promise<EventEmitter> {
+export async function genVideoDataWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, aiAPIKey?: string, aiOptions?: AIOptions, customSystemPrompt?: string,) : Promise<string> {
     const log = (msg: string) => {
         if (options.internalOptions?.debug) console.info(msg);
     }
@@ -96,6 +96,39 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
 
     log("Video script generated successfully!");
 
+    // Return JSON data
+    return aiResponse;
+}
+
+/**
+ * Generate video based on user comment and AI response
+ * 
+ * @param prompt Prompt for AI to generate script (can be user comment, etc.)
+ * @param aiType AI type (ex. OllamaAIGen)
+ * @param options Video options
+ * @param aiAPIKey AI API key (optional)
+ * @param aiOptions AI options (optional)
+ * @param customSystemPrompt Custom system prompt to override built-in prompt (optional)
+ * 
+ * @example
+ * ```typescript
+ *  await genVideoWithAI(
+ *  "make a news short about TypeScript",
+ *  AIGenType.OllamaAIGen, {
+ *      tempPath: 'video_temp',
+ *      resPath: 'res',
+ *      voiceGenType: VoiceGenType.ElevenLabsVoice,
+ *      imageGenType: ImageGenType.PexelsImageGen,
+ *      apiKeys: {
+ *       elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY,
+ *       pexelsAPIKey: process.env.PEXELS_API_KEY,
+ *      },
+ *  });
+ * ```
+ */
+export async function genVideoWithAI(prompt: string, aiType: AIGenType, options: VideoOptions, aiAPIKey?: string, aiOptions?: AIOptions, customSystemPrompt?: string,) : Promise<EventEmitter> {
+    const aiResponse = await genVideoDataWithAI(prompt, aiType, options, aiAPIKey, aiOptions, customSystemPrompt);
+
     // Generate video based on AI response
     return await genVideo(aiResponse, options);
 }
@@ -120,8 +153,10 @@ export async function genVideoWithAI(prompt: string, aiType: AIGenType, options:
  *  resPath: 'res',
  *  voiceGenType: VoiceGenType.ElevenLabsVoice,
  *  imageGenType: ImageGenType.GoogleScraperImageGen,
- *  elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY,
- *  pexelsAPIKey: process.env.PEXELS_API_KEY,
+ *  apiKeys: {
+ *   elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY,
+ *   pexelsAPIKey: process.env.PEXELS_API_KEY,
+ *  },
  * });
  * ```
  */
@@ -139,7 +174,7 @@ export async function genVideoWithJson(data: VideoDataType, options: VideoOption
  * @param options Video options
  * 
  */
-async function genVideo(jsonDataStr: string, options: VideoOptions) : Promise<EventEmitter> {
+export async function genVideo(jsonDataStr: string, options: VideoOptions) : Promise<EventEmitter> {
     // Check JSON data
     if (!jsonDataStr) {
         throw new Error("Empty JSON data!");
