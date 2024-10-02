@@ -31,12 +31,10 @@ export interface TopicVideoData {
  * Prompt will be given to AI and result will be placed inside JSON field of data.
  */
 export const topicVideoAIPrompt = {
-    text: "Generate what will be spoken in the video based on topic",
+    text: 'Generate what will be spoken in the video based on topic. Use JSON format. Use this template: {"text": ""}',
     // start_script: "Generate what will be spoken at start of the video",
     // end_script: "Generate what will be spoken at end of the video",
-    images: "List of short image search terms for the video. Use CSV format!",
-    // Fields that will be parsed as CSV into JSON array
-    csv: ["images"]
+    images: 'Generate images (search terms) for the video based on topic. Use JSON array format. Only valid JSON, no extra info. Use this template: {"images": ["", ""]}',
 };
 
 /**

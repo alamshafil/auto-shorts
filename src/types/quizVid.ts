@@ -12,26 +12,13 @@ export interface QuizVideoData {
     type: "quiz";
     /** Video title */
     title: string;
-    /** List of questions 
-     * @example
-     * ```json
-     * [
-     *  "What is the capital of France?",
-     *  "What is the capital of Italy?"
-     * ]
-     * ```
-    */
-    questions: string[];
-    /** List of answers 
-     * @example
-     * ```json
-     * [
-     *  "Paris",
-     *  "Rome"
-     * ]
-     * ```
-    */
-    answers: string[];
+    /** List of questions */
+    questions: {
+        /** Question text */
+        question: string;
+        /** Answer text */
+        answer: string;
+    }[];
     /** Start script to be spoken */
     start_script: string;
     /** End script to be spoken */
@@ -45,14 +32,11 @@ export interface QuizVideoData {
  * Prompt will be given to AI and result will be placed inside JSON field of data.
  */
 export const quizVideoAIPrompt = {
-    title: "Generate title for the quiz video",
-    questions: "Generate questions for the quiz video. Use CSV format. Only questions, no answers. Answers for each questions will be asked later, in the same order.",
-    answers: "Generate answers for the quiz video based on questions. Use CSV format. Only answers on same index as question being answered, no questions.",
-    start_script: "Generate what will be spoken at start of the quiz video",
-    end_script: "Generate what will be spoken at end of the quiz video",
+    title: 'Generate title for the quiz video. Make it short and catchy! (It needs to fit in the video) Use JSON format. Use this template: {"title": ""}',
+    questions: 'Generate questions and answers for the quiz video. Use JSON object array format. Use this template: {"questions": [{"question": "", "answer": ""}]}. Make the answer short and simple since it needs to fit in the video.',
+    start_script: 'Generate what will be spoken at start of the quiz video. Use JSON format. Use this template: {"start_script": ""}',
+    end_script: 'Generate what will be spoken at end of the quiz video. Use JSON format. Use this template: {"end_script": ""}',
     // fontName: "Generate font name for the quiz video"
-    // Fields that will be parsed as CSV into JSON array
-    csv: ["questions", "answers"]
 }
 
 /**
@@ -65,7 +49,7 @@ export class QuizVideo extends VideoGen {
      * @throws Error if JSON data is missing required fields
      */
     checkJson() {
-        if (!this.jsonData.title || !this.jsonData.questions || !this.jsonData.answers) {
+        if (!this.jsonData.title || !this.jsonData.questions) {
             throw Error('JSON data is missing required fields!');
         }
     }
@@ -78,8 +62,7 @@ export class QuizVideo extends VideoGen {
         this.checkTempPath();
 
         const title = this.jsonData.title;
-        const questions = this.jsonData.questions;
-        const answers = this.jsonData.answers;
+        const questions: {question: string, answer:string}[] = this.jsonData.questions;
         const start_script = this.jsonData.start_script;
         const end_script = this.jsonData.end_script;
 
@@ -98,11 +81,11 @@ export class QuizVideo extends VideoGen {
         // Gen questions voice
         for (const [index, question] of questions.entries()) {
             const questionFilename = path.join(this.tempPath, `question-${index}`);
-            const script = `Question ${index + 1}: ${question}`;
+            const script = `Question ${index + 1}: ${question.question}`;
             await this.generateVoice({ text: script, voice: 'male', filename: questionFilename + ".wav" });
 
             const answerFilename = path.join(this.tempPath, `answer-${index}`);
-            const answer = answers[index];
+            const answer = question.answer;
             await this.generateVoice({ text: answer, voice: 'male', filename: answerFilename + ".wav" });
 
             // Merge img/clock.mp3 to the question voice
@@ -215,7 +198,7 @@ export class QuizVideo extends VideoGen {
         scene.addChild(titleObj);
 
         // Add questions and answers
-        for (const [index, _] of questions.entries()) {
+        for (const [index, question] of questions.entries()) {
             const question_start_duration = (durations.slice(0, index + 2).reduce((a, b) => a + b, 0) - 1);
 
             // Get color based on index (green, red, yellow, cyan, orange, purple, pink)
@@ -245,7 +228,7 @@ export class QuizVideo extends VideoGen {
             scene.addChild(questionObj);
 
             const answerObj = new FFText({
-                text: answers[index],
+                text: question.answer,
                 x: 100 + 100,
                 y: 600 + (200 * index),
                 fontSize: 90,

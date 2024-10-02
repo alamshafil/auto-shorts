@@ -58,7 +58,9 @@ export class WhisperSubtitles extends SubtitleGen {
         });
 
         task.on("transcribed", (result) => {
-            gen.log("[whisper] Transcribed: " + result);
+            // Convert result to string
+            const text = `from ${result.from} to ${result.to}, text: ${result.text}`;
+            gen.log("[whisper] Transcribed: " + text);
         });
 
         const result = await task.result;

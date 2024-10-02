@@ -37,14 +37,12 @@ export interface RankVideoData {
  * Prompt will be given to AI and result will be placed inside JSON field of data.
  */
 export const rankVideoAIPrompt = {
-    title: "Generate title of the video. Make it short and catchy! (It needs to fit in the video)",
-    rankings: "List of rankings for the video. Use CSV format.",
-    images: "List of short image search terms for each ranking item. Use CSV format!",
-    start_script: "Generate what will be spoken at start of the video. Do not include rankings in this field. Do a simple greeting or introduction to the game.",
-    end_script: "Generate what will be spoken at end of the video. Do not include rankings in this field. Do a simple goodbye or thank you message.",
+    title: 'Generate title of the video. Make it short and catchy! (It needs to fit in the video). Use JSON format. Use this template: {"title": ""}',
+    rankings: 'List of rankings for the video. Use JSON array format. Use this template: {"rankings": ["", ""]}',
+    images: 'List of short image search terms for each ranking item. Use JSON array format. Use this template: {"images": ["", ""]}',
+    start_script: 'Generate what will be spoken at start of the video. Do not include rankings in this field. Do a simple greeting or introduction to the game. Use JSON format. Use this template: {"start_script": ""}',
+    end_script: 'Generate what will be spoken at end of the video. Do not include rankings in this field. Do a simple goodbye or thank you message. Use JSON format. Use this template: {"end_script": ""}',
     // fontName: "Generate a font name for the video (optional)",
-    // Fields that will be parsed as CSV into JSON array
-    csv: ["rankings", "images"]
 };
 
 /**

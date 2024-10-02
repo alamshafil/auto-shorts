@@ -40,17 +40,9 @@ export interface MessageVideoData {
  * Prompt will be given to AI and result will be placed inside JSON field of data.
  */
 export const messageVideoAIPrompt = {
-    contactname: "What is the contact name of the text message story?",
-    // script: {
-    //     voice: "What is the voice of the message? Respond with 'male' or 'female'",
-    //     message: "What is the message text?",
-    //     msgtype: "Who is the message for? Respond with 'receiver' or 'sender'"
-    // },
-    script: "Generate the script for the text message story. Use CSV format with headers. Use a break line (\n) to seperate each item. Each message (CSV item) should have the following fields: voice, message, msgtype. 'voice' will be 'male' or 'female'. 'msgtype' will be 'receiver' or 'sender'. 'message' will be the message text.",
-    extra: "What is the extra information to be spoken at the end of the video? Do a simple summary of the story and say goodbye.",
-    // Fields that will be parsed as CSV into JSON array
-    csv: [],
-    csv_multi: ["script"]
+    contactname: 'Generate the contact name of the text message story. Use JSON format. Use this template: {"contactname": ""}',   
+    script: 'Generate the script for the text message story. Use JSON object array format. Use this template: {"script": [{"voice": "", "message": "", "msgtype": ""}]}. "voice" will be "male" or "female", "msgtype" will be "receiver" or "sender". "message" will be the message text. The receiver will be on the left and the sender will be on the right. The receiver is the contact name talking to the sender. Make the message short and simple, in order to fit in video, and like real text messages.',
+    extra: 'Generate the extra information to be spoken at the end of the video. Do a simple summary of the story and say goodbye Use JSON format. Use this template: {"extra": ""}',
 };
 
 /**

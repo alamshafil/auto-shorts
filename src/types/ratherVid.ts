@@ -67,12 +67,9 @@ export interface RatherVideoData {
  * Prompt will be given to AI and result will be placed inside JSON field of data.
  */
 export const ratherVideoAIPrompt = {
-    questions: "List of questions for the video. Use this format for CSV output 'option1,option2,p1,p2,image1,image2'. p1 and p2 are the respective percenr chosen by people that adds up to 100%. (Do not put % percent sign). image1 and image2 are image search terms for the option. I will append 'Would you rather' to the beginning of each option, so omit that part in your responce. Use CSV format with headers. Use a break line (\n) to seperate each item.",
-    start_script: "Generate what will be spoken at start of the video. Do not include questions in this field. Do a simple greeting or introduction to the game.",
-    end_script: "Generate what will be spoken at end of the video. Do not include questions in this field. Do a simple goodbye or thank you message.",
-    // Fields that will be parsed as CSV into JSON array
-    csv: [],
-    csv_multi: ["questions"]
+    questions: 'List of questions for the video. Use JSON format as array of objects. Use this template: {"questions": [{"option1": "", "option2": "", "p1": 0, "p2": 0, "image1": "", "image2": ""}]}. p1 and p2 are the respective percent chosen by people that adds up to 100%. image1 and image2 are image search terms for respective option. I will append "Would you rather" to the beginning of each option, so omit that part in your response.',
+    start_script: 'Generate what will be spoken at start of the video. Do not include questions in this field. Do a simple greeting or introduction to the game. Use JSON format. Use this template: {"start_script": ""}',
+    end_script: 'Generate what will be spoken at end of the video. Do not include questions in this field. Do a simple goodbye or thank you message. Use JSON format. Use this template: {"end_script": ""}',
 };
 
 /**

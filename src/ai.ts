@@ -11,7 +11,7 @@ import { INITIAL_AI_PROMPT, messageVideoAIPrompt, quizVideoAIPrompt, rankVideoAI
 /** 
  * Function to convert video type to AI prompt
  */
-export function convertVideoTypeToPrompt(videoType: VideoGenType) : any {
+export function convertVideoTypeToPrompt(videoType: VideoGenType): any {
     switch (videoType) {
         case VideoGenType.TopicVideo:
             return topicVideoAIPrompt;
@@ -59,11 +59,11 @@ export interface AIOptions {
  * @abstract
  */
 export class AIGen {
-    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string): Promise<string> {
         throw new Error("Method 'generate' must be implemented");
     }
 
-    static async getModels() : Promise<string[]> {
+    static async getModels(): Promise<string[]> {
         throw new Error("Method 'getModels' must be implemented");
     }
 }
@@ -85,7 +85,7 @@ export class OpenAIGen extends AIGen {
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions): Promise<string> {
         const endpoint = options?.endpoint ?? this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -110,6 +110,7 @@ export class OpenAIGen extends AIGen {
             model: model,
             messages: messages as ChatCompletionMessageParam[],
             stream: true,
+            response_format: { "type": "json_object" }
         });
 
         let aiResponse = '';
@@ -136,15 +137,13 @@ export class OpenAIGen extends AIGen {
 
         const videoGenType = matchedType as VideoGenType;
         const aiPrompt = convertVideoTypeToPrompt(videoGenType);
-        
+
         // Get each prompt from each field and add to JSON
         let videoJson: any = {};
 
         videoJson["type"] = videoGenType;
 
         for (const [key, value] of Object.entries<string>(aiPrompt)) {
-            if (key == "csv" || key == "csv_multi") continue;
-
             const prompt = value;
 
             log(`(OpenAI ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
@@ -162,28 +161,12 @@ export class OpenAIGen extends AIGen {
                 log(`AI Response chunk -> ${chunk.choices[0]?.delta?.content?.trim()}`);
             }
 
-            videoJson[key] = res;
-
-            // Check if field is CSV and parse into JSON array
-            if (aiPrompt.csv?.includes(key)) {
-                videoJson[key] = res.split(',').map((item: string) => item.trim());
-            }
-
-            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
-            if (aiPrompt.csv_multi?.includes(key)) {
-                const lines = res.split('\n');
-                const headers = lines[0].split(',');
-                const data = lines.slice(1);
-                const jsonArr = data.map((line: string) => {
-                    const obj: any = {};
-                    const values = line.split(',');
-                    headers.forEach((header, index) => {
-                        obj[header] = values[index];
-                    });
-                    return obj;
-                });
-
-                videoJson[key] = jsonArr;
+            // Try to parse JSON response and validate it
+            try {
+                const jsonRes = JSON.parse(res.trim());
+                videoJson[key] = jsonRes[key] ?? jsonRes;
+            } catch (error: any) {
+                console.info(`(Google AI ${model}) Error parsing JSON response: ${error.message}`);
             }
 
             log(`(OpenAI ${model}) AI said for field '${key}' is '${res}'`);
@@ -201,7 +184,7 @@ export class OpenAIGen extends AIGen {
      * @returns List of OpenAI models
      * @throws Error if API call fails
      */
-    static async getModels(apiKey?: string, options?: AIOptions) : Promise<string[]> {
+    static async getModels(apiKey?: string, options?: AIOptions): Promise<string[]> {
         // Get all OpenAI models
         const endpoint = options?.endpoint ?? this.DEFAULT_ENDPOINT;
 
@@ -239,7 +222,7 @@ export class GoogleAIGen extends AIGen {
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions): Promise<string> {
         const endpoint = this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -292,8 +275,6 @@ export class GoogleAIGen extends AIGen {
         videoJson["type"] = videoGenType;
 
         for (const [key, value] of Object.entries<string>(aiPrompt)) {
-            if (key == "csv" || key == "csv_multi") continue;
-
             const prompt = value;
 
             log(`(Google AI ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
@@ -305,28 +286,12 @@ export class GoogleAIGen extends AIGen {
                 log(`AI Response chunk for '${key}' -> ${part.text().trim()}`);
             }
 
-            videoJson[key] = res;
-
-            // Check if field is CSV and parse into JSON array
-            if (aiPrompt.csv?.includes(key)) {
-                videoJson[key] = res.split(',').map((item: string) => item.trim());
-            }
-
-            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
-            if (aiPrompt.csv_multi?.includes(key)) {
-                const lines = res.split('\n');
-                const headers = lines[0].split(',');
-                const data = lines.slice(1);
-                const jsonArr = data.map((line: string) => {
-                    const obj: any = {};
-                    const values = line.split(',');
-                    headers.forEach((header, index) => {
-                        obj[header] = values[index];
-                    });
-                    return obj;
-                });
-
-                videoJson[key] = jsonArr;
+            // Try to parse JSON response and validate it
+            try {
+                const jsonRes = JSON.parse(res.trim());
+                videoJson[key] = jsonRes[key] ?? jsonRes;
+            } catch (error: any) {
+                console.info(`(Google AI ${model}) Error parsing JSON response: ${error.message}`);
             }
 
             log(`(Google AI ${model}) AI said for field '${key}' is '${res}'`);
@@ -337,7 +302,7 @@ export class GoogleAIGen extends AIGen {
         return aiResponse;
     }
 
-    static async getModels() : Promise<string[]> {
+    static async getModels(): Promise<string[]> {
         // Return list of Google Gemini AI models
         return [
             "gemini-1.5-flash",
@@ -365,7 +330,7 @@ export class AnthropicAIGen extends AIGen {
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, apiKey?: string, options?: AIOptions): Promise<string> {
         const endpoint = this.DEFAULT_ENDPOINT;
         const model = options?.model ?? this.DEFAULT_MODEL;
 
@@ -428,8 +393,6 @@ export class AnthropicAIGen extends AIGen {
         videoJson["type"] = videoGenType;
 
         for (const [key, value] of Object.entries<string>(aiPrompt)) {
-            if (key == "csv" || key == "csv_multi") continue;
-
             const prompt = value;
 
             log(`(Anthropic ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
@@ -455,30 +418,14 @@ export class AnthropicAIGen extends AIGen {
 
             let res: string = json.content[0].text;
 
-            videoJson[key] = res;
-
-            // Check if field is CSV and parse into JSON array
-            if (aiPrompt.csv?.includes(key)) {
-                videoJson[key] = res.split(',').map((item: string) => item.trim());
+            // Try to parse JSON response and validate it
+            try {
+                const jsonRes = JSON.parse(res.trim());
+                videoJson[key] = jsonRes[key] ?? jsonRes;
+            } catch (error: any) {
+                console.info(`(Google AI ${model}) Error parsing JSON response: ${error.message}`);
             }
-
-            // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
-            if (aiPrompt.csv_multi?.includes(key)) {
-                const lines = res.split('\n');
-                const headers = lines[0].split(',');
-                const data = lines.slice(1);
-                const jsonArr = data.map((line: string) => {
-                    const obj: any = {};
-                    const values = line.split(',');
-                    headers.forEach((header, index) => {
-                        obj[header] = values[index];
-                    });
-                    return obj;
-                });
-
-                videoJson[key] = jsonArr;
-            }
-
+            
             log(`(Anthropic ${model}) AI said for field '${key}' is '${res}'`);
         }
 
@@ -487,7 +434,7 @@ export class AnthropicAIGen extends AIGen {
         return aiResponse;
     }
 
-    static async getModels() : Promise<string[]> {
+    static async getModels(): Promise<string[]> {
         // Return list of Anthropic claude AI models
         return [
             "claude-3-5-sonnet-20240620",
@@ -514,7 +461,7 @@ export class OllamaAIGen extends AIGen {
      * @returns AI generated text
      * @throws Error if API call fails
      */
-    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, options?: AIOptions) : Promise<string> {
+    static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, options?: AIOptions): Promise<string> {
         let model = options?.model ?? this.DEFAULT_MODEL;
         log(`Calling Ollama local API with model: ${model}`);
 
@@ -524,7 +471,7 @@ export class OllamaAIGen extends AIGen {
             let videoType = '';
 
             const messages = [
-                { role: 'user', content: systemPrompt }, 
+                { role: 'user', content: systemPrompt },
                 { role: 'user', content: INITIAL_AI_PROMPT + userPrompt }
             ];
             const response = await ollama.chat({ model: model, messages: messages, stream: true })
@@ -559,14 +506,19 @@ export class OllamaAIGen extends AIGen {
             videoJson["type"] = videoGenType;
 
             for (const [key, value] of Object.entries<string>(aiPrompt)) {
-                if (key == "csv" || key == "csv_multi") continue;
-
                 const prompt = value;
 
                 log(`(Ollama ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
 
-                messages.push({ role: 'user', content: prompt });
-                const response = await ollama.chat({ model: model, messages: messages, stream: true });
+                // messages.push({ role: 'user', content: prompt });
+
+                // Low param Local LLMs lose context after a few turns, so we need to reset the context
+                const innerMessages = [
+                    { role: 'user', content: systemPrompt },
+                    { role: 'user', content: `${prompt}\n User comment: ${userPrompt}` }
+                ];
+
+                const response = await ollama.chat({ model: model, messages: innerMessages, stream: true, format: 'json' });
 
                 let res = '';
                 for await (const part of response) {
@@ -575,31 +527,12 @@ export class OllamaAIGen extends AIGen {
                     log(`AI Response chunk for '${key}' -> ${msgChunk.trim()}`);
                 }
 
-                videoJson[key] = res;
-
-                // Check if field is CSV and parse into JSON array
-                if (aiPrompt.csv?.includes(key)) {
-                    videoJson[key] = res.split(',').map((item: string) => item.trim());
-                }
-
-                // Check if field is csv_multi and parse into JSON object array based on header and new line for each object
-                if (aiPrompt.csv_multi?.includes(key)) {
-                    const lines = res.split('\n');
-                    const headers = lines[0].split(',');
-                    const data = lines.slice(1);
-                    const jsonArr = data.map((line: string) => {
-                        const obj: any = {};
-                        const values = line.split(',');
-                        headers.forEach((header, index) => {
-                            obj[header] = values[index];
-                        });
-                        return obj;
-                    });
-
-                    // Log 
-                    log(`(Ollama ${model}) Resultant: ${jsonArr}`);
-                    
-                    videoJson[key] = jsonArr;
+                // Try to parse JSON response and validate it
+                try {
+                    const jsonRes = JSON.parse(res);
+                    videoJson[key] = jsonRes[key] ?? jsonRes;
+                } catch (error: any) {
+                    console.info(`(Ollama ${model}) Error parsing JSON response: ${error.message}`);
                 }
 
                 log(`(Ollama ${model}) AI said for field '${key}' is '${res}'`);
@@ -620,7 +553,7 @@ export class OllamaAIGen extends AIGen {
      * @returns List of Ollama models
      * @throws Error if API call fails
      */
-    static async getModels() : Promise<string[]> {
+    static async getModels(): Promise<string[]> {
         // Get all Ollama models
         const response = await ollama.list();
         const models = response.models.map((model: ModelResponse) => model.name);
