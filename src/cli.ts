@@ -257,13 +257,13 @@ async function cli() {
     const userPrompt = options.prompt ?? null;
 
     const promptOverride = options.systemPromptOverride ?? null;
-    const elevenLabsAPIKey = options.elevenlabsAPIKey ?? process.env.ELEVENLABS_API_KEY ?? null;
-    const pexelsAPIKey = options.pexelsAPIKey ?? process.env.PEXELS_API_KEY ?? null;
-    const neetsAPIKey = options.neetsAPIKey ?? process.env.NEETS_API_KEY ?? null;
+    const elevenLabsAPIKey = options.elevenlabsAPIKey ?? process.env[VoiceAPIEnv.ElevenLabs] ?? null;
+    const pexelsAPIKey = options.pexelsAPIKey ?? process.env[ImageAPIEnv.PexelsAPIKey] ?? null;
+    const neetsAPIKey = options.neetsAPIKey ?? process.env[VoiceAPIEnv.NeetsTTS] ?? null;
 
-    const openaiAPIKey = options.openaiAPIKey ?? process.env.OPENAI_API_KEY ?? null;
-    const googleaiAPIKey = options.googleaiAPIKey ?? process.env.GOOGLE_AI_API_KEY ?? null;
-    const anthropicAPIKey = options.anthropicAPIKey ?? process.env.ANTHROPIC_API_KEY ?? null;
+    const openaiAPIKey = options.openaiAPIKey ?? process.env[AIAPIEnv.OpenAIGen] ?? null;
+    const googleaiAPIKey = options.googleaiAPIKey ?? process.env[AIAPIEnv.GoogleAIGen] ?? null;
+    const anthropicAPIKey = options.anthropicAPIKey ?? process.env[AIAPIEnv.AnthropicAIGen] ?? null;
 
     const openAIEndpoint = options.openAIEndpoint ?? OpenAIGen.DEFAULT_ENDPOINT;
 

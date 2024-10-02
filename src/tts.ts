@@ -15,6 +15,14 @@ export enum VoiceGenType {
 }
 
 /**
+ * Voice API key Environment variables
+ */
+export enum VoiceAPIEnv {
+    ElevenLabs = "ELEVENLABS_API_KEY",
+    NeetsTTS = "NEETS_API_KEY",
+}
+
+/**
  * Voice generation options
  * @example
  * ```

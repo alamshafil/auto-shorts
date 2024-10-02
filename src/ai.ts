@@ -38,6 +38,15 @@ export enum AIGenType {
     OllamaAIGen = "OllamaAIGen",
 }
 
+/**
+ * AI API key environment variables
+ */
+export enum AIAPIEnv {
+    OpenAIGen = "OPENAI_API_KEY",
+    GoogleAIGen = "GOOGLE_AI_API_KEY",
+    AnthropicAIGen = "ANTHROPIC_API_KEY",
+}
+
 export interface AIOptions {
     /** AI model name */
     model?: string;
@@ -494,7 +503,7 @@ export class AnthropicAIGen extends AIGen {
  */
 export class OllamaAIGen extends AIGen {
     /** Default model name */
-    static DEFAULT_MODEL = "llama3.1";
+    static DEFAULT_MODEL = "llama3.2";
 
     /**
      * Generate AI text using Ollama local API

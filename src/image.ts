@@ -9,10 +9,17 @@ import path from "path";
 
 /**
  * Image generation types
- **/
+ */
 export enum ImageGenType {
     PexelsImageGen = "PexelsImageGen",
     GoogleScraperImageGen = "GoogleScraperImageGen",
+}
+
+/**
+ * Image API Key environment variables
+ */
+export enum ImageAPIEnv {
+    PexelsAPIKey = "PEXELS_API_KEY",
 }
 
 /**

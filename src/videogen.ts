@@ -65,7 +65,7 @@ export interface VideoOptions {
     /** Internal video generation options */
     internalOptions?: InternalVideoOptions;
     /** API Keys */
-    apiKeys: APIKeys;
+    apiKeys?: APIKeys;
 }
 
 /**
