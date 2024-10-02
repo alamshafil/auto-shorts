@@ -143,16 +143,16 @@ video_temp/
 temp/
 
 # Resourse folder
-res/
+/res/
 
 # Distribution folder
-dist/
+/dist/
 
 # Coverage folder
 coverage/
 
 # Doc folder
-docs/
+/docs/
 
 # Options JSON
 options_autoshorts.json
