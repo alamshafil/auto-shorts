@@ -3,13 +3,15 @@
 // Copyright (c) 2024 Shafil Alam
 
 import 'console-info'
+import 'console-error'
 import 'dotenv/config'
 
-import { checkResDir, genVideo, genVideoDataWithAI, genVideoWithAI, genVideoWithJson, VideoOptions } from ".";
+import { checkResDir, genVideo, genVideoDataWithAI, genVideoWithJson, VideoOptions } from ".";
 
-import { AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from "./ai";
-import { VoiceGenType } from "./tts";
-import { ImageGenType } from "./image";
+import { AIAPIEnv, AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from "./ai";
+import { VoiceAPIEnv, VoiceGenType } from "./tts";
+import { ImageAPIEnv, ImageGenType } from "./image";
+import { runAPIServer } from './server';
 
 import fs from "fs";
 import path from "path";
@@ -31,6 +33,11 @@ async function cli() {
             name: 'download',
             type: Boolean,
             description: 'Download models needed for AI generation.'
+        },
+        {
+            name: 'server',
+            type: Boolean,
+            description: 'Start API server. IP and port comes from env variable.'
         },
         {
             name: 'prompt',
@@ -115,12 +122,6 @@ async function cli() {
     ];
 
     const advancedOptions = [
-        {
-            name: 'deleteFiles',
-            type: Boolean,
-            defaultValue: true,
-            description: 'Delete files before starting. {bold (default: true)}'
-        },
         {
             name: 'changePhotos',
             type: Boolean,
@@ -214,6 +215,11 @@ async function cli() {
         return;
     }
 
+    if (options.server) {
+        await runAPIServer();
+        return;
+    }
+
     let aiType: string = options.aiType ?? AIGenType.OllamaAIGen;
     let ttsType: string = options.ttsType ?? VoiceGenType.BuiltinTTS;
     let imageType: string = options.imageType ?? ImageGenType.GoogleScraperImageGen;
@@ -237,7 +243,6 @@ async function cli() {
         return;
     }
 
-    let deleteFiles = options.deleteFiles ?? true;
     let changePhotos = options.changePhotos ?? true;
     let disableTTS = options.disableTTS ?? false;
     let disableSubtitles = options.disableSubtitles ?? false;
@@ -296,7 +301,6 @@ async function cli() {
     console.info("Background video: " + (bgVideo ?? "Using random"));
     console.info("Background music: " + (bgMusic ?? "Using random"));
 
-    if (options.deleteFiles) console.info("Delete files: " + deleteFiles);
     if (options.changePhotos) console.info("Change photos: " + changePhotos);
     if (options.disableTTS) console.info("Disable TTS: " + disableTTS);
     if (options.disableSubtitles) console.info("Disable subtitles: " + disableSubtitles);
@@ -388,7 +392,6 @@ async function cli() {
                 console.info("TTS Type: " + jsonData.ttsType);
                 console.info("Image API Type: " + jsonData.imageType);
                 console.info("Orientation: " + jsonData.orientation);
-                console.info("Delete files: " + jsonData.deleteFiles);
                 console.info("Change photos: " + jsonData.changePhotos);
                 console.info("Disable TTS: " + jsonData.disableTTS);
                 console.info("Disable subtitles: " + jsonData.disableSubtitles);
@@ -400,7 +403,6 @@ async function cli() {
                 ttsType = jsonData.ttsType;
                 imageType = jsonData.imageType;
                 orientation = jsonData.orientation;
-                deleteFiles = jsonData.deleteFiles;
                 changePhotos = jsonData.changePhotos;
                 disableTTS = jsonData.disableTTS;
                 disableSubtitles = jsonData.disableSubtitles;
@@ -449,16 +451,13 @@ async function cli() {
 
         // Select AI model
         aiModel = await getAIModel();
-
-        const deleteFilesRep = await input({ message: `Delete files before starting? (default: true) (y/n) -> ` });
-
+    
         const changePhotosRep = await input({ message: `Change photos in video? (default: true) (y/n) -> ` });
 
         const disableTTSRep = await input({ message: `Disable TTS in video? (default: false) (y/n) -> ` });
 
         const disableSubtitlesRep = await input({ message: `Disable subtitles in video? (default: false) (y/n) -> ` });
 
-        deleteFiles = deleteFilesRep == "y";
         changePhotos = changePhotosRep == "y";
         disableTTS = disableTTSRep == "y";
         disableSubtitles = disableSubtitlesRep == "y";
@@ -495,7 +494,6 @@ async function cli() {
         console.info("TTS Type: " + ttsType);
         console.info("Image API Type: " + imageType);
         console.info("Image API Type: " + imageType);
-        console.info("Delete files: " + deleteFiles);
         console.info("Change photos: " + changePhotos);
         console.info("Disable TTS: " + disableTTS);
         console.info("Disable subtitles: " + disableSubtitles);
@@ -509,7 +507,6 @@ async function cli() {
             ttsType: ttsType,
             imageType: imageType,
             orientation: orientation,
-            deleteFiles: deleteFiles,
             changePhotos: changePhotos,
             disableTTS: disableTTS,
             disableSubtitles: disableSubtitles,
@@ -563,7 +560,7 @@ async function cli() {
         bgPath: bgMusic,
         internalOptions: {
             debug: true,
-            deleteFiles: deleteFiles, changePhotos: changePhotos, disableTTS: disableTTS, useMock: useMock, disableSubtitles: disableSubtitles
+            changePhotos: changePhotos, disableTTS: disableTTS, useMock: useMock, disableSubtitles: disableSubtitles
         },
     };
 
@@ -607,7 +604,7 @@ async function cli() {
         vidOptions,
         aiAPIKey,
         { model: aiModel, endpoint: openAIEndpoint },
-        promptOverride, 
+        promptOverride,
     );
 
     // Ask user if they want to generate video based on AI response

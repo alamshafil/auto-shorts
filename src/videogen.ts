@@ -90,8 +90,6 @@ export interface InternalVideoOptions {
      * If set to false, use event emitter 'log' to get output 
      */
     debug: boolean;
-    /** Delete files after video generation */
-    deleteFiles: boolean;
     /** Change photos or not */
     changePhotos: boolean;
     /** Disable TTS */
@@ -108,7 +106,6 @@ export interface InternalVideoOptions {
 
 export const DEFAULT_INTERNAL_VIDEO_OPTIONS: InternalVideoOptions = {
     debug: false,
-    deleteFiles: true,
     changePhotos: true,
     disableTTS: false,
     disableSubtitles: false,
@@ -128,7 +125,7 @@ export class VideoGen {
     /** JSON data */
     protected jsonData: any;
     /** Temporary path to save files */
-    protected tempPath: string;
+    public tempPath: string;
     /** Resource path */
     protected resPath: string;
     /** Voice generation type */
@@ -263,29 +260,26 @@ export class VideoGen {
 
     /**
      * Check if the temporary path exists
-     * 
-     * - If it doesn't exist, create it
-     * - If it exists and deleteFiles is true, delete it and create a new one
-     * - If it exists and deleteFiles is false, log that it exists
+     * If it does not exist, create a new one
      * 
      * @throws Error if temp directory cannot be created
      */
     checkTempPath() {
         this.log('Starting video generation...');
 
+        let id = (Math.random() + 1).toString(36).substring(7); // Note: This is not a secure way to generate a random ID
+        const uniqueFolder = path.join(this.tempPath, id);
 
-        if (!fs.existsSync(this.tempPath)) {
-            fs.mkdirSync(this.tempPath);
-            this.log('Temp directory created successfully!');
+        if (!fs.existsSync(uniqueFolder)) {
+            fs.mkdirSync(uniqueFolder);
+            this.log(`Temp directory ${uniqueFolder} created successfully!`);
         } else {
-            if (this.internalOptions.deleteFiles) {
-                this.log('Temp directory already exists! Deleting and creating a new one...');
-                fs.rmSync(this.tempPath, { recursive: true, force: true });
-                fs.mkdirSync(this.tempPath);
-            }
-            this.log('Temp directory exists!');
+            this.log(`Temp directory ${uniqueFolder} already exists! Deleting and creating a new one...`);
+            fs.rmSync(uniqueFolder, { recursive: true, force: true });
+            fs.mkdirSync(uniqueFolder);
         }
 
+        this.tempPath = uniqueFolder;
     }
 
     /** 

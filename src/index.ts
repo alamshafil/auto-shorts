@@ -201,23 +201,23 @@ export async function genVideo(jsonDataStr: string, options: VideoOptions) : Pro
     switch (type) {
         case VideoGenType.TopicVideo:
             vid = new TopicVideo(options, jsonData);
-            vid.generateVideo();
+            await vid.generateVideo();
             return vid.emitter;
         case VideoGenType.TextMessageVideo:
             vid = new MsgVideo(options, jsonData);
-            vid.generateVideo();
+            await vid.generateVideo();
             return vid.emitter;
         case VideoGenType.RatherVideo:
             vid = new RatherVideo(options, jsonData);
-            vid.generateVideo();
+            await vid.generateVideo();
             return vid.emitter;
         case VideoGenType.RankVideo:
             vid = new RankVideo(options, jsonData);
-            vid.generateVideo();
+            await vid.generateVideo();
             return vid.emitter;
         case VideoGenType.QuizVideo:
             vid = new QuizVideo(options, jsonData);
-            vid.generateVideo();
+            await vid.generateVideo();
             return vid.emitter;
         default:
             throw Error("Invalid video type!");
