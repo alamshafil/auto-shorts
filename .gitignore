@@ -132,7 +132,6 @@ dist
 # Old code
 old/
 python/
-ui/
 
 # Video/audio output
 *.mp4
