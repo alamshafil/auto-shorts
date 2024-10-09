@@ -21,14 +21,14 @@
  * @class
  */
 
-const Utils = require('./utils');
+const siz = require('siz');
 const Readable = require('stream').Readable;
 
 class FFStream extends Readable {
   constructor({ size = 1024, parallel }) {
     super();
 
-    this.size = Utils.siz(size);
+    this.size = siz(size);
     this.highWaterMark = this.size; // default is 64k
     this.parallel = parallel;
     this.data = null;

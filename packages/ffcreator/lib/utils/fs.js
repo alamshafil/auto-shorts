@@ -13,6 +13,7 @@
 const rmfr = require('rmfr');
 const path = require('path');
 const fs = require('fs-extra');
+const leftPad = require('left-pad');
 
 const FS = {
   format: 'raw',
@@ -108,7 +109,7 @@ const FS = {
 
   getFilePath({ dir, name, prefix = false }) {
     if (prefix) {
-      return path.join(dir, `${name.padStart(12, '0')}.${this.format}`);
+      return path.join(dir, `${leftPad(name, 12, '0')}.${this.format}`);
     } else {
       return path.join(dir, `${name}.${this.format}`);
     }

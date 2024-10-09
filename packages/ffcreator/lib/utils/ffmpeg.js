@@ -9,6 +9,7 @@
  *
  * @object
  */
+const siz = require('siz');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const isArray = require('lodash/isArray');
@@ -64,7 +65,7 @@ const FFmpegUtil = {
    * @public
    */
   setHighWaterMark({ command, highWaterMark }) {
-    highWaterMark = Utils.siz(highWaterMark);
+    highWaterMark = siz(highWaterMark);
     command.ffmpegProc.stdin._writableState.highWaterMark = highWaterMark;
     command.ffmpegProc.stdin._readableState.highWaterMark = highWaterMark;
   },
@@ -174,10 +175,12 @@ const FFmpegUtil = {
   },
 
   destroy(command) {
-    command.removeAllListeners();
-    command.kill();
-    command._inputs.length = 0;
-    command._currentInput = null;
+    try {
+      command.removeAllListeners();
+      command.kill();
+      command._inputs.length = 0;
+      command._currentInput = null;
+    } catch (e) {}
   },
 };
 

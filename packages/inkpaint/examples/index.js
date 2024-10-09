@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs-extra");
-const inquirer = require("inquirer").default;
+const inquirer = require("inquirer");
 const data = require("./source/manifest.json");
 const InkPaint = require("../");
 const { Application } = require("../");

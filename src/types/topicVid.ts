@@ -183,8 +183,8 @@ export class TopicVideo extends VideoGen {
 
         const subObj = new FFSubtitle({
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
-            x: 1080 / 2,
-            y: (1920 / 2) + 200,
+            x: width / 2,
+            y: (height / 2) + 200,
             fontSize: this.jsonData.fontSize ?? 30,
             backgroundColor: '#000000',
             color: '#fff',

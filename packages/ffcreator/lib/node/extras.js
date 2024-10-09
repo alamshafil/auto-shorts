@@ -49,8 +49,10 @@ class FFExtras extends FFNode {
   }
 
   destroyContainer() {
-    this.container.destroy();
-    this.container.removeAllChildren();
+    try {
+      this.container.destroy();
+      this.container.removeAllChildren();
+    } catch (e) {}
   }
 
   destroy() {

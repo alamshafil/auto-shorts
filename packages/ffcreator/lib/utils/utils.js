@@ -188,28 +188,6 @@ const Utils = {
     return error;
   },
 
-  // Simple file unit conversion function
-  siz(size) {
-    var num = parseInt(size);
-    if (/[0-9]*k(b|B)?/gi.test(size)) {
-      return num * 1024;
-    }
-
-    if (/[0-9]*m(b|B)?/gi.test(size)) {
-      return num * 1024 * 1024;
-    }
-
-    if (/[0-9]*g(b|B)?/gi.test(size)) {
-      return num * 1024 * 1024 * 1024;
-    }
-
-    if (/[0-9]*t(b|B)?/gi.test(size)) {
-      return num * 1024 * 1024 * 1024 * 1024;
-    }
-
-    return num;
-  },
-
   storage: {},
 };
 

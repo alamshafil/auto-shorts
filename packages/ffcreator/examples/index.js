@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const colors = require('colors');
-const inquirer = require('inquirer').default;
+const inquirer = require('inquirer');
 
 const printRestartInfo = () =>
   console.log(colors.green(`\n --- You can press the s key or the w key to restart! --- \n`));
