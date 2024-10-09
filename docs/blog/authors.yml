@@ -1,0 +1,12 @@
+alamshafil:
+  name: Shafil Alam
+  title: Software Developer and Creator
+  url: https://shafilalam.com
+  image_url: https://github.com/alamshafil.png
+  page:
+    # customize the url of the author page at /blog/authors/<permalink>
+    permalink: '/all-alamshafil-articles'
+  socials:
+    x: alamshafil
+    linkedin: shafilalam
+    github: alamshafil

@@ -1,0 +1,33 @@
+---
+slug: new-version-0.2
+title: What to expect from v0.2.0 release of AutoShorts
+authors: [alamshafil]
+tags: [autoshorts, updates]
+---
+
+We, *actually just me*, are excited to announce the future release of v0.2.0 of AutoShorts. This release brings major changes to the project and will be a significant milestone in the project's development. 
+
+Note this release is still in development and the features mentioned here are subject to change.
+
+<!-- truncate -->
+
+Here are some of the changes you can expect in the upcoming release:
+
+- **New Web UI:** The new version will feature a web UI that will allow users to interact with the project without having to use the command line. The web UI will provide a more user-friendly interface for creating videos and managing projects. The web UI will be built using Next.js and Tailwind CSS. The backend will be provided by the existing AutoShorts API.
+
+- **New server support:** The new version will feature a server mode that will allow users to run the project as a server. This will allow users to create videos programmatically using the AutoShorts API. The server mode will be built using Express.js and will provide a RESTful API for creating videos. Run via `npx autoshorts --server`. The server reads environment variables `.env` for configuration, such as the port, resource path, and temporary directory.
+
+- **API key read from environment variables:** The new version will support reading API keys from environment variables. This will allow users to store their API keys securely and avoid hardcoding them in the project configuration. Use `.env` file to store your API keys.
+
+- **AI Output is now structured:** The new version will feature structured AI output.The AI script generation has been be reworked to give each video type its own prompt to build its data object.
+
+
+- **Added video orientation support:** The new version will support video orientation. Users can now specify whether they want their video to be vertical or horizontal.
+
+- **Forked `ffcreator` and `inkpaint`:** The new version will feature a forked version of `ffcreator` and `inkpaint` as internal dependencies in `packages` directory. This will allow us to make changes to these libraries without affecting the original repositories.
+
+- **OpenAI API support:** The new version will support the OpenAI API. This will allow users to use GPT-4o, GPT-4o-mini, o1, and other OpenAI models to generate video scripts. This also supports custom endpoints to use Groq AI, local Ollama API, and other OpenAI compatible APIs.
+
+- **Google Gemini AI API support:** Users can now use the Google Gemini AI API to generate video scripts. This will allow users to use the Google Gemini AI model such as Gemini-1.5-Flash and Gemini-1.5-Pro to generate video scripts.
+
+- **Anthropic (Claude) API support:** Users can now use the Anthropic (Claude) API to generate video scripts. This will allow users to use the Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Sonnet, and Claude 3 Haiku models to generate video scripts.

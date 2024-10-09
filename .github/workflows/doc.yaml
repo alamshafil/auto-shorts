@@ -1,49 +1,56 @@
-name: "Publish documentation"
+name: Deploy to GitHub Pages
+
 on:
-  release:
-    types: [published]
   workflow_dispatch:
+  push:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/doc.yaml'
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./docs
 
 jobs:
-  publish-documentation:
-    permissions:
-      id-token: "write"
-      pages: "write"
-
-    environment:
-      name: "github-pages"
-      url: "${{ steps.deployment.outputs.page_url }}"
-
-    runs-on: "ubuntu-latest"
+  build:
+    name: Build Docusaurus
+    runs-on: ubuntu-latest
     steps:
-      - id: "checkout"
-        name: "Check out Git repository"
-        uses: "actions/checkout@v4"
-
-      - id: "setup-node"
-        name: "Set up Node.js"
-        uses: "actions/setup-node@v4"
+      - uses: actions/checkout@v4
         with:
-          cache: "npm"
-
-      - id: "install-dependencies"
-        name: "Install Node.js dependencies"
-        run: |
-          npm ci
-      - id: "build"
-        name: "Build documentation"
-        run: |
-          npm run doc
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - id: "upload-documentation"
-        name: "Upload Pages artifact"
-        uses: "actions/upload-pages-artifact@v3"
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
         with:
-          path: "docs/"
+          node-version: 18
+          cache: npm
 
-      - id: "deployment"
-        name: "Deploy documentation to GitHub Pages"
-        uses: "actions/deploy-pages@v4"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

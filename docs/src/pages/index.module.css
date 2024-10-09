@@ -1,0 +1,29 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add shadow, border radius, glow, and add padding */
+.heroImage {
+  padding: 2rem;
+  filter: drop-shadow(0 0 0.75rem rgb(0, 255, 106));
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

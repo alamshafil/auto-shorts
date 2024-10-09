@@ -1,9 +1,9 @@
 # v0.2.0
 - TODO: Add description
-- Inital release of local web UI (Frontend uses Next.js, backend uses Express.js)
+- Initial release of local web UI (Frontend uses Next.js, backend uses Express.js)
 - Server API support (--server) (gets API keys from environment variables)
 - Reworked AI script generation by giving each video type its own prompt to build its data object
-- Support for getting API keys from environment variables
+- Support for getting API keys from environment variables (`.env` file)
 - OpenAI API support
 - Google Gemini AI API support
 - Anthropic (Claude) API support

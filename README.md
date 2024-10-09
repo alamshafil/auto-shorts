@@ -348,7 +348,8 @@ The package is structured as follows:
 - [ ] Add user authentication for UI and view past videos
 - [ ] Add more error handling
 - [ ] Add more tests
-- [ ] Add more documentation
+- [x] Add more documentation
+- [ ] Add documentation for adding new video types
 - [ ] Fix external dependencies vulnerabilities (only on dev dependencies)
 - [ ] Expose more options for video customization (ElevenLabs voice customization, LLM temperature, etc.)
 

@@ -9,11 +9,8 @@
  *
  * @object
  */
-const util = require('util');
 const ndarray = require('ndarray');
-const getPixels = require('ndarray-pixels');
-
-const getPixelsFunc = util.promisify(getPixels.getPixels);
+const ndarray_pixels = require('ndarray-pixels');
 
 const GLUtil = {
   byteArray: null,
@@ -38,7 +35,8 @@ const GLUtil = {
     if (type === 'raw') {
       return ndarray(data, [width, height, 4], [4, width * 4, 1]);
     } else {
-      return await getPixelsFunc(data, `image/${type}`);
+      const res = await ndarray_pixels.getPixels(data, `image/${type}`);
+      return res;
     }
   },
 };

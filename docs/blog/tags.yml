@@ -1,0 +1,19 @@
+docusaurus:
+  label: Docusaurus
+  permalink: /docusaurus
+  description: Docusaurus tag description
+
+release:
+  label: Release
+  permalink: /release
+  description: Release tag description
+
+autoshorts:
+  label: Autoshorts
+  permalink: /autoshorts
+  description: Autoshorts tag description
+
+updates:
+  label: Updates
+  permalink: /updates
+  description: Updates tag description
