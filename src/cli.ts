@@ -250,7 +250,7 @@ async function cli() {
     let bgMusic = options.bgMusic ?? null;
     let orientation = options.orientation ?? "vertical";
 
-    let useMock = options.useMock ?? false;
+    const useMock = options.useMock ?? false;
 
     const tempPath = options.tempPath ?? path.resolve(process.cwd(), 'video_temp');
 
@@ -526,7 +526,7 @@ async function cli() {
         try {
             aiModel = await getAIModel();
         } catch (e: any) {
-            console.info("[*] IMPORTANT: Error getting AI models (check if using correct AI type, if using Ollama - check if running). Error message: " + e.message ?? e.toString());
+            console.info("[*] IMPORTANT: Error getting AI models (check if using correct AI type, if using Ollama - check if running). Error message: " + e.message);
         }
     }
 

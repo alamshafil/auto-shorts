@@ -151,7 +151,7 @@ temp/
 coverage/
 
 # Doc folder
-/docs/
+/typedoc/
 
 # Options JSON
 options_autoshorts.json

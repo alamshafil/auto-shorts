@@ -267,7 +267,7 @@ export class VideoGen {
     checkTempPath() {
         this.log('Starting video generation...');
 
-        let id = (Math.random() + 1).toString(36).substring(7); // Note: This is not a secure way to generate a random ID
+        const id = (Math.random() + 1).toString(36).substring(7); // Note: This is not a secure way to generate a random ID
         const uniqueFolder = path.join(this.tempPath, id);
 
         if (!fs.existsSync(uniqueFolder)) {

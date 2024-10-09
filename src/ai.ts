@@ -139,7 +139,7 @@ export class OpenAIGen extends AIGen {
         const aiPrompt = convertVideoTypeToPrompt(videoGenType);
 
         // Get each prompt from each field and add to JSON
-        let videoJson: any = {};
+        const videoJson: any = {};
 
         videoJson["type"] = videoGenType;
 
@@ -243,7 +243,7 @@ export class GoogleAIGen extends AIGen {
             ]
         })
 
-        let videoTypeResult = await chat.sendMessageStream(INITIAL_AI_PROMPT + userPrompt);
+        const videoTypeResult = await chat.sendMessageStream(INITIAL_AI_PROMPT + userPrompt);
         let videoType = '';
 
         for await (const part of videoTypeResult.stream) {
@@ -270,7 +270,7 @@ export class GoogleAIGen extends AIGen {
         const aiPrompt = convertVideoTypeToPrompt(videoGenType);
 
         // Get each prompt from each field and add to JSON
-        let videoJson: any = {};
+        const videoJson: any = {};
 
         videoJson["type"] = videoGenType;
 
@@ -279,7 +279,7 @@ export class GoogleAIGen extends AIGen {
 
             log(`(Google AI ${model}) Will ask AI for field '${key}' with prompt '${prompt}'`);
 
-            let result = await chat.sendMessageStream(prompt);
+            const result = await chat.sendMessageStream(prompt);
             let res = '';
             for await (const part of result.stream) {
                 res += part.text();
@@ -369,7 +369,7 @@ export class AnthropicAIGen extends AIGen {
 
         const json = await response.json();
 
-        let videoType = json.content[0].text;
+        const videoType = json.content[0].text;
 
         // Get AI prompts for video type
         // Check if AI string matches any type in VideoGenType enum
@@ -388,7 +388,7 @@ export class AnthropicAIGen extends AIGen {
         const aiPrompt = convertVideoTypeToPrompt(videoGenType);
 
         // Get each prompt from each field and add to JSON
-        let videoJson: any = {};
+        const videoJson: any = {};
 
         videoJson["type"] = videoGenType;
 
@@ -416,7 +416,7 @@ export class AnthropicAIGen extends AIGen {
 
             const json = await response.json();
 
-            let res: string = json.content[0].text;
+            const res: string = json.content[0].text;
 
             // Try to parse JSON response and validate it
             try {
@@ -429,7 +429,7 @@ export class AnthropicAIGen extends AIGen {
             log(`(Anthropic ${model}) AI said for field '${key}' is '${res}'`);
         }
 
-        let aiResponse = JSON.stringify(videoJson, null, 2);
+        const aiResponse = JSON.stringify(videoJson, null, 2);
 
         return aiResponse;
     }
@@ -462,7 +462,7 @@ export class OllamaAIGen extends AIGen {
      * @throws Error if API call fails
      */
     static async generate(log: (msg: string) => void, systemPrompt: string, userPrompt: string, options?: AIOptions): Promise<string> {
-        let model = options?.model ?? this.DEFAULT_MODEL;
+        const model = options?.model ?? this.DEFAULT_MODEL;
         log(`Calling Ollama local API with model: ${model}`);
 
         let aiResponse = '';
@@ -501,7 +501,7 @@ export class OllamaAIGen extends AIGen {
             const aiPrompt = convertVideoTypeToPrompt(videoGenType);
 
             // Get each prompt from each field and add to JSON
-            let videoJson: any = {};
+            const videoJson: any = {};
 
             videoJson["type"] = videoGenType;
 

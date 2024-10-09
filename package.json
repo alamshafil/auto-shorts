@@ -24,12 +24,15 @@
     "start": "tsc && node dist/cli.js",
     "start-server": "tsc && node dist/cli.js --server",
     "start-ui-dev": "cd ui && npm run dev",
+    "start-ui": "cd ui && npm run build && npm run start",
     "install-ui-deps": "cd ui && npm install",
+    "start-all": "concurrently \"npm run start-server\" \"npm run start-ui\"",
     "build": "tsc",
-    "build-all": "npm -w packages/inkpaint run build",
+    "build-inkpaint": "npm -w packages/inkpaint run lib",
     "lint": "eslint .",
-    "doc": "typedoc --entryPointStrategy expand ./src",
-    "test": "jest"
+    "doc": "typedoc --out typedoc --entryPointStrategy expand ./src",
+    "test": "jest",
+    "postinstall": "npm run build-inkpaint"
   },
   "bin": {
     "auto-shorts": "dist/cli.js"
@@ -43,6 +46,7 @@
     "cli-progress": "^3.12.0",
     "command-line-args": "^6.0.0",
     "command-line-usage": "^7.0.3",
+    "concurrently": "^9.0.1",
     "console-error": "^0.0.4",
     "console-info": "^0.0.5",
     "cors": "^2.8.5",

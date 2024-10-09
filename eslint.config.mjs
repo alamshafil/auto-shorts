@@ -7,6 +7,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   ...[{
-    ignores: ['ui/*', 'dist/*', 'docs/*', 'test/*', 'old/*', 'example/*', 'packages/*', '*.js'],
+    ignores: ['ui/*', 'dist/*', 'docs/*', 'typedoc/*', 'test/*', 'old/*', 'example/*', 'packages/*', '*.js'],
   }],
 );

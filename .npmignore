@@ -22,6 +22,7 @@ coverage/
 
 # Docs
 docs/
+typedoc/
 
 # Example folder
 example/
