@@ -62,7 +62,7 @@ export class QuizVideo extends VideoGen {
         this.checkTempPath();
 
         const title = this.jsonData.title;
-        const questions: {question: string, answer:string}[] = this.jsonData.questions;
+        const questions = this.jsonData.questions;
         const start_script = this.jsonData.start_script;
         const end_script = this.jsonData.end_script;
 

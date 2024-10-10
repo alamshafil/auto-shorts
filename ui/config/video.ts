@@ -13,8 +13,7 @@ export interface MessageVideoData {
 export interface QuizVideoData {
     type: "quiz";
     title: string;
-    questions: string[];
-    answers: string[];
+    questions: { question: string; answer: string }[];
     start_script: string;
     end_script: string;
     fontName?: string;

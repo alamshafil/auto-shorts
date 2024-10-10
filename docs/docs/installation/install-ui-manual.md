@@ -21,6 +21,7 @@ git clone https://github.com/alamshafil/auto-shorts
 cd auto-shorts
 npm install
 npm run install-ui-deps
+npx auto-shorts --download
 ```
 
 ## Setup backend server

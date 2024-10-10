@@ -27,6 +27,7 @@
     "start-ui": "cd ui && npm run build && npm run start",
     "install-ui-deps": "cd ui && npm install",
     "start-all": "concurrently \"npm run start-server\" \"npm run start-ui\"",
+    "start-all-dev": "concurrently \"npm run start-server\" \"npm run start-ui-dev\"",
     "build": "tsc",
     "build-inkpaint": "npm -w packages/inkpaint run lib",
     "lint": "eslint .",

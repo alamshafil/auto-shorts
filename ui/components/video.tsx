@@ -395,24 +395,18 @@ type QuizVideoFormProps = {
 
 const QuizVideoForm: React.FC<QuizVideoFormProps> = ({ setFormData, json, isAI }) => {
     const [quizTitle, setTitle] = useState('');
-    const [questions, setQuestions] = useState(['']);
-    const [answers, setAnswers] = useState(['']);
+    const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
     const [startScript, setStartScript] = useState('');
     const [endScript, setEndScript] = useState('');
 
     const handleAddQuestion = () => {
-        setQuestions([...questions, '']);
-        handleAddAnswer();
+        setQuestions([...questions, { question: '', answer: '' }]);
     };
 
-    const handleAddAnswer = () => {
-        setAnswers([...answers, '']);
-    };
-
-    const handleChange = (index: number, field: string[], value: string) => {
-        const newArray = [...field];
-        newArray[index] = value;
-        field === questions ? setQuestions(newArray) : setAnswers(newArray);
+    const handleChange = (index: number, field: string, value: string) => {
+        const newQuestions = [...questions];
+        newQuestions[index][field as "question" | "answer"] = value;
+        setQuestions(newQuestions);
     };
 
     const handleSubmit = () => {
@@ -420,7 +414,6 @@ const QuizVideoForm: React.FC<QuizVideoFormProps> = ({ setFormData, json, isAI }
             type: 'quiz',
             title: quizTitle,
             questions,
-            answers,
             start_script: startScript,
             end_script: endScript,
         };
@@ -430,10 +423,9 @@ const QuizVideoForm: React.FC<QuizVideoFormProps> = ({ setFormData, json, isAI }
     // Handle JSON if not null on initial load
     useEffect(() => {
         if (json) {
-            const { title, questions, answers, start_script, end_script } = JSON.parse(json);
+            const { title, questions, start_script, end_script } = JSON.parse(json);
             if (title) setTitle(title);
             if (questions) setQuestions(questions);
-            if (answers) setAnswers(answers);
             if (start_script) setStartScript(start_script);
             if (end_script) setEndScript(end_script);
         }
@@ -459,11 +451,10 @@ const QuizVideoForm: React.FC<QuizVideoFormProps> = ({ setFormData, json, isAI }
             </div>
             {questions.map((question, index) => (
                 <div key={index} className="flex flex-row items-center gap-4">
-                    <Input label={`Question #${index + 1}`} value={question} onChange={(e) => handleChange(index, questions, e.target.value)} />
-                    <Input label="Answer" value={answers[index]} onChange={(e) => handleChange(index, answers, e.target.value)} />
+                    <Input label={`Question #${index + 1}`} value={question.question} onChange={(e) => handleChange(index, 'question', e.target.value)} />
+                    <Input label="Answer" value={question.answer} onChange={(e) => handleChange(index, 'answer', e.target.value)} />
                     <Button color='danger' startContent={<FaTrash />} isIconOnly onClick={() => {
                         setQuestions(questions.filter((_, i) => i !== index));
-                        setAnswers(answers.filter((_, i) => i !== index));
                     }} />
                 </div>
             ))}
