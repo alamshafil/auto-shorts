@@ -58,8 +58,6 @@ export interface RatherVideoData {
     start_script: string;
     /** End script */
     end_script: string;
-    /** Font name (optional) */
-    fontName?: string;
 }
 
 /**
@@ -126,7 +124,7 @@ export class RatherVideo extends VideoGen {
             await this.mergeAudio(questionFilename + ".wav", clockAudio, fullAudio);
 
             voiceFiles.push(fullAudio);
-             
+
             this.log(`Full clock file created: ${fullAudio}`);
         }
 
@@ -135,7 +133,7 @@ export class RatherVideo extends VideoGen {
             await this.generateVoice({ text: end_script, voice: 'male', filename: filename });
             voiceFiles.push(filename);
         }
-        
+
         this.log('Voices created successfully!');
 
         // Combine audio files into a single audio file
@@ -150,18 +148,24 @@ export class RatherVideo extends VideoGen {
         this.log('Making list of durations for each audio file...');
         const durations = await this.getListOfDurations(voiceFiles);
 
-        // Overlay background audio on top of the voice audio file
-        this.log('Overlaying background audio on top of the voice audio file...');
-        
-        // Choose a random background audio file .mp3 from the music folder
-        const bgAudio = this.getRandomBgMusic();
-        this.log(`Background audio file: ${bgAudio}`);
 
-        const audioFile = path.join(this.tempPath, 'audio.wav');
+        // Video audio file (default is voice audio file)
+        let audioFile = voiceFile;
 
-        await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        if (this.useBgMusic) {
+            // Overlay background audio on top of the voice audio file
+            this.log('Overlaying background audio on top of the voice audio file...');
 
-        this.log('Background audio overlay complete!');
+            // Choose a random background audio file .mp3 from the music folder
+            const bgAudio: string = await this.getRandomBgMusic();
+            this.log("Background audio is " + bgAudio)
+
+            audioFile = path.join(this.tempPath, 'audio.wav');
+
+            await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        } else {
+            this.log('Background audio overlay disabled! Using voice audio file only...');
+        }
 
         // Find images for each question
         this.log('Finding images for each question...');
@@ -203,13 +207,13 @@ export class RatherVideo extends VideoGen {
 
             const canvas = createCanvas(width, height);
             const ctx = canvas.getContext('2d');
-            
+
             // Use img/rather.png as background
             const background = await loadImage(path.join(this.resPath, 'rather.png'));
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
             // Add text for each option
-            ctx.font = `70px ${this.jsonData.fontName ?? 'Bangers'}`;
+            ctx.font = `70px ${this.subtitleOptions?.fontName ?? 'Bangers'}`;
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
@@ -260,7 +264,7 @@ export class RatherVideo extends VideoGen {
 
         this.log("Audio file is " + audioFile)
         this.log("Video file is " + videoFile)
-        
+
         // get duration of audio file
         const full_duration = await this.getAudioDuration(audioFile);
 
@@ -298,20 +302,20 @@ export class RatherVideo extends VideoGen {
             const useGreenTop = p1 > p2;
             const useGreenBottom = p1 < p2;
 
-            const percent1 = new FFText({ text: `${p1}%`, x: 1080 / 2, y: 780, fontSize: 80, color: useGreenTop ? '#00ff00' : '#ff0000'});
-            const percent2 = new FFText({ text: `${p2}%`, x: 1080 / 2, y: 1120, fontSize: 80, color: useGreenBottom ? '#00ff00' : '#ff0000'});
+            const percent1 = new FFText({ text: `${p1}%`, x: 1080 / 2, y: 780, fontSize: 80, color: useGreenTop ? '#00ff00' : '#ff0000' });
+            const percent2 = new FFText({ text: `${p2}%`, x: 1080 / 2, y: 1120, fontSize: 80, color: useGreenBottom ? '#00ff00' : '#ff0000' });
 
             percent1.alignCenter();
             percent2.alignCenter();
 
             percent1.setStyle({
-                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+                fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
                 stroke: '#000000',
                 strokeThickness: 10,
             });
 
             percent2.setStyle({
-                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+                fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
                 stroke: '#000000',
                 strokeThickness: 10,
             });

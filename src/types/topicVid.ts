@@ -66,7 +66,6 @@ export class TopicVideo extends VideoGen {
         await this.generateVoice({ text: this.jsonData.text, voice: "male", filename: ttsFilename });
         voiceFiles.push(ttsFilename);
 
-
         const extraInfo = this.jsonData.extra;
         if (extraInfo) {
             this.log('Extra info: ' + extraInfo);
@@ -86,16 +85,23 @@ export class TopicVideo extends VideoGen {
 
         this.log('Audio file created successfully!');
 
-        // Overlay background audio on top of the voice audio file
-        this.log('Overlaying background audio on top of the voice audio file...');
+        // Video audio file (default is voice audio file)
+        let audioFile = voiceFile;
 
-        // Choose a random background audio file .mp3 from the music folder
-        const bgAudio: string = await this.getRandomBgMusic();
-        this.log("Background audio is " + bgAudio)
+        if (this.useBgMusic) {
+            // Overlay background audio on top of the voice audio file
+            this.log('Overlaying background audio on top of the voice audio file...');
 
-        const audioFile = path.join(this.tempPath, 'audio.wav');
+            // Choose a random background audio file .mp3 from the music folder
+            const bgAudio: string = await this.getRandomBgMusic();
+            this.log("Background audio is " + bgAudio)
 
-        await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+            audioFile = path.join(this.tempPath, 'audio.wav');
+
+            await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        } else {
+            this.log('Background audio overlay disabled! Using voice audio file only...');
+        }
 
         // Make 16k audio file for whisper
         const audio16kFile = path.join(this.tempPath, 'audio16k.wav');
@@ -133,82 +139,88 @@ export class TopicVideo extends VideoGen {
             audio: audioFile,
             log: true,
         });
-    
+
         this.log("Audio file is " + audioFile)
         this.log("Video file is " + videoFile)
-    
+
         // Get duration of audio file
         const full_duration = await this.getAudioDuration(audioFile);
-    
+
         this.log("Full duration of audio is " + full_duration)
-    
+
         creator.setDuration(full_duration);
-    
+
         const scene = new FFScene();
         scene.setBgColor('#000000');
         scene.setDuration(full_duration);
-    
-        // Get random video background
-        const bgVideo = await this.getRandomBgVideo();
-        this.log("Background video is " + bgVideo)
-    
-        // Add background video
-        const bg = new FFVideo({ path: bgVideo, x: width / 2, y: height / 2, width: width, height: height });
-        bg.setAudio(false);
-        scene.addChild(bg);
-    
+
+        // Add background video if not disabled
+        if (this.useBgVideo) {
+            // Get random video background
+            const bgVideo = await this.getRandomBgVideo();
+            this.log("Background video is " + bgVideo)
+
+            // Add background video
+            const bg = new FFVideo({ path: bgVideo, x: width / 2, y: height / 2, width: width, height: height });
+            bg.setAudio(false);
+            scene.addChild(bg);
+        } else {
+            // Handle no background video
+            this.log('No background video enabled! Skipping background video...');
+        }
+
         // Add images
         const album = new FFAlbum({
             list: imgs,
             x: width / 2,
-            y: (height / 2) - 200,
-            width: 512,
-            height: 512,
+            y: (this.useBgVideo) ? height / 2 - 100 : height / 2,
+            width: (this.useBgVideo) ? 512 : width,
+            height: (this.useBgVideo) ? 512 : height,
             showCover: false,
         });
-    
+
         album.setTransition("fadeIn")
         album.setTransTime(0.2);
         this.log("Album duration is " + Math.round(full_duration / imgs.length))
         album.setDuration(Math.round(full_duration / images.length));
         scene.addChild(album);
-    
+
         // Add subtitles
         const subStyle = {
-            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
-            color: '#fff',
-            stroke: '#000000',
-            strokeThickness: 8,
+            fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
+            color: this.subtitleOptions?.fontColor ?? '#fff',
+            stroke: this.subtitleOptions?.strokeColor ?? '#000000',
+            strokeThickness: this.subtitleOptions?.strokeWidth ?? 8,
         }
 
         const subObj = new FFSubtitle({
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
             x: width / 2,
             y: (height / 2) + 200,
-            fontSize: this.jsonData.fontSize ?? 30,
-            backgroundColor: '#000000',
-            color: '#fff',
+            fontSize: this.subtitleOptions?.fontSize ?? 60,
+            backgroundColor: this.subtitleOptions?.strokeColor ?? '#000000',
+            color: this.subtitleOptions?.fontColor ?? '#fff',
             comma: true,
             style: subStyle
         });
-    
+
         subObj.setStyle(subStyle);
-    
+
         this.log("Subtitles file is " + this.tempPath + "\\audio.wav.srt")
-    
+
         // subObj.setFont(path.join(__dirname, '/res/Mont.otf'));
         subObj.addAnimate("down");
         subObj.setText(this.jsonData.text);
         subObj.setSpeech(audioFile);
         subObj.frameBuffer = 24;
-    
+
         scene.addChild(subObj);
-    
+
         creator.addChild(scene);
-    
+
         creator.start();
         creator.closeLog();
-    
+
         creator.on('start', () => {
             this.log(`FFCreator start`);
         });
@@ -221,6 +233,6 @@ export class TopicVideo extends VideoGen {
         creator.on('complete', e => {
             this.log(`FFCreator completed: \n USAGE: ${e.useage} \n PATH: ${e.output} `);
             this.emitter.emit('done', e.output);
-        });    
+        });
     }
 }

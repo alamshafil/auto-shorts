@@ -76,6 +76,15 @@ Options
                               Overrides AI.
   -h, --help                  Print this usage guide.
 
+Subtitle Options
+
+  --subtitleLen number      Subtitle token length override.
+  --subFontName font        Subtitle font name override.
+  --subFontSize number      Subtitle font size override.
+  --subFontColor color      Subtitle font color override.
+  --subStrokeColor color    Subtitle stroke color override.
+  --subStrokeWidth number   Subtitle stroke width override
+
 Advanced Options
 
   --changePhotos                Change photos in video. Used to prevent
@@ -84,6 +93,8 @@ Advanced Options
                                 overriding wanted TTS (default: false)
   --bgMusic path                Use custom background music.
   --bgVideo path                Use custom background video. If applicable.
+  --noBgVideo                   Disable background video. (default: false)
+  --noBgMusic                   Disable background music. (default: false)
   --useMock                     Use mock JSON data. (default: false)
   --disableSubtitles            Disable subtitles in video. (default: false)
   --systemPromptOverride text   Override system prompt. May not work with all   

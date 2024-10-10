@@ -9,11 +9,13 @@ import { Divider } from '@nextui-org/divider';
 import { Chip } from '@nextui-org/chip';
 import { Tooltip } from '@nextui-org/tooltip';
 
+import { HexColorPicker } from 'react-colorful';
+
 import { BACKEND_ENDPOINT } from '@/config/backend';
 import { title, subtitle } from '@/components/primitives';
 import { VideoOptions } from '@/config/options';
 
-import { FaAngleDown, FaExclamationTriangle, FaGlobe, FaPhotoVideo, FaRandom, FaRegFileVideo, FaRobot, FaSave, FaSlidersH, FaSync, FaTextHeight, FaVideo, FaVolumeUp } from 'react-icons/fa';
+import { FaAngleDown, FaArrowsAltH, FaExclamationTriangle, FaEyeDropper, FaFont, FaGlobe, FaPhotoVideo, FaRandom, FaRegFileVideo, FaRobot, FaSave, FaSlidersH, FaSync, FaTextHeight, FaTextWidth, FaVideo, FaVolumeUp } from 'react-icons/fa';
 
 const config = {
     aiOptions: {
@@ -77,7 +79,7 @@ const config = {
         }
     ],
     videoOptions: {
-        orientations: ['Vertical', 'Horizontal']
+        orientations: ['vertical', 'horizontal']
     },
     miscOptions: [
         {
@@ -203,6 +205,19 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
     const [selectedSubtitleModel, setSelectedSubtitleModel] = useState(config.subtitleOptions[0]);
     const [selectedOrientation, setSelectedOrientation] = useState(config.videoOptions.orientations[0]);
     const [miscOptions, setMiscOptions] = useState(config.miscOptions.map(option => option.defaultValue));
+
+    const [useBgMusic, setUseBgMusic] = useState(true);
+    const [useBgVideo, setUseBgVideo] = useState(true);
+
+    const [subLen, setSubLen] = useState<undefined | number>(undefined);
+    const [fontName, setFontName] = useState<undefined | string>(undefined);
+    const [fontSize, setFontSize] = useState<undefined | number>(undefined);
+    const [fontColor, setFontColor] = useState<undefined | string>(undefined);
+    const [strokeColor, setStrokeColor] = useState<undefined | string>(undefined);
+    const [strokeWidth, setStrokeWidth] = useState<undefined | number>(undefined);
+
+    const [showFontColorPicker, setShowFontColorPicker] = useState(false);
+    const [showStrokeColorPicker, setShowStrokeColorPicker] = useState(false);
 
     useEffect(() => {
         fetchModels();
@@ -359,6 +374,69 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                         </DropdownMenu>
                     </Dropdown>
                 </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Subtitle Length</p>
+                        <p className={subtitle({ size: 'sm' })}>Maximum length for token (leave empty for default)</p>
+                    </div>
+                    <Input startContent={<FaTextWidth />} isClearable placeholder="Enter subtitle length" className="w-56" onChange={(e) => setSubLen(parseInt(e.target.value) ?? 0)} />
+                </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Font Name</p>
+                        <p className={subtitle({ size: 'sm' })}>Font name for subtitles (leave empty for default)</p>
+                    </div>
+                    <Input startContent={<FaFont />} isClearable placeholder="Enter font name" className="w-56" onChange={(e) => setFontName(e.target.value)} />
+                </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Font Size</p>
+                        <p className={subtitle({ size: 'sm' })}>Font size for subtitles (leave empty for default)</p>
+                    </div>
+                    <Input type="number" startContent={<FaTextHeight />} isClearable placeholder="Enter font size" className="w-56" min={0} max={300} onChange={(e) => setFontSize(parseInt(e.target.value) ?? 0)} />
+                </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Font Color</p>
+                        <p className={subtitle({ size: 'sm' })}>Font color for subtitles (hex with #) (leave empty for default)</p>
+                    </div>
+                    {/* <Input startContent={<FaEyeDropper />} isClearable placeholder="Enter font color" className="w-56" onChange={(e) => setFontColor(e.target.value)} /> */}
+                    {showFontColorPicker ? (
+                        <HexColorPicker color={fontColor} onChange={(e) => setFontColor(e)} />
+                    ) : (
+                        <Button startContent={<FaEyeDropper/>} onClick={() => setShowFontColorPicker(true)}>Choose Font Color</Button>
+                    )}
+                </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Stroke Color</p>
+                        <p className={subtitle({ size: 'sm' })}>Stroke color for subtitles (hex with #) (leave empty for default)</p>
+                    </div>
+                    {/* <Input startContent={<FaEyeDropper />} isClearable placeholder="Enter stroke color" className="w-56" onChange={(e) => setStrokeColor(e.target.value)} /> */}
+                    {showStrokeColorPicker ? (
+                        <HexColorPicker color={strokeColor} onChange={(e) => setStrokeColor(e)} />
+                    ) : (
+                        <Button startContent={<FaEyeDropper/>} onClick={() => setShowStrokeColorPicker(true)}>Choose Stroke Color</Button>
+                    )}
+                </div>
+                <div className="flex justify-between my-4">
+                    <div>
+                        <p className={title({ size: 'sm' })}>Stroke Width</p>
+                        <p className={subtitle({ size: 'sm' })}>Stroke width for subtitles (leave empty for default)</p>
+                    </div>
+                    <Input type="number" startContent={<FaArrowsAltH />} isClearable placeholder="Enter stroke width" className="w-56" min={0} max={100} onChange={(e) => setStrokeWidth(parseInt(e.target.value))} />
+                </div>
+                <div className="flex justify-center">
+                    <h1 style={{
+                        fontSize: `${fontSize}px`,
+                        color: fontColor,
+                        // stroke outline
+                        WebkitTextStroke: `${strokeWidth}px ${strokeColor}`,
+                        paintOrder: 'stroke fill',
+                    }}>
+                        This is a example.
+                        </h1>
+                </div>
             </div>
             <div className="flex items-center gap-2">
                 <FaVideo />
@@ -368,108 +446,129 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
             <div className="space-y-4 mb-8">
                 <div className="flex justify-between my-4">
                     <div>
-                        <p className={title({ size: 'sm' })}>Choose Video Background</p>
-                        <p className={subtitle({ size: 'sm' })}>Select the video background</p>
+                        <p className={title({ size: 'sm' })}>Background Video</p>
+                        <p className={subtitle({ size: 'sm' })}>Use background video</p>
                     </div>
-                    <ButtonGroup>
-                        <Dropdown>
-                            {
-                                isBgVideosError
-                                    ? <>
-                                        <Button color='danger' variant='shadow' startContent={<FaExclamationTriangle />} onPress={bgVideoModal.onOpen}>
-                                            Failed to fetch videos
-                                        </Button>
-                                        <Modal isOpen={bgVideoModal.isOpen} onOpenChange={bgVideoModal.onOpenChange}>
-                                            <ModalContent>
-                                                {(onClose) => (
-                                                    <>
-                                                        <ModalHeader className="flex flex-col gap-1">Erorr fetching videos</ModalHeader>
-                                                        <ModalBody>
-                                                            <p>{isBgVideosError}</p>
-                                                        </ModalBody>
-                                                        <ModalFooter>
-                                                            <Button color="danger" variant="light" onPress={onClose}>
-                                                                Close
-                                                            </Button>
-                                                        </ModalFooter>
-                                                    </>
-                                                )}
-                                            </ModalContent>
-                                        </Modal>
-                                    </>
-                                    : <DropdownTrigger>
-                                        <Button isLoading={selectedBgVideo == ""} startContent={<FaVideo />} endContent={<FaAngleDown />}>{selectedBgVideo == "" ? "Loading backgrounds" : selectedBgVideo}</Button>
-                                    </DropdownTrigger>
-                            }
-
-                            <DropdownMenu className="max-h-[50vh] overflow-y-auto" onAction={(key) => setSelectedBgVideo(key.toString())}>
-                                {bgVideos.map(bg => <DropdownItem key={bg} startContent={<FaVideo />}>{bg}</DropdownItem>)}
-                            </DropdownMenu>
-                        </Dropdown>
-                        <Tooltip content="Fetch background videos">
-                            <Button isIconOnly onClick={() => fetchBgVideos()}><FaSync /></Button>
-                        </Tooltip>
-                        <Tooltip content="Random background video">
-                            <Button isIconOnly onClick={() => setSelectedBgVideo(bgVideos[Math.floor(Math.random() * bgVideos.length)])}><FaRandom /></Button>
-                        </Tooltip>
-                    </ButtonGroup>
+                    <Checkbox isSelected={useBgVideo} onValueChange={(e) => setUseBgVideo(e)}>{
+                        useBgVideo ? 'Enabled' : 'Disabled'
+                    }</Checkbox>
                 </div>
                 <div className="flex justify-between my-4">
                     <div>
-                        <p className={title({ size: 'sm' })}>Choose Sound</p>
-                        <p className={subtitle({ size: 'sm' })}>Select the sound</p>
+                        <p className={title({ size: 'sm' })}>Background Music</p>
+                        <p className={subtitle({ size: 'sm' })}>Use background music</p>
                     </div>
-                    <ButtonGroup>
-                        <Dropdown>
-                            {
-                                isBgAudioError
-                                    ? <>
-                                        <Button color='danger' variant='shadow' startContent={<FaExclamationTriangle />} onPress={bgAudioModal.onOpen}>
-                                            Failed to fetch audio
-                                        </Button>
-                                        <Modal isOpen={bgAudioModal.isOpen} onOpenChange={bgAudioModal.onOpenChange}>
-                                            <ModalContent>
-                                                {(onClose) => (
-                                                    <>
-                                                        <ModalHeader className="flex flex-col gap-1">Erorr fetching audio</ModalHeader>
-                                                        <ModalBody>
-                                                            <p>{isBgAudioError}</p>
-                                                        </ModalBody>
-                                                        <ModalFooter>
-                                                            <Button color="danger" variant="light" onPress={onClose}>
-                                                                Close
-                                                            </Button>
-                                                        </ModalFooter>
-                                                    </>
-                                                )}
-                                            </ModalContent>
-                                        </Modal>
-                                    </>
-                                    : <DropdownTrigger>
-                                        <Button isLoading={selectedBgAudio == ""} startContent={<FaVolumeUp />} endContent={<FaAngleDown />}>{selectedBgAudio == "" ? "Loading sounds" : selectedBgAudio}</Button>
-                                    </DropdownTrigger>
-                            }
-
-                            <DropdownMenu className="max-h-[50vh] overflow-y-auto" onAction={(key) => setSelectedBgAudio(key.toString())}>
-                                {bgAudio.map(sound => <DropdownItem key={sound} startContent={<FaVolumeUp />}>{sound}</DropdownItem>)}
-                            </DropdownMenu>
-                        </Dropdown>
-                        <Tooltip content="Fetch background sounds">
-                            <Button isIconOnly onClick={() => fetchBgAudio()}><FaSync /></Button>
-                        </Tooltip>
-                        <Tooltip content="Random background sound">
-                            <Button isIconOnly onClick={() => setSelectedBgAudio(bgAudio[Math.floor(Math.random() * bgAudio.length)])}><FaRandom /></Button>
-                        </Tooltip>
-                    </ButtonGroup>
+                    <Checkbox isSelected={useBgMusic} onValueChange={(e) => setUseBgMusic(e)}>{
+                        useBgMusic ? 'Enabled' : 'Disabled'
+                    }</Checkbox>
                 </div>
+                {useBgVideo ?
+                    <div className="flex justify-between my-4">
+                        <div>
+                            <p className={title({ size: 'sm' })}>Choose Video Background</p>
+                            <p className={subtitle({ size: 'sm' })}>Select the video background</p>
+                        </div>
+                        <ButtonGroup>
+                            <Dropdown>
+                                {
+                                    isBgVideosError
+                                        ? <>
+                                            <Button color='danger' variant='shadow' startContent={<FaExclamationTriangle />} onPress={bgVideoModal.onOpen}>
+                                                Failed to fetch videos
+                                            </Button>
+                                            <Modal isOpen={bgVideoModal.isOpen} onOpenChange={bgVideoModal.onOpenChange}>
+                                                <ModalContent>
+                                                    {(onClose) => (
+                                                        <>
+                                                            <ModalHeader className="flex flex-col gap-1">Erorr fetching videos</ModalHeader>
+                                                            <ModalBody>
+                                                                <p>{isBgVideosError}</p>
+                                                            </ModalBody>
+                                                            <ModalFooter>
+                                                                <Button color="danger" variant="light" onPress={onClose}>
+                                                                    Close
+                                                                </Button>
+                                                            </ModalFooter>
+                                                        </>
+                                                    )}
+                                                </ModalContent>
+                                            </Modal>
+                                        </>
+                                        : <DropdownTrigger>
+                                            <Button isLoading={selectedBgVideo == ""} startContent={<FaVideo />} endContent={<FaAngleDown />}>{selectedBgVideo == "" ? "Loading backgrounds" : selectedBgVideo}</Button>
+                                        </DropdownTrigger>
+                                }
+
+                                <DropdownMenu className="max-h-[50vh] overflow-y-auto" onAction={(key) => setSelectedBgVideo(key.toString())}>
+                                    {bgVideos.map(bg => <DropdownItem key={bg} startContent={<FaVideo />}>{bg}</DropdownItem>)}
+                                </DropdownMenu>
+                            </Dropdown>
+                            <Tooltip content="Fetch background videos">
+                                <Button isIconOnly onClick={() => fetchBgVideos()}><FaSync /></Button>
+                            </Tooltip>
+                            <Tooltip content="Random background video">
+                                <Button isIconOnly onClick={() => setSelectedBgVideo(bgVideos[Math.floor(Math.random() * bgVideos.length)])}><FaRandom /></Button>
+                            </Tooltip>
+                        </ButtonGroup>
+                    </div>
+                    : null}
+                {useBgMusic ?
+                    <div className="flex justify-between my-4">
+                        <div>
+                            <p className={title({ size: 'sm' })}>Choose Audio Background</p>
+                            <p className={subtitle({ size: 'sm' })}>Select the audio background</p>
+                        </div>
+                        <ButtonGroup>
+                            <Dropdown>
+                                {
+                                    isBgAudioError
+                                        ? <>
+                                            <Button color='danger' variant='shadow' startContent={<FaExclamationTriangle />} onPress={bgAudioModal.onOpen}>
+                                                Failed to fetch audio
+                                            </Button>
+                                            <Modal isOpen={bgAudioModal.isOpen} onOpenChange={bgAudioModal.onOpenChange}>
+                                                <ModalContent>
+                                                    {(onClose) => (
+                                                        <>
+                                                            <ModalHeader className="flex flex-col gap-1">Erorr fetching audio</ModalHeader>
+                                                            <ModalBody>
+                                                                <p>{isBgAudioError}</p>
+                                                            </ModalBody>
+                                                            <ModalFooter>
+                                                                <Button color="danger" variant="light" onPress={onClose}>
+                                                                    Close
+                                                                </Button>
+                                                            </ModalFooter>
+                                                        </>
+                                                    )}
+                                                </ModalContent>
+                                            </Modal>
+                                        </>
+                                        : <DropdownTrigger>
+                                            <Button isLoading={selectedBgAudio == ""} startContent={<FaVolumeUp />} endContent={<FaAngleDown />}>{selectedBgAudio == "" ? "Loading sounds" : selectedBgAudio}</Button>
+                                        </DropdownTrigger>
+                                }
+
+                                <DropdownMenu className="max-h-[50vh] overflow-y-auto" onAction={(key) => setSelectedBgAudio(key.toString())}>
+                                    {bgAudio.map(sound => <DropdownItem key={sound} startContent={<FaVolumeUp />}>{sound}</DropdownItem>)}
+                                </DropdownMenu>
+                            </Dropdown>
+                            <Tooltip content="Fetch background sounds">
+                                <Button isIconOnly onClick={() => fetchBgAudio()}><FaSync /></Button>
+                            </Tooltip>
+                            <Tooltip content="Random background sound">
+                                <Button isIconOnly onClick={() => setSelectedBgAudio(bgAudio[Math.floor(Math.random() * bgAudio.length)])}><FaRandom /></Button>
+                            </Tooltip>
+                        </ButtonGroup>
+                    </div>
+                    : null}
                 <div className="flex justify-between my-4">
                     <div>
                         <p className={title({ size: 'sm' })}>Orientation</p>
                         <p className={subtitle({ size: 'sm' })}>Select the video orientation</p>
-                        {(selectedOrientation != 'Vertical') ? <Chip className="mt-2" color='danger' variant='shadow'>Horizontal orientation may produce issues due to WIP</Chip> : null}
+                        {(selectedOrientation != 'vertical') ? <Chip className="mt-2" color='danger' variant='shadow'>Horizontal orientation may produce issues due to WIP</Chip> : null}
                     </div>
                     <Dropdown>
-
                         <DropdownTrigger>
                             <Button endContent={<FaAngleDown />}>{selectedOrientation}</Button>
                         </DropdownTrigger>
@@ -512,12 +611,22 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                         orientation: selectedOrientation,
                         vidPath: selectedBgVideo,
                         bgPath: selectedBgAudio,
+                        useBgMusic: useBgMusic,
+                        useBgVideo: useBgVideo,
                         internalOptions: {
                             // TODO: Remove use of findIndex() to find index of option
                             changePhotos: miscOptions[config.miscOptions.findIndex(option => option.name === 'changePhotos')],
                             disableTTS: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableTTS')],
                             disableSubtitles: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableSubtitles')],
                             useMock: miscOptions[config.miscOptions.findIndex(option => option.name === 'useMock')],
+                        },
+                        subtitleOptions: {
+                            maxLen: subLen,
+                            fontName: fontName,
+                            fontSize: fontSize,
+                            fontColor: fontColor,
+                            strokeColor: strokeColor,
+                            strokeWidth: strokeWidth
                         }
                     })
                 }}>

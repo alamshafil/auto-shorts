@@ -145,6 +145,18 @@ async function cli() {
             description: 'Use custom background video. {italic If applicable.}'
         },
         {
+            name: 'noBgVideo',
+            type: Boolean,
+            defaultValue: false,
+            description: 'Disable background video. {bold (default: false)}'
+        },
+        {
+            name: 'noBgMusic',
+            type: Boolean,
+            defaultValue: false,
+            description: 'Disable background music. {bold (default: false)}'
+        },
+        {
             name: 'useMock',
             type: Boolean,
             defaultValue: false,
@@ -161,7 +173,7 @@ async function cli() {
             typeLabel: '{underline text}',
             description: "Override system prompt. {italic May not work with all AI types.}"
         },
-        { 
+        {
             name: 'openAIEndpoint',
             typeLabel: '{underline endpoint}',
             description: 'OpenAI endpoint URL to use. {italic If applicable.}'
@@ -173,6 +185,39 @@ async function cli() {
         }
     ];
 
+    const subOptions = [
+        {
+            name: 'subtitleLen',
+            type: Number,
+            description: 'Subtitle token length override.'
+        },
+        {
+            name: 'subFontName',
+            typeLabel: '{underline font}',
+            description: 'Subtitle font name override.'
+        },
+        {
+            name: 'subFontSize',
+            type: Number,
+            description: 'Subtitle font size override.'
+        },
+        {
+            name: 'subFontColor',
+            typeLabel: '{underline color}',
+            description: 'Subtitle font color override.'
+        },
+        {
+            name: 'subStrokeColor',
+            typeLabel: '{underline color}',
+            description: 'Subtitle stroke color override.'
+        },
+        {
+            name: 'subStrokeWidth',
+            type: Number,
+            description: 'Subtitle stroke width override'
+        }
+    ];
+
     const sections = [
         {
             header: 'AutoShorts AI video generator (CLI Edition)',
@@ -181,6 +226,10 @@ async function cli() {
         {
             header: 'Options',
             optionList: mainOptions
+        },
+        {
+            header: 'Subtitle Options',
+            optionList: subOptions
         },
         {
             header: 'Advanced Options',
@@ -243,18 +292,29 @@ async function cli() {
         return;
     }
 
+    // Advanced options
     let changePhotos = options.changePhotos ?? true;
     let disableTTS = options.disableTTS ?? false;
     let disableSubtitles = options.disableSubtitles ?? false;
     let bgVideo = options.bgVideo ?? null;
     let bgMusic = options.bgMusic ?? null;
     let orientation = options.orientation ?? "vertical";
+    let noBgVideo = options.noBgVideo ?? false;
+    let noBgMusic = options.noBgMusic ?? false;
+
+    // Subtitle options
+    let subtitleLen = options.subtitleLen ?? null;
+    let subFontName = options.subFontName ?? null;
+    let subFontSize = options.subFontSize ?? null;
+    let subFontColor = options.subFontColor ?? null;
+    let subStrokeColor = options.subStrokeColor ?? null;
+    let subStrokeWidth = options.subStrokeWidth ?? null;
 
     const useMock = options.useMock ?? false;
 
     const tempPath = options.tempPath ?? path.resolve(process.cwd(), 'video_temp');
 
-    const resPath = options.resPath ??  path.resolve(process.cwd(), 'res');
+    const resPath = options.resPath ?? path.resolve(process.cwd(), 'res');
 
     // Check if res folder before starting
     checkResDir(resPath);
@@ -297,6 +357,14 @@ async function cli() {
     console.info("Res path: " + resPath);
     console.info("Prompt: " + (userPrompt ?? "None (will be asked later)"));
 
+    console.log("\n--> Subtitle options:");
+    console.info("Subtitle length: " + (subtitleLen ?? "Default"));
+    console.info("Subtitle font name: " + (subFontName ?? "Default"));
+    console.info("Subtitle font size: " + (subFontSize ?? "Default"));
+    console.info("Subtitle font color: " + (subFontColor ?? "Default"));
+    console.info("Subtitle stroke color: " + (subStrokeColor ?? "Default"));
+    console.info("Subtitle stroke width: " + (subStrokeWidth ?? "Default"));
+
     console.log("\n--> Advanced options:");
     console.info("Background video: " + (bgVideo ?? "Using random"));
     console.info("Background music: " + (bgMusic ?? "Using random"));
@@ -315,6 +383,9 @@ async function cli() {
     if (options.model) console.info("AI override model: " + aiModel);
     if (options.openAIEndpoint && aiType == AIGenType.OpenAIGen) console.info("OpenAI endpoint: " + openAIEndpoint);
     if (options.openAIEndpoint && aiType != AIGenType.OpenAIGen) console.info("OpenAI endpoint: present but not used for current AI type.");
+
+    if (options.noBgVideo) console.info("No background video enabled!");
+    if (options.noBgMusic) console.info("No background music enabled!");
 
     // Check API keys (checked again later)
     if (ttsType == VoiceGenType.ElevenLabs && !elevenLabsAPIKey) {
@@ -387,7 +458,8 @@ async function cli() {
                 const data = fs.readFileSync('options_autoshorts.json');
                 const jsonData = JSON.parse(data.toString());
 
-                console.info("Using advanced previous options:");
+                // Log previous advanced options
+                console.info("--> Using advanced previous options:");
                 console.info("AI Type: " + jsonData.aiType);
                 console.info("TTS Type: " + jsonData.ttsType);
                 console.info("Image API Type: " + jsonData.imageType);
@@ -397,8 +469,20 @@ async function cli() {
                 console.info("Disable subtitles: " + jsonData.disableSubtitles);
                 console.info("Background video: " + (jsonData.bgVideo ?? "Using random"));
                 console.info("Background music: " + (jsonData.bgMusic ?? "Using random"));
+                console.info("Use background video: " + !jsonData.noBgVideo);
+                console.info("Use background music: " + !jsonData.noBgMusic);
                 console.info("AI Model: " + jsonData.model);
 
+                // Log previous subtitle options
+                console.info("--> Using previous subtitles options:");
+                console.info("Subtitle length: " + (jsonData.subtitleLen ?? "Default"));
+                console.info("Subtitle font name: " + (jsonData.subFontName ?? "Default"));
+                console.info("Subtitle font size: " + (jsonData.subFontSize ?? "Default"));
+                console.info("Subtitle font color: " + (jsonData.subFontColor ?? "Default"));
+                console.info("Subtitle stroke color: " + (jsonData.subStrokeColor ?? "Default"));
+                console.info("Subtitle stroke width: " + (jsonData.subStrokeWidth ?? "Default"));
+
+                // Set previous options
                 aiType = jsonData.aiType;
                 ttsType = jsonData.ttsType;
                 imageType = jsonData.imageType;
@@ -408,7 +492,17 @@ async function cli() {
                 disableSubtitles = jsonData.disableSubtitles;
                 bgVideo = jsonData.bgVideo;
                 bgMusic = jsonData.bgMusic
+                noBgVideo = jsonData.noBgVideo;
+                noBgMusic = jsonData.noBgMusic;
                 aiModel = jsonData.model;
+
+                // Set previous subtitle options
+                subtitleLen = jsonData.subtitleLen;
+                subFontName = jsonData.subFontName;
+                subFontSize = jsonData.subFontSize;
+                subFontColor = jsonData.subFontColor;
+                subStrokeColor = jsonData.subStrokeColor;
+                subStrokeWidth = jsonData.subStrokeWidth;
             } catch (e: any) {
                 console.info("[!] Error reading previous options file. Using default options and CLI options.\nError details ->");
                 console.error(e.message ?? e.toString());
@@ -417,6 +511,8 @@ async function cli() {
     }
 
     if (useAdvancedOptions && !usePrev) {
+        // Ask for API types
+
         aiType = await select({
             message: 'Select AI type',
             choices:
@@ -451,45 +547,73 @@ async function cli() {
 
         // Select AI model
         aiModel = await getAIModel();
-    
+
+        // Ask for advanced options
+
         const changePhotosRep = await input({ message: `Change photos in video? (default: true) (y/n) -> ` });
 
         const disableTTSRep = await input({ message: `Disable TTS in video? (default: false) (y/n) -> ` });
 
         const disableSubtitlesRep = await input({ message: `Disable subtitles in video? (default: false) (y/n) -> ` });
 
-        changePhotos = changePhotosRep == "y";
+        changePhotos = changePhotosRep == "y" || changePhotosRep == "";
         disableTTS = disableTTSRep == "y";
         disableSubtitles = disableSubtitlesRep == "y";
 
-        // Custom video/bg music
-        const useCustomMusicRep = await input({ message: `Use custom video/bg music? (default: false) (y/n) -> ` });
+        // Ask if user wants to use background video and music
+        const useBgVideoRep = await input({ message: `Use background video? (default: true) (y/n) -> ` });
+        const useBgMusicRep = await input({ message: `Use background music? (default: true) (y/n) -> ` });
+        noBgVideo = useBgVideoRep == "n";
+        noBgMusic = useBgMusicRep == "n";
 
-        if (useCustomMusicRep == "y") {
+        // Custom video/bg music (only if user wants to use bg video and music)
+        if (!noBgVideo || !noBgMusic) {
+            const useCustomMusicRep = await input({ message: `Use custom video/bg music? (default: false) (y/n) -> ` });
 
-            const vidFiles = fs.readdirSync(path.join(resPath, 'vid'));
-            const bgFiles = fs.readdirSync(path.join(resPath, 'music'));
+            if (useCustomMusicRep == "y") {
+                if (!noBgVideo) {
+                    const vidFiles = fs.readdirSync(path.join(resPath, 'vid'));
+                    const answerVid = await select({
+                        message: 'Select video',
+                        choices: vidFiles.map((file) => {
+                            return { title: file, value: file };
+                        }),
+                    });
+                    bgVideo = path.join(resPath, 'vid', answerVid);
+                }
 
-            const answerVid = await select({
-                message: 'Select video',
-                choices: vidFiles.map((file) => {
-                    return { title: file, value: file };
-                }),
-            });
-
-            const answerBg = await select({
-                message: 'Select music',
-                choices: bgFiles.map((file) => {
-                    return { title: file, value: file };
-                }),
-            });
-
-            bgVideo = path.join(resPath, 'vid', answerVid);
-            bgMusic = path.join(resPath, 'music', answerBg);
+                if (!noBgMusic) {
+                    const bgFiles = fs.readdirSync(path.join(resPath, 'music'));
+                    const answerBg = await select({
+                        message: 'Select music',
+                        choices: bgFiles.map((file) => {
+                            return { title: file, value: file };
+                        }),
+                    });
+                    bgMusic = path.join(resPath, 'music', answerBg);
+                }
+            }
         }
 
-        // Print
-        console.info("Advanced options:");
+        // Ask for subtitle options (if empty then keep null or current value)
+        console.info("[*] Asking for subtitle options (leave empty for default):");
+
+        const subtitleLenRep = await input({ message: `Subtitle token length override? -> ` });
+        const subFontNameRep = await input({ message: `Subtitle font name override? -> ` });
+        const subFontSizeRep = await input({ message: `Subtitle font size override? -> ` });
+        const subFontColorRep = await input({ message: `Subtitle font color override? (hex with #) -> ` });
+        const subStrokeColorRep = await input({ message: `Subtitle stroke color override? (hex with #) -> ` });
+        const subStrokeWidthRep = await input({ message: `Subtitle stroke width override? -> ` });
+
+        subtitleLen = subtitleLenRep !== "" ? subtitleLenRep : subtitleLen;
+        subFontName = subFontNameRep !== "" ? subFontNameRep : subFontName;
+        subFontSize = subFontSizeRep !== "" ? subFontSizeRep : subFontSize;
+        subFontColor = subFontColorRep !== "" ? subFontColorRep : subFontColor;
+        subStrokeColor = subStrokeColorRep !== "" ? subStrokeColorRep : subStrokeColor;
+        subStrokeWidth = subStrokeWidthRep !== "" ? subStrokeWidthRep : subStrokeWidth;
+
+        // Print advanced options
+        console.info("--> Advanced options:");
         console.info("AI Type: " + aiType);
         console.info("TTS Type: " + ttsType);
         console.info("Image API Type: " + imageType);
@@ -499,7 +623,17 @@ async function cli() {
         console.info("Disable subtitles: " + disableSubtitles);
         console.info("Background video: " + (bgVideo ?? "Using random"));
         console.info("Background music: " + (bgMusic ?? "Using random"));
+        console.info("Use background video: " + !noBgVideo);
+        console.info("Use background music: " + !noBgMusic);
         console.info("AI Model: " + aiModel);
+
+        // Print subtitle options
+        console.info("--> Subtitle options:");
+        console.info("Subtitle length: " + (subtitleLen ?? "Default"));
+        console.info("Subtitle font name: " + (subFontName ?? "Default"));
+        console.info("Subtitle font size: " + (subFontSize ?? "Default"));
+        console.info("Subtitle font color: " + (subFontColor ?? "Default"));
+        console.info("Subtitle stroke color: " + (subStrokeColor ?? "Default"));
 
         // Save to file
         const data = {
@@ -512,7 +646,15 @@ async function cli() {
             disableSubtitles: disableSubtitles,
             bgVideo: bgVideo,
             bgMusic: bgMusic,
-            aiModel: aiModel
+            noBgVideo: noBgVideo,
+            noBgMusic: noBgMusic,
+            aiModel: aiModel,
+            subtitleLen: subtitleLen,
+            subFontName: subFontName,
+            subFontSize: subFontSize,
+            subFontColor: subFontColor,
+            subStrokeColor: subStrokeColor,
+            subStrokeWidth: subStrokeWidth
         };
 
         const jsonData = JSON.stringify(data);
@@ -552,12 +694,18 @@ async function cli() {
         imageGenType: ImageGenType[imageType as keyof typeof ImageGenType],
         orientation: orientation,
         apiKeys: {
-            elevenLabsAPIKey: elevenLabsAPIKey ?? process.env.ELEVENLABS_API_KEY,
-            pexelsAPIKey: pexelsAPIKey ?? process.env.PEXELS_API_KEY,
-            neetsAPIKey: neetsAPIKey ?? process.env.NEETS_API_KEY,
+            elevenLabsAPIKey: elevenLabsAPIKey ?? process.env[VoiceAPIEnv.ElevenLabs],
+            pexelsAPIKey: pexelsAPIKey ?? process.env[ImageAPIEnv.PexelsAPIKey],
+            neetsAPIKey: neetsAPIKey ?? process.env[VoiceAPIEnv.NeetsTTS],
         },
         vidPath: bgVideo,
         bgPath: bgMusic,
+        useBgMusic: !noBgMusic,
+        useBgVideo: !noBgVideo,
+        subtitleOptions: {
+            maxLen: subtitleLen, fontName: subFontName, fontSize: subFontSize,
+            fontColor: subFontColor, strokeColor: subStrokeColor, strokeWidth: subStrokeWidth
+        },
         internalOptions: {
             debug: true,
             changePhotos: changePhotos, disableTTS: disableTTS, useMock: useMock, disableSubtitles: disableSubtitles

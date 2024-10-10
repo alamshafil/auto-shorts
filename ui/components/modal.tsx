@@ -10,7 +10,7 @@ export function ConfirmModal({ confirmModal, usedDefaultOptions, advancedOptions
     { confirmModal: ReturnType<typeof useDisclosure>, usedDefaultOptions: boolean, advancedOptions: VideoOptions | null, renderVideo: () => void }
 ) {
     return (
-        <Modal isOpen={confirmModal.isOpen} onOpenChange={confirmModal.onOpenChange}>
+        <Modal isOpen={confirmModal.isOpen} onOpenChange={confirmModal.onOpenChange} size="2xl">
             <ModalContent>
                 {(onClose) => (
                     <>
@@ -43,11 +43,21 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
 
     const mainRows = Object.entries(advancedOptions)
         .filter(([_, value]) => typeof value !== "object")
-        .map(([key, value]) => ({ key, name: key, value }));
+        .map(([key, value]) => {
+            if (typeof value === "boolean") {
+                return { key, name: key, value: value ? "true" : "false" };
+            }
+            return { key, name: key, value };
+        });
 
     const internalRows = advancedOptions?.internalOptions
         ? Object.entries(advancedOptions.internalOptions).map(([key, value]) => {
             return { key, name: key, value: value.toString() };
+        }) : [];
+
+    const subtitleRows = advancedOptions?.subtitleOptions
+        ? Object.entries(advancedOptions.subtitleOptions).map(([key, value]) => {
+            return { key, name: key, value: (value) ? value.toString() : "Default" };
         }) : [];
 
     const columns = [
@@ -63,7 +73,9 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
 
     return (
         <div>
-            <Table shadow="lg" aria-label="Advanced Options">
+               <Accordion>
+               <AccordionItem title="Main Options">
+            <Table shadow="lg" aria-label="Main Options">
                 <TableHeader columns={columns}>
                     {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
                 </TableHeader>
@@ -75,8 +87,22 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
                     )}
                 </TableBody>
             </Table>
-            <Accordion>
-                <AccordionItem title="Internal Options" subtitle="Internal options that are not shown by default.">
+        </AccordionItem>
+                <AccordionItem title="Subtitle Options">
+                    <Table shadow="lg" aria-label="Subtitle Options">
+                        <TableHeader columns={columns}>
+                            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                        </TableHeader>
+                        <TableBody items={subtitleRows}>
+                            {(item) => (
+                                <TableRow key={item.key}>
+                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </AccordionItem>
+                <AccordionItem title="Internal Options">
                     <Table shadow="lg" aria-label="Internal Advanced Options">
                         <TableHeader columns={columns}>
                             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

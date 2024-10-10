@@ -23,8 +23,6 @@ export interface QuizVideoData {
     start_script: string;
     /** End script to be spoken */
     end_script: string;
-    /** Font name (optional) */
-    fontName?: string;
 }
 
 /**
@@ -36,7 +34,6 @@ export const quizVideoAIPrompt = {
     questions: 'Generate questions and answers for the quiz video. Use JSON object array format. Use this template: {"questions": [{"question": "", "answer": ""}]}. Make the answer short and simple since it needs to fit in the video.',
     start_script: 'Generate what will be spoken at start of the quiz video. Use JSON format. Use this template: {"start_script": ""}',
     end_script: 'Generate what will be spoken at end of the quiz video. Use JSON format. Use this template: {"end_script": ""}',
-    // fontName: "Generate font name for the quiz video"
 }
 
 /**
@@ -74,7 +71,7 @@ export class QuizVideo extends VideoGen {
         // Gen start voice
         if (start_script) {
             const filename = path.join(this.tempPath, 'start.wav');
-            await this.generateVoice({ text: start_script, voice: 'male', filename});
+            await this.generateVoice({ text: start_script, voice: 'male', filename });
             voiceFiles.push(filename);
         }
 
@@ -117,16 +114,23 @@ export class QuizVideo extends VideoGen {
         this.log('Making list of durations for each audio file...');
         const durations = await this.getListOfDurations(voiceFiles);
 
-        // Overlay background audio on top of the voice audio file
-        this.log('Overlaying background audio on top of the voice audio file...');
+        // Video audio file (default is voice audio file)
+        let audioFile = voiceFile;
 
-        // Choose a random background audio file .mp3 from the music folder
-        const bgAudio = this.getRandomBgMusic();
-        this.log(`Background audio file: ${bgAudio}`);
+        if (this.useBgMusic) {
+            // Overlay background audio on top of the voice audio file
+            this.log('Overlaying background audio on top of the voice audio file...');
 
-        const audioFile = path.join(this.tempPath, 'audio.wav');
+            // Choose a random background audio file .mp3 from the music folder
+            const bgAudio: string = await this.getRandomBgMusic();
+            this.log("Background audio is " + bgAudio)
 
-        await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+            audioFile = path.join(this.tempPath, 'audio.wav');
+
+            await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        } else {
+            this.log('Background audio overlay disabled! Using voice audio file only...');
+        }
 
         // Make 16k audio file
         const audio16kFile = path.join(this.tempPath, 'audio16k.wav');
@@ -154,7 +158,7 @@ export class QuizVideo extends VideoGen {
 
         this.log("Audio file is " + audioFile)
         this.log("Video file is " + videoFile)
-        
+
         // get duration of audio file
         const fullDuration = await this.getAudioDuration(audioFile);
 
@@ -166,14 +170,18 @@ export class QuizVideo extends VideoGen {
         const scene = new FFScene();
         scene.setBgColor('#000000');
         scene.setDuration(fullDuration);
-        
-        // Get random video background
-        const bgVideo = this.getRandomBgVideo();
-        this.log(`Background video file: ${bgVideo}`);
 
-        const bg = new FFVideo({ path: bgVideo, x: width/2, y: height/2, width: width, height: height });
-        bg.setAudio(false);
-        scene.addChild(bg);
+        if (this.useBgVideo) {
+            // Get random video background
+            const bgVideo = this.getRandomBgVideo();
+            this.log(`Background video file: ${bgVideo}`);
+
+            const bg = new FFVideo({ path: bgVideo, x: width / 2, y: height / 2, width: width, height: height });
+            bg.setAudio(false);
+            scene.addChild(bg);
+        } else {
+            this.log('Background video overlay disabled! Using black background...');
+        }
 
         // Add title text
         const titleObj = new FFText({
@@ -188,7 +196,7 @@ export class QuizVideo extends VideoGen {
         titleObj.alignCenter()
 
         titleObj.setStyle({
-            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+            fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
             // fontWeight: 'bold',
             color: '#fff',
             stroke: '#000000',
@@ -218,7 +226,7 @@ export class QuizVideo extends VideoGen {
             });
 
             questionObj.setStyle({
-                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+                fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
                 // fontWeight: 'bold',
                 color: randomColor,
                 stroke: outlineColor,
@@ -239,7 +247,7 @@ export class QuizVideo extends VideoGen {
             answerObj.addEffect('fadeIn', 0.2, question_start_duration);
 
             answerObj.setStyle({
-                fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+                fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
                 // fontWeight: 'bold',
                 color: randomColor,
                 stroke: outlineColor,
@@ -247,11 +255,11 @@ export class QuizVideo extends VideoGen {
             });
 
             scene.addChild(answerObj);
-        } 
+        }
 
         // Add subtitles
         const subStyle = {
-            fontFamily: [(this.jsonData.fontName ?? 'Bangers')],
+            fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
             // fontWeight: 'bold',
             color: '#fff',
             stroke: '#000000',
@@ -260,11 +268,11 @@ export class QuizVideo extends VideoGen {
 
         const subObj = new FFSubtitle({
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
-            x: width / 2, 
-            y: 400, 
-            fontSize: 70, 
-            backgroundColor: '#000000', 
-            color: '#fff', 
+            x: width / 2,
+            y: 400,
+            fontSize: 70,
+            backgroundColor: '#000000',
+            color: '#fff',
             comma: true,
             style: subStyle
         });

@@ -7,7 +7,6 @@ export interface MessageVideoData {
         msgtype: "receiver" | "sender";
     }[];
     extra: string;
-    fontName?: string;
 }
 
 export interface QuizVideoData {
@@ -16,7 +15,6 @@ export interface QuizVideoData {
     questions: { question: string; answer: string }[];
     start_script: string;
     end_script: string;
-    fontName?: string;
 }
 
 export interface RankVideoData {
@@ -26,7 +24,6 @@ export interface RankVideoData {
     images: string[];
     start_script: string;
     end_script: string;
-    fontName?: string;
 }
 
 export interface RatherVideoData {
@@ -42,7 +39,6 @@ export interface RatherVideoData {
     }[];
     start_script: string;
     end_script: string;
-    fontName?: string;
 }
 
 export interface TopicVideoData {
@@ -52,8 +48,6 @@ export interface TopicVideoData {
     start_script: string;
     end_script: string;
     images: string[];
-    fontName?: string;
-    fontSize?: number;
 }
 
 export type VideoData = MessageVideoData | QuizVideoData | RankVideoData | RatherVideoData | TopicVideoData;

@@ -28,8 +28,6 @@ export interface RankVideoData {
     start_script: string;
     /** End script to be spoken */
     end_script: string;
-    /** Font name (optional) */
-    fontName?: string;
 }
 
 /**
@@ -42,7 +40,6 @@ export const rankVideoAIPrompt = {
     images: 'List of short image search terms for each ranking item. Use JSON array format. Use this template: {"images": ["", ""]}',
     start_script: 'Generate what will be spoken at start of the video. Do not include rankings in this field. Do a simple greeting or introduction to the game. Use JSON format. Use this template: {"start_script": ""}',
     end_script: 'Generate what will be spoken at end of the video. Do not include rankings in this field. Do a simple goodbye or thank you message. Use JSON format. Use this template: {"end_script": ""}',
-    // fontName: "Generate a font name for the video (optional)",
 };
 
 /**
@@ -57,7 +54,7 @@ export class RankVideo extends VideoGen {
     checkJson() {
         if (!this.jsonData.rankings || !this.jsonData.images || !this.jsonData.start_script || !this.jsonData.end_script) {
             throw Error('JSON data is missing required fields!');
-        }    
+        }
     }
 
     /**
@@ -114,16 +111,24 @@ export class RankVideo extends VideoGen {
         this.log('Making list of durations for each audio file...');
         const durations = await this.getListOfDurations(voicesFiles);
 
-        // Overlay background audio on top of the voice audio file
-        this.log('Overlaying background audio on top of the voice audio file...');
-        const bgAudio = this.getRandomBgMusic();
-        this.log(`Background audio file: ${bgAudio}`);
 
-        const audioFile = path.join(this.tempPath, 'audio.wav');
+        // Video audio file (default is voice audio file)
+        let audioFile = voiceFile;
 
-        await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        if (this.useBgMusic) {
+            // Overlay background audio on top of the voice audio file
+            this.log('Overlaying background audio on top of the voice audio file...');
 
-        this.log('Background audio overlay complete!');
+            // Choose a random background audio file .mp3 from the music folder
+            const bgAudio: string = await this.getRandomBgMusic();
+            this.log("Background audio is " + bgAudio)
+
+            audioFile = path.join(this.tempPath, 'audio.wav');
+
+            await this.combineVoiceToBgAudio(voiceFile, bgAudio, audioFile);
+        } else {
+            this.log('Background audio overlay disabled! Using voice audio file only...');
+        }
 
         // Find images for each rank
         this.log('Finding images for each rank...');
@@ -144,7 +149,7 @@ export class RankVideo extends VideoGen {
         const r_image = await loadImage(rankImages[0]);
         startCtx.drawImage(r_image, 0, 0, startCanvas.width, startCanvas.height);
 
-        startCtx.font = `80px ${this.jsonData.fontName ?? 'Bangers'}`;
+        startCtx.font = `80px ${this.subtitleOptions?.fontName ?? 'Bangers'}`;
         startCtx.fillStyle = '#ffffff';
         startCtx.textAlign = 'center';
         startCtx.strokeStyle = '#000000';
@@ -155,7 +160,7 @@ export class RankVideo extends VideoGen {
         // Show numbers based on length of rankings
         const numbers = rankings.length;
         for (let i = 0; i < numbers; i++) {
-            startCtx.font = `90px ${this.jsonData.fontName ?? 'Bangers'}`;
+            startCtx.font = `90px ${this.subtitleOptions?.fontName ?? 'Bangers'}`;
             startCtx.fillStyle = '#ffffff';
             startCtx.textAlign = 'center';
             startCtx.strokeStyle = '#000000';
@@ -179,7 +184,7 @@ export class RankVideo extends VideoGen {
             const rankImage = await loadImage(rankImages[index]);
             ctx.drawImage(rankImage, 0, 0, canvas.width, canvas.height);
 
-            ctx.font = `90px ${this.jsonData.fontName ?? 'Bangers'}`;
+            ctx.font = `90px ${this.subtitleOptions?.fontName ?? 'Bangers'}`;
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
@@ -190,7 +195,7 @@ export class RankVideo extends VideoGen {
             // Show numbers based on length of rankings
             const numbers = rankings.length;
             for (let i = 0; i < numbers; i++) {
-                ctx.font = `80px ${this.jsonData.fontName ?? 'Bangers'}`;
+                ctx.font = `80px ${this.subtitleOptions?.fontName ?? 'Bangers'}`;
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.strokeStyle = '#000000';
@@ -225,7 +230,7 @@ export class RankVideo extends VideoGen {
 
         this.log("Audio file is " + audioFile)
         this.log("Video file is " + videoFile)
-        
+
         // get duration of audio file
         const full_duration = await this.getAudioDuration(audioFile);
 

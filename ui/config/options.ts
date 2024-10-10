@@ -18,10 +18,14 @@ export interface VideoOptions {
     vidPath?: string;
     /** Custom background music path */
     bgPath?: string;
+    /** Use background music or not */
+    useBgMusic?: boolean;
+    /** Use background video or not */
+    useBgVideo?: boolean;
     /** Internal video generation options */
     internalOptions?: InternalVideoOptions;
-    /** API Keys */
-    apiKeys?: any; // TODO: Add API keys
+    /** Subtitle generation options */
+    subtitleOptions?: SubtitleOptions;
 }
 
 /**
@@ -38,6 +42,25 @@ export interface InternalVideoOptions {
     useMock: boolean;
 }
 
+/**
+ * Frontend model for subtitle options
+ * (Note: same as backend model, so it is not separate)
+ */
+export interface SubtitleOptions {
+    /** Maximum length for token */
+    maxLen?: number;
+    /** Font name */
+    fontName?: string;
+    /** Font size */
+    fontSize?: number;
+    /** Font color */
+    fontColor?: string;
+    /** Stroke color */
+    strokeColor?: string;
+    /** Stroke width */
+    strokeWidth?: number;
+}
+
 // Default video options
 export const defaultVideoOptions: VideoOptions = {
     aiType: "OllamaAIGen",
@@ -45,6 +68,8 @@ export const defaultVideoOptions: VideoOptions = {
     voiceGenType: "BuiltinTTS",
     imageGenType: "GoogleScraperImageGen",
     orientation: "vertical",
+    useBgMusic: true,
+    useBgVideo: true,
     internalOptions: {
         changePhotos: true,
         disableTTS: false,
@@ -70,10 +95,16 @@ export interface BackendVideoOptions {
     vidPath?: string;
     /** Custom background music path */
     bgPath?: string;
+    /** Use background music or not */
+    useBgMusic?: boolean;
+    /** Use background video or not */
+    useBgVideo?: boolean;
     /** Internal video generation options */
     internalOptions?: InternalVideoOptions;
+    /** Subtitle generation options */
+    subtitleOptions?: SubtitleOptions;
     /** API Keys */
-    apiKeys?: any; // TODO: Add API keys
+    apiKeys?: any; // API keys already defined in the backend
 }
 
 export interface BackendInternalVideoOptions {

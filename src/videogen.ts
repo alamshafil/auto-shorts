@@ -62,8 +62,14 @@ export interface VideoOptions {
     vidPath?: string;
     /** Custom background music path */
     bgPath?: string;
+    /** Use background music or not */
+    useBgMusic?: boolean;
+    /** Use background video or not */
+    useBgVideo?: boolean;
     /** Internal video generation options */
     internalOptions?: InternalVideoOptions;
+    /** Subtitle generation options */
+    subtitleOptions?: SubtitleOptions;
     /** API Keys */
     apiKeys?: APIKeys;
 }
@@ -104,6 +110,24 @@ export interface InternalVideoOptions {
     neetsTTSOptions?: tts.NeetsTTSOptions;
 }
 
+/**
+ * Subtitle generation options
+ */
+export interface SubtitleOptions {
+    /** Maximum length for token */
+    maxLen?: number;
+    /** Font name */
+    fontName?: string;
+    /** Font size */
+    fontSize?: number;
+    /** Font color */
+    fontColor?: string;
+    /** Stroke color */
+    strokeColor?: string;
+    /** Stroke width */
+    strokeWidth?: number;
+}
+
 export const DEFAULT_INTERNAL_VIDEO_OPTIONS: InternalVideoOptions = {
     debug: false,
     changePhotos: true,
@@ -138,8 +162,14 @@ export class VideoGen {
     protected vidPath?: string;
     /** Custom background music path */
     protected bgPath?: string;
+    /** Use background music or not */
+    protected useBgMusic?: boolean;
+    /** Use background video or not */
+    protected useBgVideo?: boolean;
     /** Internal video generation options */
     protected internalOptions: InternalVideoOptions = DEFAULT_INTERNAL_VIDEO_OPTIONS;
+    /** Subtitle generation options */
+    protected subtitleOptions?: SubtitleOptions;
     /** API Keys */
     protected apiKeys?: APIKeys;
 
@@ -153,7 +183,10 @@ export class VideoGen {
         this.apiKeys = options.apiKeys;
         this.vidPath = options.vidPath;
         this.bgPath = options.bgPath;
+        this.useBgMusic = options.useBgMusic;
+        this.useBgVideo = options.useBgVideo;
         this.internalOptions = options.internalOptions ?? DEFAULT_INTERNAL_VIDEO_OPTIONS;
+        this.subtitleOptions = options.subtitleOptions;
         this.jsonData = jsonData;
     }
 

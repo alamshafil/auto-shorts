@@ -9,7 +9,10 @@ import fs from 'fs';
 import path from 'path';
 
 import { AIGenType, genVideoDataWithAI, genVideoWithJson, ImageGenType, VoiceGenType } from '.';
-import { AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from './ai';
+import { AIAPIEnv, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from './ai';
+
+import { VoiceAPIEnv } from './tts';
+import { ImageAPIEnv } from './image';
 
 /**
  * Frontend model for video options
@@ -31,10 +34,14 @@ export interface FrontendVideoOptions {
     vidPath?: string;
     /** Custom background music path */
     bgPath?: string;
+    /** Use background music or not */
+    useBgMusic?: boolean;
+    /** Use background video or not */
+    useBgVideo?: boolean;
     /** Internal video generation options */
     internalOptions?: FrontendInternalVideoOptions;
-    /** API Keys */
-    apiKeys?: any; // TODO: Add API keys
+    /** Subtitle generation options */
+    subtitleOptions?: SubtitleOptions;
 }
 
 /**
@@ -49,6 +56,25 @@ export interface FrontendInternalVideoOptions {
     disableSubtitles: boolean;
     /** Use mock data */
     useMock: boolean;
+}
+
+/**
+ * Frontend model for subtitle options
+ * (Note: same as backend model, so it is not separate)
+ */
+export interface SubtitleOptions {
+    /** Maximum length for token */
+    maxLen?: number;
+    /** Font name */
+    fontName?: string;
+    /** Font size */
+    fontSize?: number;
+    /** Font color */
+    fontColor?: string;
+    /** Stroke color */
+    strokeColor?: string;
+    /** Stroke width */
+    strokeWidth?: number;
 }
 
 /**
@@ -163,6 +189,16 @@ export async function runAPIServer() {
 
             const data: FrontendVideoOptions = json as FrontendVideoOptions;
 
+            // Convert AI type to respective API key
+            let aiAPIKey;
+            if (data.aiType === AIGenType.OpenAIGen) {
+                aiAPIKey = process.env[AIAPIEnv.OpenAIGen];
+            } else if (data.aiType === AIGenType.GoogleAIGen) {
+                aiAPIKey = process.env[AIAPIEnv.GoogleAIGen];
+            } else if (data.aiType === AIGenType.AnthropicAIGen) {
+                aiAPIKey = process.env[AIAPIEnv.AnthropicAIGen];
+            }
+
             const task = await genVideoDataWithAI(
                 data.aiPrompt ?? "",
                 data.aiType as AIGenType,
@@ -174,7 +210,14 @@ export async function runAPIServer() {
                     orientation: data.orientation as 'vertical' | 'horizontal',
                     vidPath: data.vidPath,
                     bgPath: data.bgPath,
-                    // apiKeys: data.apiKeys, // TODO: Add API keys
+                    useBgMusic: data.useBgMusic,
+                    useBgVideo: data.useBgVideo,                    
+                    apiKeys: {
+                        elevenLabsAPIKey: process.env[VoiceAPIEnv.ElevenLabs],
+                        pexelsAPIKey: process.env[ImageAPIEnv.PexelsAPIKey],
+                        neetsAPIKey: process.env[VoiceAPIEnv.NeetsTTS],
+                    },
+                    subtitleOptions: data.subtitleOptions,
                     internalOptions: {
                         debug: true,
                         changePhotos: data.internalOptions?.changePhotos ?? true,
@@ -183,6 +226,7 @@ export async function runAPIServer() {
                         useMock: data.internalOptions?.useMock ?? false
                     }
                 },
+                aiAPIKey
             );
 
             res.json({
@@ -234,7 +278,14 @@ export async function runAPIServer() {
                     orientation: options.orientation as 'vertical' | 'horizontal',
                     vidPath: options.vidPath,
                     bgPath: options.bgPath,
-                    // apiKeys: data.apiKeys, // TODO: Add API keys
+                    useBgMusic: options.useBgMusic,
+                    useBgVideo: options.useBgVideo,                    
+                    apiKeys: {
+                        elevenLabsAPIKey: process.env[VoiceAPIEnv.ElevenLabs],
+                        pexelsAPIKey: process.env[ImageAPIEnv.PexelsAPIKey],
+                        neetsAPIKey: process.env[VoiceAPIEnv.NeetsTTS],
+                    },
+                    subtitleOptions: options.subtitleOptions,
                     internalOptions: {
                         debug: false,
                         changePhotos: options.internalOptions?.changePhotos ?? true,

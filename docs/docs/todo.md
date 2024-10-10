@@ -18,7 +18,7 @@ This is a list of things that could be done for the project. This list is not ex
 - [ ] Add more video types (Twitter/X posts, Reddit posts, etc.)
 - [ ] Add more AI tools (e.g., OpenAI, Neets.ai, AI Image Generators, etc.)
 - [x] Make AI output structured for LLMs
-- [ ] Add subtitle and font customization
+- [x] Add subtitle and font customization
 - [ ] Add AI-generated image/videos for background
 - [ ] Fix local LLM context when generating images
 - [ ] Add customization for each section of the video with JSON info
