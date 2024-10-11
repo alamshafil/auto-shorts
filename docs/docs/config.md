@@ -26,7 +26,7 @@ npx auto-shorts --help
 
 - `--ttsType [type]`: The TTS provider to use. Can be ElevenLabs, BuiltinTTS, NeetsTTS.
 
-- `--imageType [type]`: The image provider to use. Can be PexelsImageGen, GoogleScraperImageGen.
+- `--imageType [type]`: The image provider to use. Can be Pexels, GoogleScraper, and more.
 
 - `--orientation [orientation]`: The orientation of the video. Options are vertical or horizontal.
 

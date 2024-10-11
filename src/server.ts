@@ -12,7 +12,8 @@ import { AIGenType, genVideoDataWithAI, genVideoWithJson, ImageGenType, VoiceGen
 import { AIAPIEnv, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from './ai';
 
 import { VoiceAPIEnv } from './tts';
-import { ImageAPIEnv } from './image';
+import { AIImageGenOptions, ImageAPIEnv } from './image';
+import { SubtitleOptions } from './videogen';
 
 /**
  * Frontend model for video options
@@ -24,6 +25,8 @@ export interface FrontendVideoOptions {
     aiType: string;
     /** AI Model */
     aiModel: string;
+    /** OpenAI Endpoint */
+    openAIEndpoint?: string;
     /** Voice generation type */
     voiceGenType: string; // TODO: Fix typing
     /** Image generation type */
@@ -41,7 +44,9 @@ export interface FrontendVideoOptions {
     /** Internal video generation options */
     internalOptions?: FrontendInternalVideoOptions;
     /** Subtitle generation options */
-    subtitleOptions?: SubtitleOptions;
+    subtitleOptions?: SubtitleOptions; // Frontend and backend model is same
+    /** AI Image generation options */
+    imageOptions?: AIImageGenOptions;
 }
 
 /**
@@ -56,25 +61,6 @@ export interface FrontendInternalVideoOptions {
     disableSubtitles: boolean;
     /** Use mock data */
     useMock: boolean;
-}
-
-/**
- * Frontend model for subtitle options
- * (Note: same as backend model, so it is not separate)
- */
-export interface SubtitleOptions {
-    /** Maximum length for token */
-    maxLen?: number;
-    /** Font name */
-    fontName?: string;
-    /** Font size */
-    fontSize?: number;
-    /** Font color */
-    fontColor?: string;
-    /** Stroke color */
-    strokeColor?: string;
-    /** Stroke width */
-    strokeWidth?: number;
 }
 
 /**
@@ -208,16 +194,17 @@ export async function runAPIServer() {
                     voiceGenType: data.voiceGenType as VoiceGenType,
                     imageGenType: data.imageGenType as ImageGenType,
                     orientation: data.orientation as 'vertical' | 'horizontal',
-                    vidPath: data.vidPath,
-                    bgPath: data.bgPath,
+                    vidPath: data.vidPath === "" ? undefined : path.join(resPath, 'vid', data.vidPath ?? ""),
+                    bgPath: data.bgPath === "" ? undefined : path.join(resPath, 'music', data.bgPath ?? ""),
                     useBgMusic: data.useBgMusic,
-                    useBgVideo: data.useBgVideo,                    
+                    useBgVideo: data.useBgVideo,
                     apiKeys: {
                         elevenLabsAPIKey: process.env[VoiceAPIEnv.ElevenLabs],
                         pexelsAPIKey: process.env[ImageAPIEnv.PexelsAPIKey],
                         neetsAPIKey: process.env[VoiceAPIEnv.NeetsTTS],
                     },
                     subtitleOptions: data.subtitleOptions,
+                    imageOptions: data.imageOptions,
                     internalOptions: {
                         debug: true,
                         changePhotos: data.internalOptions?.changePhotos ?? true,
@@ -226,7 +213,10 @@ export async function runAPIServer() {
                         useMock: data.internalOptions?.useMock ?? false
                     }
                 },
-                aiAPIKey
+                aiAPIKey,
+                {
+                    endpoint: data.openAIEndpoint
+                }
             );
 
             res.json({
@@ -276,16 +266,17 @@ export async function runAPIServer() {
                     voiceGenType: options.voiceGenType as VoiceGenType,
                     imageGenType: options.imageGenType as ImageGenType,
                     orientation: options.orientation as 'vertical' | 'horizontal',
-                    vidPath: options.vidPath,
-                    bgPath: options.bgPath,
+                    vidPath: options.vidPath === "" ? undefined : path.join(resPath, 'vid', options.vidPath ?? ""),
+                    bgPath: options.bgPath === "" ? undefined : path.join(resPath, 'music', options.bgPath ?? ""),
                     useBgMusic: options.useBgMusic,
-                    useBgVideo: options.useBgVideo,                    
+                    useBgVideo: options.useBgVideo,
                     apiKeys: {
                         elevenLabsAPIKey: process.env[VoiceAPIEnv.ElevenLabs],
                         pexelsAPIKey: process.env[ImageAPIEnv.PexelsAPIKey],
                         neetsAPIKey: process.env[VoiceAPIEnv.NeetsTTS],
                     },
                     subtitleOptions: options.subtitleOptions,
+                    imageOptions: options.imageOptions,
                     internalOptions: {
                         debug: false,
                         changePhotos: options.internalOptions?.changePhotos ?? true,

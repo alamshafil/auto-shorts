@@ -70,6 +70,8 @@ export interface VideoOptions {
     internalOptions?: InternalVideoOptions;
     /** Subtitle generation options */
     subtitleOptions?: SubtitleOptions;
+    /** AI image generation options */
+    imageOptions?: img.AIImageGenOptions;
     /** API Keys */
     apiKeys?: APIKeys;
 }
@@ -170,6 +172,8 @@ export class VideoGen {
     protected internalOptions: InternalVideoOptions = DEFAULT_INTERNAL_VIDEO_OPTIONS;
     /** Subtitle generation options */
     protected subtitleOptions?: SubtitleOptions;
+    /** AI image generation options */
+    protected imageOptions?: img.AIImageGenOptions;
     /** API Keys */
     protected apiKeys?: APIKeys;
 
@@ -260,12 +264,16 @@ export class VideoGen {
      * @throws Error if invalid image generation type
      */
     async generateImages(images: string[], filePrefix?: string) : Promise<string[]> {
+        this.log(`Image gen type: ${this.imageGenType}; Style type: ${this.getImageStyleType()}`);
+
         const genImages = async (images: string[]) : Promise<string[]> => {
             switch (this.imageGenType) {
-                case img.ImageGenType.PexelsImageGen:
+                case img.ImageGenType.Pexels:
                     return await img.PexelsImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, this.apiKeys?.pexelsAPIKey, filePrefix);
-                case img.ImageGenType.GoogleScraperImageGen:
+                case img.ImageGenType.GoogleScraper:
                     return await img.GoogleScraperImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, filePrefix);
+                case img.ImageGenType.FluxAI:
+                    return await img.FluxAIImageGen.generateImages(this, images, this.tempPath, this.internalOptions.changePhotos, this.imageOptions, filePrefix);
                 default:
                     throw new Error("Invalid image generation type");
             }
@@ -285,6 +293,31 @@ export class VideoGen {
         return imgs;
     }
 
+    /**
+     * Get image type style
+     * @returns Image style type
+     * @throws Error if invalid image generation type
+     */
+    getImageStyleType() : img.ImageStyleType {
+        switch (this.imageGenType) {
+            case img.ImageGenType.Pexels:
+                return img.PexelsImageGen.styleType;
+            case img.ImageGenType.GoogleScraper:
+                return img.GoogleScraperImageGen.styleType
+            case img.ImageGenType.FluxAI:
+                return img.FluxAIImageGen.styleType;
+            default:
+                throw new Error("Invalid image generation type");
+        }
+    }
+
+    /**
+     * Generate subtitles for the video
+     * @param audio16kFile 16k frequency audio file
+     * @param srtFile SRT file path
+     * @param maxLen Maximum length for token
+     * @returns Promise that resolves when the subtitles are generated
+     */
     async generateSubtitles(audio16kFile: string, srtFile: string, maxLen: number) {
         if (!this.internalOptions.disableSubtitles) {
             return await WhisperSubtitles.transcribeSrt(this, audio16kFile, maxLen, srtFile, this.resPath);

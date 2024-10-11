@@ -185,6 +185,19 @@ async function cli() {
         }
     ];
 
+    const imgOptions = [
+        {
+            name: 'imgAIModel',
+            typeLabel: '{underline model}',
+            description: 'AI model to use for image generation. {italic If applicable.}'
+        },
+        {
+            name: 'imgAIPrompt',
+            typeLabel: '{underline prompt}',
+            description: 'AI suffix prompt to use for image generation. {italic If applicable.}'
+        }
+    ]
+
     const subOptions = [
         {
             name: 'subtitleLen',
@@ -226,6 +239,10 @@ async function cli() {
         {
             header: 'Options',
             optionList: mainOptions
+        },
+        {
+            header: 'Image Options',
+            optionList: imgOptions
         },
         {
             header: 'Subtitle Options',
@@ -271,7 +288,7 @@ async function cli() {
 
     let aiType: string = options.aiType ?? AIGenType.OllamaAIGen;
     let ttsType: string = options.ttsType ?? VoiceGenType.BuiltinTTS;
-    let imageType: string = options.imageType ?? ImageGenType.GoogleScraperImageGen;
+    let imageType: string = options.imageType ?? ImageGenType.GoogleScraper;
 
     // Check if type is valid
     if (!(aiType in AIGenType)) {
@@ -301,6 +318,10 @@ async function cli() {
     let orientation = options.orientation ?? "vertical";
     let noBgVideo = options.noBgVideo ?? false;
     let noBgMusic = options.noBgMusic ?? false;
+
+    // AI Image options
+    let imgAIModel = options.imgAIModel ?? null;
+    let imgAIPrompt = options.imgAIPrompt ?? null;
 
     // Subtitle options
     let subtitleLen = options.subtitleLen ?? null;
@@ -357,6 +378,10 @@ async function cli() {
     console.info("Res path: " + resPath);
     console.info("Prompt: " + (userPrompt ?? "None (will be asked later)"));
 
+    console.log("\n--> Image AI options:");
+    console.info("Image AI model: " + (imgAIModel ?? "Default"));
+    console.info("Image AI prompt: " + (imgAIPrompt ?? "Default"));
+
     console.log("\n--> Subtitle options:");
     console.info("Subtitle length: " + (subtitleLen ?? "Default"));
     console.info("Subtitle font name: " + (subFontName ?? "Default"));
@@ -393,7 +418,7 @@ async function cli() {
         return;
     }
 
-    if (imageType == ImageGenType.PexelsImageGen && !pexelsAPIKey) {
+    if (imageType == ImageGenType.GoogleScraper && !pexelsAPIKey) {
         console.error("Error: Pexels API key not found. Exiting...");
         return;
     }
@@ -473,6 +498,11 @@ async function cli() {
                 console.info("Use background music: " + !jsonData.noBgMusic);
                 console.info("AI Model: " + jsonData.model);
 
+                // Log previous image options
+                console.info("--> Using previous image options:");
+                console.info("Image AI model: " + (jsonData.imgAIModel ?? "Default"));
+                console.info("Image AI prompt: " + (jsonData.imgAIPrompt ?? "Default"));
+
                 // Log previous subtitle options
                 console.info("--> Using previous subtitles options:");
                 console.info("Subtitle length: " + (jsonData.subtitleLen ?? "Default"));
@@ -495,6 +525,10 @@ async function cli() {
                 noBgVideo = jsonData.noBgVideo;
                 noBgMusic = jsonData.noBgMusic;
                 aiModel = jsonData.model;
+
+                // Set previous image options
+                imgAIModel = jsonData.imgAIModel;
+                imgAIPrompt = jsonData.imgAIPrompt;
 
                 // Set previous subtitle options
                 subtitleLen = jsonData.subtitleLen;
@@ -595,6 +629,15 @@ async function cli() {
             }
         }
 
+        // Ask for image AI options
+        console.info("[*] Asking for image AI options (leave empty for default):");
+
+        const imgAIModelRep = await input({ message: `Image AI model? -> ` });
+        const imgAIPromptRep = await input({ message: `Image AI prompt? -> ` });
+
+        imgAIModel = imgAIModelRep !== "" ? imgAIModelRep : imgAIModel;
+        imgAIPrompt = imgAIPromptRep !== "" ? imgAIPromptRep : imgAIPrompt;
+
         // Ask for subtitle options (if empty then keep null or current value)
         console.info("[*] Asking for subtitle options (leave empty for default):");
 
@@ -627,6 +670,11 @@ async function cli() {
         console.info("Use background music: " + !noBgMusic);
         console.info("AI Model: " + aiModel);
 
+        // Print image AI options
+        console.info("--> Image AI options:");
+        console.info("Image AI model: " + (imgAIModel ?? "Default"));
+        console.info("Image AI prompt: " + (imgAIPrompt ?? "Default"));
+
         // Print subtitle options
         console.info("--> Subtitle options:");
         console.info("Subtitle length: " + (subtitleLen ?? "Default"));
@@ -637,6 +685,7 @@ async function cli() {
 
         // Save to file
         const data = {
+            // Main options
             aiType: aiType,
             ttsType: ttsType,
             imageType: imageType,
@@ -649,6 +698,10 @@ async function cli() {
             noBgVideo: noBgVideo,
             noBgMusic: noBgMusic,
             aiModel: aiModel,
+            // Image options
+            imgAIModel: imgAIModel,
+            imgAIPrompt: imgAIPrompt,
+            // Subtitle options
             subtitleLen: subtitleLen,
             subFontName: subFontName,
             subFontSize: subFontSize,
@@ -705,6 +758,9 @@ async function cli() {
         subtitleOptions: {
             maxLen: subtitleLen, fontName: subFontName, fontSize: subFontSize,
             fontColor: subFontColor, strokeColor: subStrokeColor, strokeWidth: subStrokeWidth
+        },
+        imageOptions: {
+            modelName: imgAIModel, suffixPrompt: imgAIPrompt
         },
         internalOptions: {
             debug: true,

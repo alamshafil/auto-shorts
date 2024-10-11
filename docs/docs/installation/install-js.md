@@ -31,7 +31,7 @@ const task = await genVideoWithAI(
         tempPath: 'video_temp', // Provide the path to the temporary video folder
         resPath: 'res', // Provide the path to the downloaded resources folder
         voiceGenType: VoiceGenType.ElevenLabsVoice, // Use ElevenLabs to generate the voice
-        imageGenType: ImageGenType.PexelsImageGen, // Use Pexels to generate the image
+        imageGenType: ImageGenType.Pexels, // Use Pexels to generate the image
         apiKeys: {
             elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY, // Provide the ElevenLabs API key
             pexelsAPIKey: process.env.PEXELS_API_KEY, // Provide the Pexels API key
@@ -65,7 +65,7 @@ const task = await genVideoWithJson(
     tempPath: 'video_temp', // Provide the path to the temporary video folder
     resPath: 'res', // Provide the path to the downloaded resources folder
     voiceGenType: VoiceGenType.ElevenLabsVoice, // Use ElevenLabs to generate the voice
-    imageGenType: ImageGenType.PexelsImageGen, // Use Google Scraper to generate the image
+    imageGenType: ImageGenType.Pexels, // Use Google Scraper to generate the image
     apiKeys: {
         elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY, // Provide the ElevenLabs API key
         pexelsAPIKey: process.env.PEXELS_API_KEY, // Provide the Pexels API key

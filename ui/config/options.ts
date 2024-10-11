@@ -8,6 +8,8 @@ export interface VideoOptions {
     aiType: string;
     /** AI Model */
     aiModel: string;
+    /** OpenAI Endpoint */
+    openAIEndpoint?: string;
     /** Voice generation type */
     voiceGenType: string; // TODO: Fix typing
     /** Image generation type */
@@ -26,6 +28,8 @@ export interface VideoOptions {
     internalOptions?: InternalVideoOptions;
     /** Subtitle generation options */
     subtitleOptions?: SubtitleOptions;
+    /** AI Image generation options */
+    imageOptions?: AIImageGenOptions;
 }
 
 /**
@@ -61,12 +65,24 @@ export interface SubtitleOptions {
     strokeWidth?: number;
 }
 
+
+/**
+ * Options for AI image generation
+ * (Note: same as backend model, so it is not separate)
+ */
+export interface AIImageGenOptions {
+    /** Model name */
+    modelName: string;
+    /** Additional prompt */
+    suffixPrompt: string;
+}
+
 // Default video options
 export const defaultVideoOptions: VideoOptions = {
     aiType: "OllamaAIGen",
     aiModel: "llama3.2",
     voiceGenType: "BuiltinTTS",
-    imageGenType: "GoogleScraperImageGen",
+    imageGenType: "GoogleScraper",
     orientation: "vertical",
     useBgMusic: true,
     useBgVideo: true,

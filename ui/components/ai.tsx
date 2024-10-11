@@ -14,7 +14,7 @@ import { subtitle, title } from "@/components/primitives";
 import { ConfirmModal } from "@/components/modal";
 import { defaultVideoOptions, VideoOptions } from "@/config/options";
 
-import { FaArrowLeft, FaCogs, FaMagic } from "react-icons/fa";
+import { FaArrowLeft, FaArrowUp, FaCogs, FaMagic, FaVideo } from "react-icons/fa";
 import { VideoGenerator } from "./video";
 import { BACKEND_ENDPOINT } from "@/config/backend";
 
@@ -76,18 +76,36 @@ export default function AIGen() {
         fetchAI();
     }
 
+    const promptSuggestions = [
+        'news topic about the world',
+        'quiz about country capitals',
+        'text message between two friends',
+        'rank fast food',
+        'would you rather about food',
+    ]
+
     return (
         isAIRunning ? <AIOutput aiRepsonse={aiRepsonse} aiError={aiError} options={advancedOptions} /> :
             <div className="flex flex-col items-center justify-center gap-4 w-full">
+                <div className="flex items-center gap-4">
+                    <FaVideo size={32} />
+                    <p className={title()}>Generate video with AI!</p>
+                </div>
+                <p className={subtitle({ size: 'sm' })}>Enter a prompt for the AI to generate a video.</p>
                 <Input
+                    variant="faded"
+                    startContent={<FaMagic />}
                     placeholder="Enter prompt..."
-                    description="Enter a prompt for the AI to generate a video."
-                    label="AI Prompt"
                     size='lg'
                     isClearable
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                 />
+                <div className="flex flex-row gap-2 overflow-x-auto max-w-full">
+                    {promptSuggestions.map((suggestion, _) => (
+                        <Chip variant="bordered" endContent={<FaArrowUp className="m-2 rotate-45" />} className="text-xs cursor-pointer " onClick={() => setPrompt(suggestion)} key={suggestion}>{suggestion}</Chip>
+                    ))}
+                </div>
                 <Divider />
                 <Accordion>
                     <AccordionItem startContent={<FaCogs />} title="Advanced Options" subtitle='Change options such as AI model, TTS voice, background music, etc.'>

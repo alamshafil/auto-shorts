@@ -29,7 +29,7 @@ You have options to use different AI tools to generate the script, voice, and im
 - Use OpenAI gpt-4o-mini to generate the script, ElevenLabs to generate the voice, and Pexels to generate the image
 
 ```bash
-npx auto-shorts -p "make a news short about TypeScript" --aiType OpenAIGen --ttsType ElevenLabs --imageType PexelsImageGen --elevenLabsAPIKey YOUR_ELEVENLABS_API_KEY --pexelsAPIKey YOUR_PEXELS_API_KEY --openaiAPIKey YOUR_OPENAI_API_KEY
+npx auto-shorts -p "make a news short about TypeScript" --aiType OpenAIGen --ttsType ElevenLabs --imageType Pexels --elevenLabsAPIKey YOUR_ELEVENLABS_API_KEY --pexelsAPIKey YOUR_PEXELS_API_KEY --openaiAPIKey YOUR_OPENAI_API_KEY
 ```
 
 - Use local Ollama llama3.2 to generate the script, Built-in TTS to generate the voice, and Google Scraper to generate the image (default, no need to provide API keys)
@@ -64,8 +64,8 @@ Options
                               GoogleAIGen, AnthropicAIGen, OllamaAIGen.
   --ttsType type              The TTS provider to use. Can be ElevenLabs,       
                               BuiltinTTS, NeetsTTS.
-  --imageType type            The image provider to use. Can be PexelsImageGen, 
-                              GoogleScraperImageGen.
+  --imageType type            The image provider to use. Can be Pexels,
+                              GoogleScraper, FluxAI.
   --orientation orientation   The orientation of the video. (vertical,
                               horizontal)
   --tempPath path             The temporary path to save video files. (default: 
@@ -75,6 +75,12 @@ Options
   --jsonFile path             The JSON file to use for video generation.
                               Overrides AI.
   -h, --help                  Print this usage guide.
+
+Image Options
+
+  --imgAIModel model     AI model to use for image generation. If applicable.
+  --imgAIPrompt prompt   AI suffix prompt to use for image generation. If       
+                         applicable.
 
 Subtitle Options
 

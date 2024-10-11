@@ -15,7 +15,7 @@ import { BACKEND_ENDPOINT } from '@/config/backend';
 import { title, subtitle } from '@/components/primitives';
 import { VideoOptions } from '@/config/options';
 
-import { FaAngleDown, FaArrowsAltH, FaExclamationTriangle, FaEyeDropper, FaFont, FaGlobe, FaPhotoVideo, FaRandom, FaRegFileVideo, FaRobot, FaSave, FaSlidersH, FaSync, FaTextHeight, FaTextWidth, FaVideo, FaVolumeUp } from 'react-icons/fa';
+import { FaAngleDown, FaArrowsAltH, FaExclamationTriangle, FaEyeDropper, FaFileAudio, FaFont, FaGlobe, FaMagic, FaPhotoVideo, FaRandom, FaRegFileVideo, FaRobot, FaSave, FaSearch, FaSlidersH, FaSync, FaTextHeight, FaTextWidth, FaVideo, FaVolumeUp } from 'react-icons/fa';
 
 const config = {
     aiOptions: {
@@ -63,13 +63,21 @@ const config = {
         {
             "name": "Google Search",
             "description": "Google image search (scraping) (local/free)",
-            "type": "GoogleScraperImageGen",
+            "type": "GoogleScraper",
+            "style": "search"
         },
         {
             "name": "Pexels",
             "description": "Pexels image search (API key required)",
-            "type": "PexelsImageGen",
+            "type": "Pexels",
+            "style": "search"
         },
+        {
+            "name": "Flux",
+            "description": "Flux AI image gen (API key required)",
+            "type": "FluxAI",
+            "style": "ai"
+        }
     ],
     subtitleOptions: [
         {
@@ -198,17 +206,20 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
         }
     }
 
-    // State
+    // State for options
     const [selectedAIType, setSelectedAIType] = useState(config.aiOptions.types[0]);
+    const [openAIEndpoint, setOpenAIEndpoint] = useState<undefined | string>(undefined);
     const [selectedTTSProvider, setSelectedTTSProvider] = useState(config.ttsOptions[0]);
     const [selectedImageType, setSelectedImageType] = useState(config.imageTypes[0]);
     const [selectedSubtitleModel, setSelectedSubtitleModel] = useState(config.subtitleOptions[0]);
     const [selectedOrientation, setSelectedOrientation] = useState(config.videoOptions.orientations[0]);
     const [miscOptions, setMiscOptions] = useState(config.miscOptions.map(option => option.defaultValue));
 
+    // State for bg vid/audio
     const [useBgMusic, setUseBgMusic] = useState(true);
     const [useBgVideo, setUseBgVideo] = useState(true);
 
+    // Subtitle options
     const [subLen, setSubLen] = useState<undefined | number>(undefined);
     const [fontName, setFontName] = useState<undefined | string>(undefined);
     const [fontSize, setFontSize] = useState<undefined | number>(undefined);
@@ -216,8 +227,13 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
     const [strokeColor, setStrokeColor] = useState<undefined | string>(undefined);
     const [strokeWidth, setStrokeWidth] = useState<undefined | number>(undefined);
 
+    // Color pickers
     const [showFontColorPicker, setShowFontColorPicker] = useState(false);
     const [showStrokeColorPicker, setShowStrokeColorPicker] = useState(false);
+
+    // AI Image options
+    const [aiImageModel, setAiImageModel] = useState('');
+    const [aiImagePrompt, setAiImagePrompt] = useState('');
 
     useEffect(() => {
         fetchModels();
@@ -305,12 +321,12 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                             <p className={title({ size: 'sm' })}>API Endpoint</p>
                             <p className={subtitle({ size: 'sm' })}>Custom OpenAI compliant endpoint</p>
                         </div>
-                        <Input startContent={<FaGlobe />} isClearable placeholder="Enter API Endpoint" className="w-96" />
+                        <Input startContent={<FaGlobe />} isClearable placeholder="Enter API Endpoint" className="w-96" onChange={(e) => setOpenAIEndpoint(e.target.value)} />
                     </div>
                 )}
             </div>
             <div className="flex items-center gap-2">
-                <FaTextHeight />
+                <FaFileAudio />
                 <h1 className={title()}>TTS Options</h1>
             </div>
             <Divider />
@@ -333,7 +349,7 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
             </div>
             <div className="flex items-center gap-2">
                 <FaPhotoVideo />
-                <h1 className={title()}>Image</h1>
+                <h1 className={title()}>Image Options</h1>
             </div>
             <Divider />
             <div className="space-y-4 mb-8">
@@ -344,17 +360,37 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                     </div>
                     <Dropdown>
                         <DropdownTrigger>
-                            <Button endContent={<FaAngleDown />}>{selectedImageType.name}</Button>
+                            <Button startContent={selectedImageType.style == "ai" ? <FaMagic /> : <FaSearch />} endContent={<FaAngleDown />}>{selectedImageType.name}</Button>
                         </DropdownTrigger>
 
                         <DropdownMenu onAction={(key) => setSelectedImageType(config.imageTypes.find(provider => provider.type === key)!)}>
-                            {config.imageTypes.map(provider => <DropdownItem key={provider.type} description={provider.description}>{provider.name}</DropdownItem>)}
+                            {config.imageTypes.map(provider => <DropdownItem key={provider.type} description={
+                                ` ${provider.style === 'ai' ? '(AI generated)' : '(Image search)'} - ${provider.description}`
+                            }>{provider.name}</DropdownItem>)}
                         </DropdownMenu>
                     </Dropdown>
                 </div>
+                {selectedImageType.style === 'ai' ?
+                    <>
+                        <div className="flex justify-between my-4">
+                            <div>
+                                <p className={title({ size: 'sm' })}>AI Image Model</p>
+                                <p className={subtitle({ size: 'sm' })}>Select the AI image model (leave empty for default)</p>
+                            </div>
+                            <Input startContent={<FaSlidersH />} isClearable placeholder="Enter AI image model" className="w-56" onChange={(e) => setAiImageModel(e.target.value)} />
+                        </div>
+                        <div className="flex justify-between my-4">
+                            <div>
+                                <p className={title({ size: 'sm' })}>AI Image Prompt</p>
+                                <p className={subtitle({ size: 'sm' })}>Enter the AI image prompt (put styles, etc.) (leave empty for default)</p>
+                            </div>
+                            <Input startContent={<FaMagic />} isClearable placeholder="Enter AI image prompt" className="w-56" onChange={(e) => setAiImagePrompt(e.target.value)} />
+                        </div>
+                    </> : null
+                }
             </div>
             <div className="flex items-center gap-2">
-                <FaRegFileVideo />
+                <FaTextWidth />
                 <h1 className={title()}>Subtitle Options</h1>
             </div>
             <Divider />
@@ -404,7 +440,7 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                     {showFontColorPicker ? (
                         <HexColorPicker color={fontColor} onChange={(e) => setFontColor(e)} />
                     ) : (
-                        <Button startContent={<FaEyeDropper/>} onClick={() => setShowFontColorPicker(true)}>Choose Font Color</Button>
+                        <Button startContent={<FaEyeDropper />} onClick={() => setShowFontColorPicker(true)}>Choose Font Color</Button>
                     )}
                 </div>
                 <div className="flex justify-between my-4">
@@ -416,7 +452,7 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                     {showStrokeColorPicker ? (
                         <HexColorPicker color={strokeColor} onChange={(e) => setStrokeColor(e)} />
                     ) : (
-                        <Button startContent={<FaEyeDropper/>} onClick={() => setShowStrokeColorPicker(true)}>Choose Stroke Color</Button>
+                        <Button startContent={<FaEyeDropper />} onClick={() => setShowStrokeColorPicker(true)}>Choose Stroke Color</Button>
                     )}
                 </div>
                 <div className="flex justify-between my-4">
@@ -435,7 +471,7 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                         paintOrder: 'stroke fill',
                     }}>
                         This is a example.
-                        </h1>
+                    </h1>
                 </div>
             </div>
             <div className="flex items-center gap-2">
@@ -606,6 +642,7 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                     setAdvancedOptions({
                         aiType: selectedAIType.type,
                         aiModel: selectedAIModel,
+                        openAIEndpoint: openAIEndpoint,
                         voiceGenType: selectedTTSProvider.type,
                         imageGenType: selectedImageType.type,
                         orientation: selectedOrientation,
@@ -619,6 +656,10 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                             disableTTS: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableTTS')],
                             disableSubtitles: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableSubtitles')],
                             useMock: miscOptions[config.miscOptions.findIndex(option => option.name === 'useMock')],
+                        },
+                        imageOptions: {
+                            modelName: aiImageModel,
+                            suffixPrompt: aiImagePrompt
                         },
                         subtitleOptions: {
                             maxLen: subLen,

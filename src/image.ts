@@ -11,8 +11,9 @@ import path from "path";
  * Image generation types
  */
 export enum ImageGenType {
-    PexelsImageGen = "PexelsImageGen",
-    GoogleScraperImageGen = "GoogleScraperImageGen",
+    Pexels = "Pexels",
+    GoogleScraper = "GoogleScraper",
+    FluxAI = "FluxAI",
 }
 
 /**
@@ -23,11 +24,34 @@ export enum ImageAPIEnv {
 }
 
 /**
+ * Image style types
+ */
+export enum ImageStyleType {
+    /** AI generated images */
+    AI = "AI",
+    /** Real images */
+    Search = "Search",
+}
+
+/**
+ * Options for AI image generation
+ */
+export interface AIImageGenOptions {
+    /** Model name */
+    modelName: string;
+    /** Additional prompt */
+    suffixPrompt: string;
+}
+
+/**
  * Base class for image generation
  * @abstract
  */
 export class ImageGen {
-    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean) : Promise<string[]> {
+    /** Image style type */
+    styleType: ImageStyleType = ImageStyleType.Search;
+
+    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean): Promise<string[]> {
         throw new Error("Method 'generateImage' must be implemented");
     }
 }
@@ -36,6 +60,8 @@ export class ImageGen {
  * Image generation using Pexels API
  */
 export class PexelsImageGen extends ImageGen {
+    /** Image style type */
+    public static styleType: ImageStyleType = ImageStyleType.Search;
 
     /**
      * Generate images using Pexels API
@@ -46,40 +72,40 @@ export class PexelsImageGen extends ImageGen {
      * @param filePrefix - File prefix for images
      * @returns List of image paths
      */
-    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean, apiKey?: string, filePrefix?: string) : Promise<string[]> {
+    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean, apiKey?: string, filePrefix?: string): Promise<string[]> {
         if (!apiKey) {
             throw new Error("Pexels API key required");
         }
 
         const client = new Client({ apiKey: apiKey });
         const imgs: string[] = [];
-    
+
         for (const [index, _] of images.entries()) {
             if (changePhotos) {
                 const query = images[index];
                 gen.log(`Searching for images for rank ${index + 1} with query: ${query}`);
-    
+
                 const r_images_rep = await client.v1.photos.search(query, { perPage: 1, page: 1 });
                 const r_image1 = r_images_rep.photos[0].src.large;
-    
+
                 // Download images with axios
                 const r_image_path = path.join(tempPath, `image-${filePrefix ?? index}.png`);
-    
+
                 const image_response = await axios.get(r_image1, { responseType: 'arraybuffer' });
                 fs.writeFileSync(r_image_path, image_response.data);
-    
+
                 imgs.push(r_image_path);
-    
+
                 gen.log(`Image for rank ${index + 1} downloaded successfully at ${r_image_path}`);
             } else {
                 const r_image_path = path.join(tempPath, `image-${filePrefix ?? index}.png`);
-    
+
                 imgs.push(r_image_path);
-        
+
                 gen.log(`Image for rank ${index + 1} downloaded successfully at ${r_image_path}`);
             }
         }
-        
+
         return imgs;
     }
 }
@@ -88,6 +114,8 @@ export class PexelsImageGen extends ImageGen {
  * Image generation using Google
  */
 export class GoogleScraperImageGen extends ImageGen {
+    /** Image style type */
+    public static styleType: ImageStyleType = ImageStyleType.Search;
 
     /**
      * Generate images using Google
@@ -97,7 +125,7 @@ export class GoogleScraperImageGen extends ImageGen {
      * @param filePrefix - File prefix for images
      * @returns List of image paths
      */
-    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean, filePrefix?: string) : Promise<string[]> {
+    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean, filePrefix?: string): Promise<string[]> {
         const imgs: string[] = [];
 
         if (changePhotos) {
@@ -122,7 +150,7 @@ export class GoogleScraperImageGen extends ImageGen {
 
         return imgs;
     }
-    
+
     private static async imgScrape(queries: string[]) {
         try {
             const browser = await puppeteer.launch({ headless: true });
@@ -164,5 +192,27 @@ export class GoogleScraperImageGen extends ImageGen {
         } catch (err) {
             console.error('An error occurred:', err);
         }
+    }
+}
+
+/**
+ * Image generation using Flux AI
+ */
+export class FluxAIImageGen extends ImageGen {
+    /** Image style type */
+    public static styleType: ImageStyleType = ImageStyleType.AI;
+
+    /**
+     * Generate images using Flux AI
+     * @param images - List of image queries
+     * @param tempPath - Temporary path to save images
+     * @param changePhotos - Change photos or not
+     * @param filePrefix - File prefix for images
+     * @param aiOptions - AI image generation options
+     * @returns List of image paths
+     */
+    static async generateImages(gen: VideoGen, images: string[], tempPath: string, changePhotos: boolean, aiOptions?: AIImageGenOptions, filePrefix?: string): Promise<string[]> {
+        throw Error("Flux AI image generation not implemented yet");
+        return [];
     }
 }

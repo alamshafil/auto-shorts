@@ -6,6 +6,8 @@ import { Chip } from "@nextui-org/chip";
 
 import { VideoOptions } from "@/config/options";
 
+import { FaCog, FaCogs, FaImage, FaTextWidth } from "react-icons/fa";
+
 export function ConfirmModal({ confirmModal, usedDefaultOptions, advancedOptions, renderVideo }:
     { confirmModal: ReturnType<typeof useDisclosure>, usedDefaultOptions: boolean, advancedOptions: VideoOptions | null, renderVideo: () => void }
 ) {
@@ -60,6 +62,11 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
             return { key, name: key, value: (value) ? value.toString() : "Default" };
         }) : [];
 
+    const imageOptionRows = advancedOptions?.imageOptions
+        ? Object.entries(advancedOptions.imageOptions).map(([key, value]) => {
+            return { key, name: key, value: value.toString() };
+        }) : [];
+
     const columns = [
         {
             key: "name",
@@ -73,22 +80,22 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
 
     return (
         <div>
-               <Accordion>
-               <AccordionItem title="Main Options">
-            <Table shadow="lg" aria-label="Main Options">
-                <TableHeader columns={columns}>
-                    {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                </TableHeader>
-                <TableBody items={mainRows}>
-                    {(item) => (
-                        <TableRow key={item.key}>
-                            {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-        </AccordionItem>
-                <AccordionItem title="Subtitle Options">
+            <Accordion>
+                <AccordionItem title="Main Options" startContent={<FaCogs />}>
+                    <Table shadow="lg" aria-label="Main Options">
+                        <TableHeader columns={columns}>
+                            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                        </TableHeader>
+                        <TableBody items={mainRows}>
+                            {(item) => (
+                                <TableRow key={item.key}>
+                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </AccordionItem>
+                <AccordionItem title="Subtitle Options" startContent={<FaTextWidth />}>
                     <Table shadow="lg" aria-label="Subtitle Options">
                         <TableHeader columns={columns}>
                             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
@@ -102,7 +109,21 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
                         </TableBody>
                     </Table>
                 </AccordionItem>
-                <AccordionItem title="Internal Options">
+                <AccordionItem title="Image Options" startContent={<FaImage />}>
+                    <Table shadow="lg" aria-label="Image Options">
+                        <TableHeader columns={columns}>
+                            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                        </TableHeader>
+                        <TableBody items={imageOptionRows}>
+                            {(item) => (
+                                <TableRow key={item.key}>
+                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </AccordionItem>
+                <AccordionItem title="Internal Options" startContent={<FaCog />}>
                     <Table shadow="lg" aria-label="Internal Advanced Options">
                         <TableHeader columns={columns}>
                             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

@@ -186,7 +186,7 @@ npx auto-shorts --download
 # You have options to use different AI tools to generate the script, voice, and image
 
 # Use OpenAI gpt-4o-mini to generate the script, ElevenLabs to generate the voice, and Pexels to generate the image
-npx auto-shorts -p "make a news short about TypeScript" --aiType OpenAIGen --ttsType ElevenLabs --imageType PexelsImageGen --elevenLabsAPIKey YOUR_ELEVENLABS_API_KEY --pexelsAPIKey YOUR_PEXELS_API_KEY --openaiAPIKey YOUR_OPENAI_API_KEY
+npx auto-shorts -p "make a news short about TypeScript" --aiType OpenAIGen --ttsType ElevenLabs --imageType Pexels --elevenLabsAPIKey YOUR_ELEVENLABS_API_KEY --pexelsAPIKey YOUR_PEXELS_API_KEY --openaiAPIKey YOUR_OPENAI_API_KEY
 
 # Use local Ollama llama3.2 to generate the script, Built-in TTS to generate the voice, and Google Scraper to generate the image (default, no need to provide API keys)
 npx auto-shorts -p "make a news short about TypeScript"
@@ -229,7 +229,7 @@ const task = await genVideoWithAI(
         tempPath: 'video_temp', // Provide the path to the temporary video folder
         resPath: 'res', // Provide the path to the downloaded resources folder
         voiceGenType: VoiceGenType.ElevenLabsVoice, // Use ElevenLabs to generate the voice
-        imageGenType: ImageGenType.PexelsImageGen, // Use Pexels to generate the image
+        imageGenType: ImageGenType.Pexels, // Use Pexels to generate the image
         apiKeys: {
             elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY, // Provide the ElevenLabs API key
             pexelsAPIKey: process.env.PEXELS_API_KEY, // Provide the Pexels API key
@@ -264,7 +264,7 @@ const task = await genVideoWithJson(
     tempPath: 'video_temp', // Provide the path to the temporary video folder
     resPath: 'res', // Provide the path to the downloaded resources folder
     voiceGenType: VoiceGenType.ElevenLabsVoice, // Use ElevenLabs to generate the voice
-    imageGenType: ImageGenType.PexelsImageGen, // Use Google Scraper to generate the image
+    imageGenType: ImageGenType.Pexels, // Use Pexels to generate the image
     apiKeys: {
         elevenLabsAPIKey: process.env.ELEVENLABS_API_KEY, // Provide the ElevenLabs API key
         pexelsAPIKey: process.env.PEXELS_API_KEY, // Provide the Pexels API key
