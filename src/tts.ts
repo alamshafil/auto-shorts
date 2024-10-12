@@ -40,28 +40,14 @@ export interface VoiceGenOptions {
     voice: "male" | "female";
     /** Filename to save the voice to */
     filename: string;
-    /** ElevenLabs options */
-    elevenLabsOptions?: ElevenLabsOptions;
-    /** Neets options */
-    neetsTTSOptions?: NeetsTTSOptions;
+    /** Options for API */
+    apiOptions?: APIVoiceOptions;
 }
 
 /**
- * ElevenLabs voice options
+ * API voice generation options
  */
-export interface ElevenLabsOptions {
-    /** Voice model */
-    model?: "eleven_turbo_v2";
-    /** Male voice model used for ElevenLabs */
-    maleVoice?: "Will";
-    /** Female voice model used for ElevenLabs */
-    femaleVoice?: "Sarah";
-}
-
-/**
- * NeetsTTS voice options
- */
-export interface NeetsTTSOptions {
+export interface APIVoiceOptions {
     /** Voice model */
     voiceModel?: string;
     /** Male voice model */
@@ -101,8 +87,8 @@ export class ElevenLabsVoice extends VoiceGen {
         });
 
         const voiceModel = (options.voice == "male") ?
-            (options.elevenLabsOptions?.maleVoice ?? "Will") :
-            (options.elevenLabsOptions?.femaleVoice ?? "Sarah");
+            (options.apiOptions?.maleVoice ?? "Will") :
+            (options.apiOptions?.femaleVoice ?? "Sarah");
 
         // TODO: Fix async issue
         // eslint-disable-next-line no-async-promise-executor
@@ -111,7 +97,7 @@ export class ElevenLabsVoice extends VoiceGen {
                 const audio = await elevenlabs.generate({
                     voice: voiceModel,
                     text: options.text,
-                    model_id: "eleven_turbo_v2"
+                    model_id: options.apiOptions?.voiceModel ?? "eleven_turbo_v2",
                 });
 
                 const fileStream = fs.createWriteStream(options.filename);
@@ -148,15 +134,15 @@ export class NeetsTTSVoice extends VoiceGen {
         // const voiceModel = (options.voice == "male") ? "us-male-2" : "us-female-2";
 
         const voiceModel = (options.voice == "male") ?
-            (options.neetsTTSOptions?.maleVoice ?? "us-male-2") :
-            (options.neetsTTSOptions?.femaleVoice ?? "us-female-2");
+            (options.apiOptions?.maleVoice ?? "us-male-2") :
+            (options.apiOptions?.femaleVoice ?? "us-female-2");
 
         const data = JSON.stringify({
             text: options.text,
             voice_id: voiceModel,
             fmt: "wav",
             params: {
-                model: options.neetsTTSOptions?.voiceModel ?? "style-diff-500"
+                model: options.apiOptions?.voiceModel ?? "style-diff-500"
             }
         });
 

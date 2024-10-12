@@ -15,7 +15,7 @@ import { BACKEND_ENDPOINT } from '@/config/backend';
 import { title, subtitle } from '@/components/primitives';
 import { VideoOptions } from '@/config/options';
 
-import { FaAngleDown, FaArrowsAltH, FaExclamationTriangle, FaEyeDropper, FaFileAudio, FaFont, FaGlobe, FaMagic, FaPhotoVideo, FaRandom, FaRegFileVideo, FaRobot, FaSave, FaSearch, FaSlidersH, FaSync, FaTextHeight, FaTextWidth, FaVideo, FaVolumeUp } from 'react-icons/fa';
+import { FaAngleDown, FaArrowsAltH, FaExclamationTriangle, FaEyeDropper, FaFileAudio, FaFont, FaGlobe, FaMagic, FaPhotoVideo, FaRandom, FaRegFileAudio, FaRegFileVideo, FaRobot, FaSave, FaSearch, FaSlidersH, FaSync, FaTextHeight, FaTextWidth, FaVideo, FaVolumeUp, FaWrench } from 'react-icons/fa';
 
 const config = {
     aiOptions: {
@@ -219,6 +219,11 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
     const [useBgMusic, setUseBgMusic] = useState(true);
     const [useBgVideo, setUseBgVideo] = useState(true);
 
+    // TTS Options
+    const [ttsVoiceModel, setTTSVoiceModel] = useState<undefined | string>(undefined);
+    const [ttsModelMale, setTTSModelMale] = useState<undefined | string>(undefined);
+    const [ttsModelFemale, setTTSModelFemale] = useState<undefined | string>(undefined);
+
     // Subtitle options
     const [subLen, setSubLen] = useState<undefined | number>(undefined);
     const [fontName, setFontName] = useState<undefined | string>(undefined);
@@ -346,6 +351,30 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                         </DropdownMenu>
                     </Dropdown>
                 </div>
+                {selectedTTSProvider.type == "BuiltinTTS" ? null : <>
+                    <div className="flex justify-between my-4">
+                        <div>
+                            <p className={title({ size: 'sm' })}>Voice Model</p>
+                            <p className={subtitle({ size: 'sm' })}>Select the voice model (leave empty for default)</p>
+                        </div>
+                        <Input startContent={<FaWrench />} isClearable placeholder="Enter voice model" className="w-56" onChange={(e) => setTTSVoiceModel(e.target.value)} />
+                    </div>
+                    <div className="flex justify-between my-4">
+                        <div>
+                            <p className={title({ size: 'sm' })}>Male Voice</p>
+                            <p className={subtitle({ size: 'sm' })}>Select the male voice name (leave empty for default)</p>
+                        </div>
+                        <Input startContent={<FaRegFileAudio />} isClearable placeholder="Enter male voice" className="w-56" onChange={(e) => setTTSModelMale(e.target.value)} />
+                    </div>
+                    <div className="flex justify-between my-4">
+                        <div>
+                            <p className={title({ size: 'sm' })}>Female Voice</p>
+                            <p className={subtitle({ size: 'sm' })}>Select the female voice name (leave empty for default)</p>
+                        </div>
+                        <Input startContent={<FaRegFileAudio />} isClearable placeholder="Enter female voice" className="w-56" onChange={(e) => setTTSModelFemale(e.target.value)} />
+                    </div>
+                </>
+                }
             </div>
             <div className="flex items-center gap-2">
                 <FaPhotoVideo />
@@ -656,6 +685,11 @@ export default function AdvancedOptions({ setAdvancedOptions }: { setAdvancedOpt
                             disableTTS: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableTTS')],
                             disableSubtitles: miscOptions[config.miscOptions.findIndex(option => option.name === 'disableSubtitles')],
                             useMock: miscOptions[config.miscOptions.findIndex(option => option.name === 'useMock')],
+                        },
+                        ttsOptions: {
+                            voiceModel: ttsVoiceModel,
+                            maleVoice: ttsModelMale,
+                            femaleVoice: ttsModelFemale
                         },
                         imageOptions: {
                             modelName: aiImageModel,

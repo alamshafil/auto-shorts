@@ -52,7 +52,7 @@ Example output (v0.2.0-dev):
 ```bash
 AutoShorts AI video generator (CLI Edition)
 
-  Generate AI videos of different types based on a prompt. 
+  Generate AI videos of different types based on a prompt.
 
 Options
 
@@ -75,6 +75,12 @@ Options
   --jsonFile path             The JSON file to use for video generation.
                               Overrides AI.
   -h, --help                  Print this usage guide.
+
+TTS Options
+
+  --ttsMaleVoice voice     TTS male voice to use. If applicable.
+  --ttsFemaleVoice voice   TTS female voice to use If applicable.
+  --ttsVoiceModel model    TTS voice model to use. If applicable.
 
 Image Options
 

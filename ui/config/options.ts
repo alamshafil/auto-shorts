@@ -30,6 +30,8 @@ export interface VideoOptions {
     subtitleOptions?: SubtitleOptions;
     /** AI Image generation options */
     imageOptions?: AIImageGenOptions;
+    /** TTS options */
+    ttsOptions?: APIVoiceOptions;
 }
 
 /**
@@ -75,6 +77,19 @@ export interface AIImageGenOptions {
     modelName: string;
     /** Additional prompt */
     suffixPrompt: string;
+}
+
+/**
+ * API voice generation options
+ * (Note: same as backend model, so it is not separate)
+ */
+export interface APIVoiceOptions {
+    /** Voice model */
+    voiceModel?: string;
+    /** Male voice model */
+    maleVoice?: string;
+    /** Female voice model */
+    femaleVoice?: string;
 }
 
 // Default video options

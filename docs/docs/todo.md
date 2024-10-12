@@ -10,7 +10,8 @@ This is a list of things that could be done for the project. This list is not ex
 - [ ] Fix logging
 - [x] Add Docker support
 - [ ] Get GUI production-ready
-- [ ] Add more customization options (custom fonts, colors, images, etc.)
+- [x] Add more customization options (custom colors, images, etc.)
+- [ ] Add custom font support
 - [ ] Allow custom images and background music via GUI
 - [ ] Work on a more general 'AI-powered' video editor instead of automatic video generation
 - [ ] Add support for more general video generation (e.g., long-form videos)

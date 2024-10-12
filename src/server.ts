@@ -11,7 +11,7 @@ import path from 'path';
 import { AIGenType, genVideoDataWithAI, genVideoWithJson, ImageGenType, VoiceGenType } from '.';
 import { AIAPIEnv, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from './ai';
 
-import { VoiceAPIEnv } from './tts';
+import { APIVoiceOptions, VoiceAPIEnv } from './tts';
 import { AIImageGenOptions, ImageAPIEnv } from './image';
 import { SubtitleOptions } from './videogen';
 
@@ -46,7 +46,9 @@ export interface FrontendVideoOptions {
     /** Subtitle generation options */
     subtitleOptions?: SubtitleOptions; // Frontend and backend model is same
     /** AI Image generation options */
-    imageOptions?: AIImageGenOptions;
+    imageOptions?: AIImageGenOptions; // Frontend and backend model is same
+    /** TTS options */
+    ttsOptions?: APIVoiceOptions; // Frontend and backend model is same
 }
 
 /**
@@ -205,6 +207,7 @@ export async function runAPIServer() {
                     },
                     subtitleOptions: data.subtitleOptions,
                     imageOptions: data.imageOptions,
+                    ttsOptions: data.ttsOptions,
                     internalOptions: {
                         debug: true,
                         changePhotos: data.internalOptions?.changePhotos ?? true,
@@ -277,6 +280,7 @@ export async function runAPIServer() {
                     },
                     subtitleOptions: options.subtitleOptions,
                     imageOptions: options.imageOptions,
+                    ttsOptions: options.ttsOptions,
                     internalOptions: {
                         debug: false,
                         changePhotos: options.internalOptions?.changePhotos ?? true,

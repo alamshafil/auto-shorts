@@ -2,7 +2,7 @@
 - TODO: Add description
 - Initial release of local web UI (Frontend uses Next.js, backend uses Express.js)
 - Server API support (--server) (gets API keys from environment variables)
-- Added subtitle customization support
+- Added image, voice, and subtitle customization support
 - Added option to not include background music or video
 - Reworked AI script generation by giving each video type its own prompt to build its data object
 - Support for getting API keys from environment variables (`.env` file)

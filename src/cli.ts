@@ -185,6 +185,24 @@ async function cli() {
         }
     ];
 
+    const ttsOptions = [
+        {
+            name: 'ttsMaleVoice',
+            typeLabel: '{underline voice}',
+            description: 'TTS male voice to use. {italic If applicable.}'
+        },
+        {
+            name: 'ttsFemaleVoice',
+            typeLabel: '{underline voice}',
+            description: 'TTS female voice to use {italic If applicable.}'
+        },
+        {
+            name: 'ttsVoiceModel',
+            typeLabel: '{underline model}',
+            description: 'TTS voice model to use. {italic If applicable.}'
+        }
+    ];
+
     const imgOptions = [
         {
             name: 'imgAIModel',
@@ -239,6 +257,10 @@ async function cli() {
         {
             header: 'Options',
             optionList: mainOptions
+        },
+        {
+            header: 'TTS Options',
+            optionList: ttsOptions
         },
         {
             header: 'Image Options',
@@ -319,6 +341,11 @@ async function cli() {
     let noBgVideo = options.noBgVideo ?? false;
     let noBgMusic = options.noBgMusic ?? false;
 
+    // TTS options
+    let ttsMaleVoice = options.ttsMaleVoice ?? null;
+    let ttsFemaleVoice = options.ttsFemaleVoice ?? null;
+    let ttsVoiceModel = options.ttsVoiceModel ?? null;
+
     // AI Image options
     let imgAIModel = options.imgAIModel ?? null;
     let imgAIPrompt = options.imgAIPrompt ?? null;
@@ -381,6 +408,11 @@ async function cli() {
     console.log("\n--> Image AI options:");
     console.info("Image AI model: " + (imgAIModel ?? "Default"));
     console.info("Image AI prompt: " + (imgAIPrompt ?? "Default"));
+
+    console.log("\n--> TTS options:");
+    console.info("Male voice: " + (ttsMaleVoice ?? "Default"));
+    console.info("Female voice: " + (ttsFemaleVoice ?? "Default"));
+    console.info("Voice model: " + (ttsVoiceModel ?? "Default"));
 
     console.log("\n--> Subtitle options:");
     console.info("Subtitle length: " + (subtitleLen ?? "Default"));
@@ -498,6 +530,12 @@ async function cli() {
                 console.info("Use background music: " + !jsonData.noBgMusic);
                 console.info("AI Model: " + jsonData.model);
 
+                // Log previous TTS options
+                console.info("--> Using previous TTS options:");
+                console.info("Male voice: " + (jsonData.ttsMaleVoice ?? "Default"));
+                console.info("Female voice: " + (jsonData.ttsFemaleVoice ?? "Default"));
+                console.info("Voice model: " + (jsonData.ttsVoiceModel ?? "Default"));
+
                 // Log previous image options
                 console.info("--> Using previous image options:");
                 console.info("Image AI model: " + (jsonData.imgAIModel ?? "Default"));
@@ -525,6 +563,11 @@ async function cli() {
                 noBgVideo = jsonData.noBgVideo;
                 noBgMusic = jsonData.noBgMusic;
                 aiModel = jsonData.model;
+
+                // Set previous TTS options
+                ttsMaleVoice = jsonData.ttsMaleVoice;
+                ttsFemaleVoice = jsonData.ttsFemaleVoice;
+                ttsVoiceModel = jsonData.ttsVoiceModel;
 
                 // Set previous image options
                 imgAIModel = jsonData.imgAIModel;
@@ -629,6 +672,17 @@ async function cli() {
             }
         }
 
+        // Ask for TTS options
+        console.info("[*] Asking for TTS options (leave empty for default):");
+
+        const ttsMaleVoiceRep = await input({ message: `TTS Male voice model? -> ` });
+        const ttsFemaleVoiceRep = await input({ message: `TTS Female voice model? -> ` });
+        const ttsVoiceModelRep = await input({ message: `TTS voice model? -> ` });
+
+        ttsMaleVoice = ttsMaleVoiceRep !== "" ? ttsMaleVoiceRep : ttsMaleVoice;
+        ttsFemaleVoice = ttsFemaleVoiceRep !== "" ? ttsFemaleVoiceRep : ttsFemaleVoice;
+        ttsVoiceModel = ttsVoiceModelRep !== "" ? ttsVoiceModelRep : ttsVoiceModel;
+
         // Ask for image AI options
         console.info("[*] Asking for image AI options (leave empty for default):");
 
@@ -670,6 +724,12 @@ async function cli() {
         console.info("Use background music: " + !noBgMusic);
         console.info("AI Model: " + aiModel);
 
+        // Print TTS options
+        console.info("--> TTS options:");
+        console.info("Male voice: " + (ttsMaleVoice ?? "Default"));
+        console.info("Female voice: " + (ttsFemaleVoice ?? "Default"));
+        console.info("Voice model: " + (ttsVoiceModel ?? "Default"));
+
         // Print image AI options
         console.info("--> Image AI options:");
         console.info("Image AI model: " + (imgAIModel ?? "Default"));
@@ -698,6 +758,10 @@ async function cli() {
             noBgVideo: noBgVideo,
             noBgMusic: noBgMusic,
             aiModel: aiModel,
+            // TTS options
+            ttsMaleVoice: ttsMaleVoice,
+            ttsFemaleVoice: ttsFemaleVoice,
+            ttsVoiceModel: ttsVoiceModel,
             // Image options
             imgAIModel: imgAIModel,
             imgAIPrompt: imgAIPrompt,

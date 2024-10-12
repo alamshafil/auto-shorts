@@ -6,21 +6,23 @@
  * @packageDocumentation
  */
 
+import { EventEmitter } from 'events';
+import fs from 'fs';
+import path from 'path';
+
 import { AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen, AIOptions } from './ai';
-import { VideoDataType, VideoGenType, VideoOptions, InternalVideoOptions } from './videogen';
+import { VideoDataType, VideoGenType, VideoOptions, InternalVideoOptions, SubtitleOptions } from './videogen';
+
 import { TopicVideo } from "./types/topicVid";
 import { MsgVideo } from './types/msgVid';
 import { RatherVideo } from './types/ratherVid';
 import { RankVideo } from './types/rankVid';
 import { QuizVideo } from './types/quizVid';
+
 import { BUILTIN_AI_SYSTEM_PROMPT, MockAIData } from "./const";
 
-import { EventEmitter } from 'events';
-import fs from 'fs';
-import path from 'path';
-
-import { ElevenLabsOptions, VoiceGenOptions, VoiceGenType } from './tts';
-import { ImageGenType } from './image';
+import { APIVoiceOptions, VoiceGenOptions, VoiceGenType } from './tts';
+import { AIImageGenOptions, ImageGenType } from './image';
 
 export { 
     AIGenType, 
@@ -30,7 +32,9 @@ export {
     InternalVideoOptions,
     VoiceGenType, 
     VoiceGenOptions, 
-    ElevenLabsOptions, 
+    APIVoiceOptions,
+    AIImageGenOptions,
+    SubtitleOptions,
     ImageGenType
 };
 
@@ -63,8 +67,6 @@ export async function genVideoDataWithAI(prompt: string, aiType: AIGenType, opti
         if (options.internalOptions?.debug) console.info(msg);
     }
     
-    const userComment = prompt;
-
     // Add user comment to system prompt
     const systemPrompt = customSystemPrompt ? customSystemPrompt : BUILTIN_AI_SYSTEM_PROMPT;
     let aiResponse = '';

@@ -72,6 +72,8 @@ export interface VideoOptions {
     subtitleOptions?: SubtitleOptions;
     /** AI image generation options */
     imageOptions?: img.AIImageGenOptions;
+    /** TTS options */
+    ttsOptions?: tts.APIVoiceOptions;
     /** API Keys */
     apiKeys?: APIKeys;
 }
@@ -106,10 +108,6 @@ export interface InternalVideoOptions {
     disableSubtitles: boolean;
     /** Use mock data */
     useMock: boolean;
-    /** Eleven Labs options */
-    elevenLabsOptions?: tts.ElevenLabsOptions;
-    /** Neets TTS options */
-    neetsTTSOptions?: tts.NeetsTTSOptions;
 }
 
 /**
@@ -174,6 +172,8 @@ export class VideoGen {
     protected subtitleOptions?: SubtitleOptions;
     /** AI image generation options */
     protected imageOptions?: img.AIImageGenOptions;
+    /** TTS options */
+    protected ttsOptions?: tts.APIVoiceOptions;
     /** API Keys */
     protected apiKeys?: APIKeys;
 
@@ -191,6 +191,7 @@ export class VideoGen {
         this.useBgVideo = options.useBgVideo;
         this.internalOptions = options.internalOptions ?? DEFAULT_INTERNAL_VIDEO_OPTIONS;
         this.subtitleOptions = options.subtitleOptions;
+        this.imageOptions = options.imageOptions;
         this.jsonData = jsonData;
     }
 
@@ -232,12 +233,8 @@ export class VideoGen {
      * @throws Error if invalid voice generation type
      */
     async generateVoice(options: tts.VoiceGenOptions) {
-        if (this.internalOptions.elevenLabsOptions) {
-            options.elevenLabsOptions = this.internalOptions.elevenLabsOptions;
-        }
-
-        if (this.internalOptions.neetsTTSOptions) {
-            options.neetsTTSOptions = this.internalOptions.neetsTTSOptions;
+        if (this.ttsOptions) {
+            options.apiOptions = this.ttsOptions;
         }
 
         if (!this.internalOptions.disableTTS) {

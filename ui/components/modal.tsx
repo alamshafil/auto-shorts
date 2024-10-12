@@ -6,7 +6,7 @@ import { Chip } from "@nextui-org/chip";
 
 import { VideoOptions } from "@/config/options";
 
-import { FaCog, FaCogs, FaImage, FaTextWidth } from "react-icons/fa";
+import { FaCog, FaCogs, FaFileAudio, FaImage, FaTextWidth } from "react-icons/fa";
 
 export function ConfirmModal({ confirmModal, usedDefaultOptions, advancedOptions, renderVideo }:
     { confirmModal: ReturnType<typeof useDisclosure>, usedDefaultOptions: boolean, advancedOptions: VideoOptions | null, renderVideo: () => void }
@@ -67,6 +67,11 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
             return { key, name: key, value: value.toString() };
         }) : [];
 
+    const ttsOptionsRows = advancedOptions?.ttsOptions
+        ? Object.entries(advancedOptions.ttsOptions).map(([key, value]) => {
+            return { key, name: key, value: value.toString() };
+        }) : [];
+
     const columns = [
         {
             key: "name",
@@ -101,6 +106,20 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
                             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
                         </TableHeader>
                         <TableBody items={subtitleRows}>
+                            {(item) => (
+                                <TableRow key={item.key}>
+                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </AccordionItem>
+                <AccordionItem title="TTS Options" startContent={<FaFileAudio />}>
+                    <Table shadow="lg" aria-label="TTS Options">
+                        <TableHeader columns={columns}>
+                            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                        </TableHeader>
+                        <TableBody items={ttsOptionsRows}>
                             {(item) => (
                                 <TableRow key={item.key}>
                                     {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
