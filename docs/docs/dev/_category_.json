@@ -1,0 +1,8 @@
+{
+    "label": "Developer Guide",
+    "position": 7,
+    "link": {
+        "type": "generated-index",
+        "description": "Learn how to add new features to the project."
+    }
+}

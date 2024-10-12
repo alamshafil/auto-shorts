@@ -13,7 +13,6 @@
 /* Add shadow, border radius, glow, and add padding */
 .heroImage {
   padding: 2rem;
-  filter: drop-shadow(0 0 0.75rem rgb(0, 255, 106));
 }
 
 @media screen and (max-width: 996px) {

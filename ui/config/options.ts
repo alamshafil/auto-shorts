@@ -134,6 +134,10 @@ export interface BackendVideoOptions {
     internalOptions?: InternalVideoOptions;
     /** Subtitle generation options */
     subtitleOptions?: SubtitleOptions;
+    /** AI Image generation options */
+    imageOptions?: AIImageGenOptions;
+    /** TTS options */
+    ttsOptions?: APIVoiceOptions;
     /** API Keys */
     apiKeys?: any; // API keys already defined in the backend
 }
