@@ -285,7 +285,7 @@ async function cli() {
 
     const usage = commandLineUsage(sections)
 
-    const optionDefinitions = [...mainOptions, ...advancedOptions, ...apiOptions];
+    const optionDefinitions = [...mainOptions, ...advancedOptions, ...subOptions, ...imgOptions, ...ttsOptions, ...apiOptions];
 
     const options = commandLineArgs(optionDefinitions)
 

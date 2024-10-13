@@ -214,7 +214,7 @@ export class MsgVideo extends VideoGen {
         const headerCanvas = createCanvas(headerImage.width, headerImage.height);
         const headerCtx = headerCanvas.getContext('2d');
         headerCtx.drawImage(headerImage, 0, 0);
-        headerCtx.font = `20px "${this.jsonData.fontName ?? 'SF Pro Display'}"`;
+        headerCtx.font = `20px "${this.subtitleOptions?.fontName ?? 'SF Pro Display'}"`;
         headerCtx.fillStyle = 'white';
         headerCtx.textAlign = 'center';
         headerCtx.fillText(name, headerImage.width / 2, 225);
@@ -231,7 +231,7 @@ export class MsgVideo extends VideoGen {
         const ctx = canvas.getContext('2d');
 
         // Set up text properties
-        ctx.font = '30px "SF Pro Display"';
+        ctx.font = `30px "${this.subtitleOptions?.fontName ?? 'SF Pro Display'}"`;
         ctx.textBaseline = 'top';
         const textWidth = ctx.measureText(message).width;
         const textHeight = parseInt(ctx.font);
