@@ -91,10 +91,14 @@ export const MockAIData = `
 //     "type": "quiz",
 //     "title": "Quiz Title",
 //     "questions": [
-//         "What is the capital of France?"
-//     ],
-//     "answers": [
-//         "Paris"
+//         {
+//             "question": "What is the capital of France?",
+//             "answer": "Paris"
+//         },
+//         {
+//             "question": "What is the capital of the United States?",
+//             "answer": "Washington D.C."
+//         }
 //     ],
 //     "start_script": "Welcome to the quiz!",
 //     "end_script": "Thanks for playing!"

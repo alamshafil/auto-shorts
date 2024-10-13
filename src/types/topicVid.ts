@@ -124,7 +124,7 @@ export class TopicVideo extends VideoGen {
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
-        await this.generateSubtitles(audio16kFile, srtFile, 10);
+        await this.generateSubtitles(audio16kFile, srtFile, this.subtitleOptions?.maxLen ?? 30);
 
         // Create video from audio file with on-screen text
         this.log('Creating video from audio file with on-screen text...');
@@ -190,14 +190,14 @@ export class TopicVideo extends VideoGen {
             fontFamily: [(this.subtitleOptions?.fontName ?? 'Bangers')],
             color: this.subtitleOptions?.fontColor ?? '#fff',
             stroke: this.subtitleOptions?.strokeColor ?? '#000000',
-            strokeThickness: this.subtitleOptions?.strokeWidth ?? 8,
+            strokeThickness: this.subtitleOptions?.strokeWidth ?? 20,
         }
 
         const subObj = new FFSubtitle({
             path: path.join(this.tempPath, 'audio16k.wav.srt'),
             x: width / 2,
             y: (height / 2) + 200,
-            fontSize: this.subtitleOptions?.fontSize ?? 60,
+            fontSize: this.subtitleOptions?.fontSize ?? 80,
             backgroundColor: this.subtitleOptions?.strokeColor ?? '#000000',
             color: this.subtitleOptions?.fontColor ?? '#fff',
             comma: true,

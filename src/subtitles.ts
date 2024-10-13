@@ -53,8 +53,8 @@ export class WhisperSubtitles extends SubtitleGen {
         
         const task = await whisper.transcribe(pcm, {
              language: "en",
-             // TODO: FIX MAX_LEN
-             max_len: maxLen
+             max_len: maxLen,
+             token_timestamps: true,
         });
 
         task.on("transcribed", (result) => {
