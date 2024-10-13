@@ -59,6 +59,7 @@ Options
   --download                  Download models needed for AI generation.
   --server                    Start API server. IP and port comes from env
                               variable.
+  --deleteTemp                Delete temporary video files.
   -p, --prompt text           The prompt to use for the AI to generate video.
   --aiType type               The AI provider to use. Can be OpenAIGen,
                               GoogleAIGen, AnthropicAIGen, OllamaAIGen.

@@ -66,7 +66,7 @@ export async function genVideoDataWithAI(prompt: string, aiType: AIGenType, opti
     const log = (msg: string) => {
         if (options.internalOptions?.debug) console.info(msg);
     }
-    
+
     // Add user comment to system prompt
     const systemPrompt = customSystemPrompt ? customSystemPrompt : BUILTIN_AI_SYSTEM_PROMPT;
     let aiResponse = '';
@@ -240,5 +240,16 @@ export function checkResDir(resPath: string) {
         if (!fs.existsSync(folderPath)) {
             throw new Error(`Resource folder is missing folder: ${folderPath}.\nTry running "npx auto-shorts --download --resPath [folder]" to download resources.`);
         }
+    }
+}
+
+/**
+ * Check if temp path exists
+ * 
+ * @param tempPath Temporary path
+ */
+export function checkTempDir(tempPath: string) {
+    if (!fs.existsSync(tempPath)) {
+        throw new Error(`Temporary folder does not exist: ${tempPath}. Create the folder or pass --tempPath option.`);
     }
 }

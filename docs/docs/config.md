@@ -16,9 +16,13 @@ npx auto-shorts --help
 
 ### Options
 
+#### Main Options
+
 - `--download`: Download models needed for AI generation.
 
 - `--server`: Start API server. IP and port come from environment variables.
+
+- `--deleteTemp`: Delete temporary files after video generation.
 
 - `-p`, `--prompt [text]`: The prompt to use for the AI to generate video.
 
@@ -38,7 +42,27 @@ npx auto-shorts --help
 
 - `-h, --help`: Print the usage guide.
 
-### Advanced Options
+#### TTS Options
+
+- `--ttsMaleVoice [voice]`: TTS male voice to use. If applicable.
+- `--ttsFemaleVoice [voice]`: TTS female voice to use If applicable.
+- `--ttsVoiceModel [model]`: TTS voice model to use. If applicable.
+
+#### Image Options
+
+- `--imgAIModel [model]`: AI model to use for image generation. If applicable.
+- `--imgAIPrompt [prompt]`: AI suffix prompt to use for image generation. If applicable.
+
+#### Subtitle Options
+
+- `--subtitleLen [number]`: Subtitle token length override.
+- `--subFontName [font]`: Subtitle font name override.
+- `--subFontSize [number]`: Subtitle font size override.
+- `--subFontColor [color]`: Subtitle font color override.
+- `--subStrokeColor [color]`: Subtitle stroke color override.
+- `--subStrokeWidth [number]`: Subtitle stroke width override
+
+#### Advanced Options
 
 - `--changePhotos`: Change photos in video. Used to prevent overriding wanted photos. Default is true.
 

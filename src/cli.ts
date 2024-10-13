@@ -6,7 +6,7 @@ import 'console-info'
 import 'console-error'
 import 'dotenv/config'
 
-import { checkResDir, genVideo, genVideoDataWithAI, genVideoWithJson, VideoOptions } from ".";
+import { checkResDir, checkTempDir, genVideo, genVideoDataWithAI, genVideoWithJson, VideoOptions } from ".";
 
 import { AIAPIEnv, AIGenType, AnthropicAIGen, GoogleAIGen, OllamaAIGen, OpenAIGen } from "./ai";
 import { VoiceAPIEnv, VoiceGenType } from "./tts";
@@ -38,6 +38,11 @@ async function cli() {
             name: 'server',
             type: Boolean,
             description: 'Start API server. IP and port comes from env variable.'
+        },
+        {
+            name: 'deleteTemp',
+            type: Boolean,
+            description: 'Delete temporary video files.'
         },
         {
             name: 'prompt',
@@ -289,6 +294,7 @@ async function cli() {
 
     const options = commandLineArgs(optionDefinitions)
 
+    // Handle download option
     if (options.download) {
         let resPath = options.resPath ?? path.resolve(process.cwd(), 'res');
         if (!options.resPath) {
@@ -303,8 +309,36 @@ async function cli() {
         return;
     }
 
+    // Handle server option
     if (options.server) {
         await runAPIServer();
+        return;
+    }
+
+    // Handle delete temp option
+    if (options.deleteTemp) {
+        const tempPath = options.tempPath ?? path.resolve(process.cwd(), 'video_temp');
+        checkTempDir(tempPath);
+
+        // Ask user if they want to delete temp files
+        const deleteTempRep = await input({ message: `Delete temporary files in ${tempPath}? (y/n) -> ` });
+
+        if (deleteTempRep == "y") {
+            // Get amount of files in temp folder
+            const files = fs.readdirSync(tempPath);
+
+            // Get size of temp folder
+            const stats = fs.statSync(tempPath);
+
+            fs.rmSync(tempPath, { recursive: true });
+            console.info(`Deleted ${files.length} files in ${tempPath}.`);
+
+            // Recreate temp folder
+            fs.mkdirSync(tempPath);
+        } else {
+            console.info("No files were deleted.");
+        }
+
         return;
     }
 
@@ -364,9 +398,6 @@ async function cli() {
 
     const resPath = options.resPath ?? path.resolve(process.cwd(), 'res');
 
-    // Check if res folder before starting
-    checkResDir(resPath);
-
     const userPrompt = options.prompt ?? null;
 
     const promptOverride = options.systemPromptOverride ?? null;
@@ -393,6 +424,14 @@ async function cli() {
     if (!options.resPath) {
         console.info("[*] Resource path not found (--resPath). Using 'res' directory.");
     }
+
+    if (!options.tempPath) {
+        console.info("[*] Temporary path not found (--tempPath). Using 'video_temp' directory.");
+    }
+
+    // Check if res folder before starting
+    checkResDir(resPath);
+    checkTempDir(tempPath);
 
     // Log current options
     console.log("\n--> Current options:");
