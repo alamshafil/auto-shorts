@@ -140,7 +140,7 @@ export async function runAPIServer() {
     // TODO: Make CORS only on localhost, 127.0.0.1
     app.use(cors());
 
-    app.use(express.json()); // to support JSON-encoded bodies
+    app.use(express.json({ limit: "10mb" })); // to support JSON-encoded bodies
 
     app.use((req, res, next) => {
         console.info(`[${new Date().toLocaleString()}] ${req.method} ${req.url}`);
@@ -196,8 +196,8 @@ export async function runAPIServer() {
                     voiceGenType: data.voiceGenType as VoiceGenType,
                     imageGenType: data.imageGenType as ImageGenType,
                     orientation: data.orientation as 'vertical' | 'horizontal',
-                    vidPath: data.vidPath === "" ? undefined : path.join(resPath, 'vid', data.vidPath ?? ""),
-                    bgPath: data.bgPath === "" ? undefined : path.join(resPath, 'music', data.bgPath ?? ""),
+                    vidPath: data.vidPath == undefined ? undefined : path.join(resPath, 'vid', data.vidPath ?? ""),
+                    bgPath: data.bgPath == undefined ? undefined : path.join(resPath, 'music', data.bgPath ?? ""),
                     useBgMusic: data.useBgMusic,
                     useBgVideo: data.useBgVideo,
                     apiKeys: {
@@ -269,8 +269,8 @@ export async function runAPIServer() {
                     voiceGenType: options.voiceGenType as VoiceGenType,
                     imageGenType: options.imageGenType as ImageGenType,
                     orientation: options.orientation as 'vertical' | 'horizontal',
-                    vidPath: options.vidPath === "" ? undefined : path.join(resPath, 'vid', options.vidPath ?? ""),
-                    bgPath: options.bgPath === "" ? undefined : path.join(resPath, 'music', options.bgPath ?? ""),
+                    vidPath: options.vidPath == undefined ? undefined : path.join(resPath, 'vid', options.vidPath ?? ""),
+                    bgPath: options.bgPath == undefined ? undefined : path.join(resPath, 'music', options.bgPath ?? ""),
                     useBgMusic: options.useBgMusic,
                     useBgVideo: options.useBgVideo,
                     apiKeys: {

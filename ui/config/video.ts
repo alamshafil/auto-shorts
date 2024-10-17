@@ -48,6 +48,7 @@ export interface TopicVideoData {
     start_script: string;
     end_script: string;
     images: string[];
+    imgOverride?: string[];
 }
 
 export type VideoData = MessageVideoData | QuizVideoData | RankVideoData | RatherVideoData | TopicVideoData;

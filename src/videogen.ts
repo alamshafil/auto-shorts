@@ -309,6 +309,26 @@ export class VideoGen {
     }
 
     /**
+     * Convert base64 images to image files
+     * @param base64List List of base64 images
+     * @param filePrefix File prefix for images
+     * @returns List of image paths
+     * @throws Error if image file cannot be created
+     */
+    async saveBase64Images(base64List: string[], filePrefix?: string) : Promise<string[]> {
+        const imgFiles: string[] = [];
+        for (const [index, imgData] of base64List.entries()) {
+            const imgPath = path.join(this.tempPath, `image-${filePrefix ?? index}.png`);
+            const base64Data = imgData.replace(/^data:image\/(png|gif|jpg|jpeg);base64,/, "");
+            fs.writeFileSync(imgPath, base64Data, 'base64');
+            imgFiles.push(imgPath);
+            console.log(`Base64 image saved: ${imgPath}`);
+        }
+
+        return imgFiles;
+    }
+
+    /**
      * Generate subtitles for the video
      * @param audio16kFile 16k frequency audio file
      * @param srtFile SRT file path

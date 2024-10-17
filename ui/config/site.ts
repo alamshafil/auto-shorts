@@ -10,7 +10,7 @@ export const siteConfig = {
     },
     {
       label: "Docs",
-      href: "/docs",
+      href: "https://alamshafil.github.io/auto-shorts/",
     },
     {
       label: "About",
@@ -24,7 +24,7 @@ export const siteConfig = {
     },
     {
       label: "Docs",
-      href: "/docs",
+      href: "https://alamshafil.github.io/auto-shorts/",
     },
     {
       label: "About",
@@ -33,7 +33,7 @@ export const siteConfig = {
   ],
   links: {
     github: "https://github.com/alamshafil/auto-shorts/",
-    docs: "https://nextui.org",
+    docs: "https://alamshafil.github.io/auto-shorts/",
     // twitter: "https://twitter.com/getnextui",
     // discord: "https://discord.gg/9b6yyZKmH4",
     sponsor: "https://ko-fi.com/shafilalam",

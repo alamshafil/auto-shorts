@@ -24,6 +24,8 @@ export interface TopicVideoData {
     fontName?: string;
     /** Font size (optional) */
     fontSize?: number;
+    /** Override images with base64 encoded images (optional) */
+    imgOverride?: string[];
 }
 
 /**
@@ -112,15 +114,20 @@ export class TopicVideo extends VideoGen {
 
         // Create images
         const images = this.jsonData.images;
-        if (!images) {
+        if (!images && !this.jsonData.imgOverride) {
             throw Error('JSON data is missing required "images" field!');
         }
 
-        this.log('Creating images from JSON data...');
-
         let imgs: string[] = [];
 
-        imgs = await this.generateImages(images);
+        if (this.jsonData.imgOverride) {
+            this.log('Using base64 encoded images...');
+            imgs = await this.saveBase64Images(this.jsonData.imgOverride);
+            console.log(imgs)
+        } else {
+            this.log('Creating images from JSON data...');
+            imgs = await this.generateImages(images);
+        }
 
         this.log('Creating subtitles from text...');
         const srtFile = path.join(this.tempPath, 'audio16k.wav.srt');
@@ -182,7 +189,7 @@ export class TopicVideo extends VideoGen {
         album.setTransition("fadeIn")
         album.setTransTime(0.2);
         this.log("Album duration is " + Math.round(full_duration / imgs.length))
-        album.setDuration(Math.round(full_duration / images.length));
+        album.setDuration(Math.round(full_duration / imgs.length));
         scene.addChild(album);
 
         // Add subtitles

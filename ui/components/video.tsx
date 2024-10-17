@@ -3,12 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/modal';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/dropdown';
 import { Accordion, AccordionItem } from '@nextui-org/accordion';
+import { Card, CardBody } from '@nextui-org/card';
 import { Input, Textarea } from '@nextui-org/input';
+import { Switch } from '@nextui-org/switch';
 import { Button } from '@nextui-org/button';
 import { Divider } from '@nextui-org/divider';
 import { Code } from '@nextui-org/code';
 import { Progress } from '@nextui-org/progress';
 import { Chip } from '@nextui-org/chip';
+import { Image } from '@nextui-org/image';
 
 import AdvancedOptions from '@/components/options';
 import { subtitle, title } from '@/components/primitives';
@@ -17,7 +20,7 @@ import { BACKEND_ENDPOINT } from '@/config/backend';
 import { defaultVideoOptions, VideoOptions } from '@/config/options';
 import { MessageVideoData, QuizVideoData, RankVideoData, RatherVideoData, TopicVideoData, VideoData } from '@/config/video';
 
-import { FaAngleDown, FaArrowLeft, FaArrowRight, FaArrowsAltH, FaCogs, FaComment, FaCommentAlt, FaImage, FaList, FaMagic, FaNewspaper, FaPhone, FaPlus, FaQuestion, FaQuestionCircle, FaSave, FaSearch, FaTextHeight, FaTrash, FaVolumeUp } from 'react-icons/fa';
+import { FaAngleDown, FaArrowLeft, FaArrowRight, FaCogs, FaComment, FaCommentAlt, FaImage, FaList, FaMagic, FaNewspaper, FaPhone, FaPlus, FaQuestion, FaQuestionCircle, FaSave, FaSearch, FaTextHeight, FaTrash, FaUpload, FaVolumeUp } from 'react-icons/fa';
 
 const videoTypes = [
     {
@@ -681,9 +684,14 @@ const TopicVideoForm: React.FC<TopicVideoFormProps> = ({ setFormData, json, isAI
     const [startScript, setStartScript] = useState('');
     const [endScript, setEndScript] = useState('');
     const [images, setImages] = useState(['']);
+    const [imageOverrides, setImageOverrides] = useState<string[]>([]);
+
+    const [showImageOverrides, setShowImageOverrides] = useState(false);
 
     const handleAddImage = () => {
-        setImages([...images, '']);
+        if (!showImageOverrides) {
+            setImages([...images, '']);
+        }
     };
 
     const handleChange = (index: number, value: string) => {
@@ -698,7 +706,8 @@ const TopicVideoForm: React.FC<TopicVideoFormProps> = ({ setFormData, json, isAI
             text,
             start_script: startScript,
             end_script: endScript,
-            images
+            images,
+            imgOverride: showImageOverrides ? imageOverrides : undefined,
         };
         setFormData(data);
     };
@@ -741,14 +750,49 @@ const TopicVideoForm: React.FC<TopicVideoFormProps> = ({ setFormData, json, isAI
                     <FaImage />
                     <h1 className={title()}>Images for video</h1>
                 </div>
-                <p className={subtitle({ size: 'sm' })}>Enter the image search term that will be used in the video. {`(${images.length} images)`}</p>
+                <div className="flex flex-col gap-2 mt-4">
+                    {showImageOverrides ? <Chip color='danger' variant='shadow'>Uploading images may produce issues due to WIP</Chip> : null}
+                    <Switch checked={showImageOverrides} onChange={() => setShowImageOverrides(!showImageOverrides)}>Use Uploaded Images</Switch>
+                    <p className={subtitle({ size: 'sm' })}>{showImageOverrides ? "Upload images (512x512 by default)" : "Enter the image search term that will be used in the video."} {`(${images.length} images)`}</p>
+                </div>
             </div>
-            {images.map((image, index) => (
-                <Input startContent={<FaSearch />} key={index} placeholder="Image search term" value={image} onChange={(e) => handleChange(index, e.target.value)}
-                    endContent={<Button color='danger' variant='light' startContent={<FaTrash />} isIconOnly radius='full' onClick={() => setImages(images.filter((_, i) => i !== index))} />}
-                />
-            ))}
-            <Button onClick={handleAddImage} startContent={<FaPlus />}>Add Image</Button>
+            {
+                showImageOverrides ?
+                    <div className="flex flex-row gap-4 overflow-x-auto">
+                        {imageOverrides?.map((_, index) => (
+                            <Card key={index}>
+                                <CardBody>
+                                    <div className="flex justify-between items-center gap-2">
+                                        <div className="flex items-center gap-2 ml-2">
+                                            <FaImage />
+                                            <p>Image {index + 1}</p>
+                                        </div>
+                                        <Button color='danger' variant='light' startContent={<FaTrash />} isIconOnly radius='full' onClick={() => setImageOverrides(imageOverrides.filter((_, i) => i !== index))} />
+                                    </div>
+                                    <Image isBlurred src={imageOverrides[index]} width={256} height={256} className='p-2 flex-none shrink-0	' alt={`Image ${index + 1}`} />
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </div>
+                    : images.map((image, index) => (
+                        <Input startContent={<FaSearch />} key={index} placeholder="Image search term" value={image} onChange={(e) => handleChange(index, e.target.value)}
+                            endContent={<Button color='danger' variant='light' startContent={<FaTrash />} isIconOnly radius='full' onClick={() => setImages(images.filter((_, i) => i !== index))} />}
+                        />
+                    ))
+            }
+            {
+                showImageOverrides ?
+                    <Input type='file' accept="image/*" startContent={<FaUpload />} onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            setImageOverrides([...imageOverrides, e.target?.result as string]);
+                        };
+                        reader.readAsDataURL(file);
+                    }} />
+                    : <Button onClick={handleAddImage} startContent={<FaPlus />}>Add Image</Button>
+            }
             <Divider />
             <div className="flex justify-center mt-4">
                 <Button color='primary' variant='shadow' size='lg' startContent={<FaSave />} onClick={handleSubmit}>Save Data</Button>

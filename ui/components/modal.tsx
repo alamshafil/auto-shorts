@@ -64,12 +64,12 @@ export const TableAdvancedOptions = ({ advancedOptions }: { advancedOptions: Vid
 
     const imageOptionRows = advancedOptions?.imageOptions
         ? Object.entries(advancedOptions.imageOptions).map(([key, value]) => {
-            return { key, name: key, value: value.toString() };
+            return { key, name: key, value: (value) ? value.toString() : "Default" };
         }) : [];
 
     const ttsOptionsRows = advancedOptions?.ttsOptions
         ? Object.entries(advancedOptions.ttsOptions).map(([key, value]) => {
-            return { key, name: key, value: value.toString() };
+            return { key, name: key, value: (value) ? value.toString() : "Default" };
         }) : [];
 
     const columns = [
