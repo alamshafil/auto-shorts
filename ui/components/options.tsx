@@ -51,7 +51,7 @@ const config = {
         {
             "name": "ElevenLabs",
             "description": "ElevenLabs advanced high-quality TTS (API key required)",
-            "type": "ElevenLabsTTS",
+            "type": "ElevenLabs",
         },
         {
             "name": "Neets.ai",

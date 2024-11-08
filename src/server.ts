@@ -218,7 +218,8 @@ export async function runAPIServer() {
                 },
                 aiAPIKey,
                 {
-                    endpoint: data.openAIEndpoint
+                    endpoint: data.openAIEndpoint,
+                    model: data.aiModel
                 }
             );
 
@@ -291,7 +292,7 @@ export async function runAPIServer() {
                 },
             );
 
-            console.info("Stating live log stream to client...");
+            console.info("Starting live log stream to client...");
 
             task.on('log', (log: string) => {
                 // Send log to client in JSON
@@ -407,6 +408,9 @@ export async function runAPIServer() {
             // Get AI type
             const aiTypeStr = req.query.type as string;
 
+            // Get openAI endpoint if provided
+            const openAIEndpoint = req.query.endpoint as string;
+
             // Check if empty
             if (!aiTypeStr) {
                 res.status(400).json({
@@ -443,17 +447,17 @@ export async function runAPIServer() {
                     models = await OllamaAIGen.getModels();
                     break;
                 case AIGenType.OpenAIGen:
-                    apiKey = process.env[AIGenType.OpenAIGen];
+                    apiKey = process.env[AIAPIEnv.OpenAIGen];
                     if (!apiKey) return errorIfNoAPIKey();
-                    models = await OpenAIGen.getModels();
+                    models = await OpenAIGen.getModels(apiKey, { endpoint: openAIEndpoint });
                     break;
                 case AIGenType.GoogleAIGen:
-                    apiKey = process.env[AIGenType.GoogleAIGen];
+                    apiKey = process.env[AIAPIEnv.GoogleAIGen];
                     if (!apiKey) return errorIfNoAPIKey();
                     models = await GoogleAIGen.getModels();
                     break;
                 case AIGenType.AnthropicAIGen:
-                    apiKey = process.env[AIGenType.AnthropicAIGen];
+                    apiKey = process.env[AIAPIEnv.AnthropicAIGen];
                     if (!apiKey) return errorIfNoAPIKey();
                     models = await AnthropicAIGen.getModels();
                     break;
