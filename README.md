@@ -1,8 +1,10 @@
 # AutoShorts - AI-powered Shorts Generator
 
+> [!WARNING]
+> Unfortunately, I have stopped working on auto-shorts since it was just a learning project for me. I do not have time to continue working on the project. I will keep this project open for minor bug fixes, etc. 
+
 <!-- Badges -->
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://alamshafil.github.io/auto-shorts/)
-[![NPM Version](https://img.shields.io/npm/v/auto-shorts)](https://www.npmjs.com/package/auto-shorts)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/alamshafil/auto-shorts/node.js.yaml)](https://github.com/alamshafil/auto-shorts/actions/workflows/node.js.yaml)
 [![Discord](https://img.shields.io/discord/1288339492633182320?label=discord&logo=discord)](https://discord.gg/wMdjy2NtQy)
 
